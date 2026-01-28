@@ -850,9 +850,9 @@ app.post('/api/generate-roadmap', async (req, res) => {
 
         const prompt = PROMPTS.roadmap(level, weaknesses, cert, RESOURCES);
         
-        console.log('📤 Calling AI API for roadmap generation (Primary only - no fallback)...');
-        // Use primary API only for roadmap, no fallback
-        const response = await callAIPrimary(prompt, false);
+        console.log('📤 Calling AI API for roadmap generation (fast fallback chain)...');
+        // Use fallback chain with only 1 retry for fast response
+        const response = await callAI(prompt, false, 1);
         console.log('📄 Roadmap response received, length:', response?.length || 0);
 
         // Save roadmap if logged in
@@ -878,11 +878,153 @@ app.post('/api/generate-roadmap', async (req, res) => {
         // Check if it's a rate limit error (case-insensitive)
         const isRateLimit = error.message.toLowerCase().includes('rate limit');
         if (isRateLimit) {
-            return res.status(429).json({
-                error: 'API Rate Limited',
-                details: 'The primary AI service is overloaded. Please wait a few minutes and try again.',
-                retryAfter: 300
-            });
+            console.log('🗺️ All APIs rate-limited, returning demo roadmap...');
+            // Return a demo roadmap when all APIs are rate-limited
+            const demoRoadmap = `# ${req.body.cert} Certification Roadmap
+## Your Personalized Learning Path
+
+### Phase 1: Foundations (Weeks 1-3)
+**Objective**: Build core cybersecurity knowledge
+
+- **Networking Fundamentals**
+  - TCP/IP Model and OSI Layers
+  - Common Protocols (HTTP, DNS, DHCP, SMTP)
+  - Network Addressing and Subnetting
+  
+- **Linux Essentials** (${req.body.weaknesses?.includes('Linux') ? '⭐ PRIORITY' : 'Standard'})
+  - File system navigation and permissions
+  - User and group management
+  - Shell scripting basics
+  
+- **Security Concepts**
+  - CIA Triad and security principles
+  - Common threat vectors
+  - Defense-in-depth strategies
+
+**Resources**:
+- TryHackMe: Linux Fundamentals rooms
+- YouTube: NetworkChuck Linux crash course
+
+---
+
+### Phase 2: Intermediate Skills (Weeks 4-8)
+**Objective**: Develop practical offensive security skills
+
+- **Web Security**
+  - OWASP Top 10 vulnerabilities
+  - SQL Injection and XSS
+  - Authentication & authorization flaws
+  
+- **System Hardening**
+  - Access controls and permissions
+  - Firewall configuration
+  - Service security hardening
+  
+- **Reconnaissance Techniques**
+  - Active and passive information gathering
+  - Vulnerability scanning
+  - Network mapping tools
+
+**Resources**:
+- HackTheBox: Easy difficulty machines
+- TryHackMe: Security assessment courses
+
+---
+
+### Phase 3: Practical Exploitation (Weeks 9-14)
+**Objective**: Hands-on hacking experience
+
+- **Lab Work**
+  - Complete 15-20 capture-the-flag challenges
+  - Solve 10+ HackTheBox machines
+  - Participate in practice penetration tests
+  
+- **Tool Proficiency**
+  - Nmap, Metasploit, Burp Suite
+  - Wireshark for packet analysis
+  - Exploitation frameworks
+
+- **Methodology**
+  - Penetration testing reports
+  - Vulnerability assessment documentation
+  - Risk analysis frameworks
+
+---
+
+### Phase 4: Advanced Topics (Weeks 15+)
+**Objective**: Master advanced techniques
+
+- **Advanced Exploitation**
+  - Privilege escalation techniques
+  - Lateral movement strategies
+  - Post-exploitation activities
+  
+- **Specialized Areas**
+  - Web application testing
+  - Wireless security
+  - Cloud security basics
+  
+- **Certification Prep**
+  - Practice exams and reviews
+  - Weak area reinforcement
+  - Mock assessments
+
+---
+
+## Daily Schedule Recommendation
+
+| Time | Activity | Duration |
+|------|----------|----------|
+| 8-9 AM | Theory & Concepts | 1 hour |
+| 9-12 PM | Lab Work & Practice | 3 hours |
+| 12-1 PM | Lunch Break | 1 hour |
+| 1-4 PM | Hands-on Challenges | 3 hours |
+| 4-5 PM | Review & Notes | 1 hour |
+
+**Total: 8 hours/day (flexible)**
+
+---
+
+## Key Resources
+
+**Platforms**:
+- TryHackMe (Free & Paid): Interactive labs and guided learning
+- HackTheBox: Real-world-like challenges
+- OverTheWire: Wargames for practice
+
+**YouTube Channels**:
+- NetworkChuck: Networking and security fundamentals
+- John Hammond: CTF walkthroughs and tutorials
+- LiveOverflow: Advanced security concepts
+
+**Books**:
+- "Penetration Testing" by Georgia Weidman
+- "The Web Application Hacker's Handbook"
+- "Linux Command Line" by William E. Shotts Jr.
+
+---
+
+## Success Milestones
+
+✓ Complete all foundational courses
+✓ Solve 20+ CTF challenges
+✓ Pass 3 practice exams with 80%+ score
+✓ Build and configure personal lab environment
+✓ Document findings and create sample report
+✓ Network with security community
+
+---
+
+## Progress Tracking
+
+After each phase:
+- Review weak areas identified
+- Adjust study plan as needed
+- Document lessons learned
+- Update skill matrix
+
+**Remember**: Security mastery is a marathon, not a sprint. Consistency beats intensity!`;
+            return res.status(200).json({ roadmap: demoRoadmap });
         }
         
         res.status(500).json({ 
