@@ -1274,6 +1274,16 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// API 404 handler - MUST come before catch-all route
+// This ensures any unmatched /api/* routes return JSON errors, not HTML
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ 
+        error: 'API endpoint not found',
+        path: req.path,
+        message: `The endpoint ${req.path} does not exist. Please check the API documentation.`
+    });
+});
+
 // Serve static files (CSS, images, etc.) - MUST come after API routes but BEFORE catch-all
 app.use(express.static(path.join(__dirname)));
 
