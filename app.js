@@ -37,6 +37,24 @@ const LOADING_TIPS = [
     "🎮 Treat CTFs like games - they're meant to be fun!"
 ];
 
+const DEV_JOKES = [
+    "🔧 75% of bugs are fixed by checking the API key...",
+    "🚀 If it works on localhost, it's production ready, right?",
+    "🎯 Generating roadmap... responsibly hacking knowledge...",
+    "🔑 Blaming the API key in 3...2...1...",
+    "🤖 Teaching AI about responsible disclosure...",
+    "📊 Enumerating best learning paths...",
+    "⏱️ Compiling 200 hours of knowledge into 20 weeks...",
+    "🔍 Scanning for optimal study strategies...",
+    "🛡️ Hardening your learning methodology...",
+    "💻 Exploiting the power of personalized education...",
+    "🎓 Privilege escalating your skill level...",
+    "🔐 Encrypting procrastination... decrypting motivation...",
+    "🌐 Port forwarding knowledge directly to your brain...",
+    "🎭 Social engineering the best resources for you...",
+    "📚 Buffer overflow detected... loading more knowledge..."
+];
+
 const CERTIFICATIONS = [
     { 
         id: 'oscp', 
@@ -1493,15 +1511,58 @@ async function generateRoadmapForCert(certId) {
     if (roadmapTitle) roadmapTitle.textContent = `Your ${certName.split(' - ')[0]} Learning Roadmap`;
     if (roadmapSubtitle) roadmapSubtitle.textContent = `Personalized for your ${level} level • Target: ${certName}`;
     
-    // Show loading
+    // Clear any existing intervals from previous calls
+    if (window.roadmapCountdownInterval) {
+        clearInterval(window.roadmapCountdownInterval);
+    }
+    if (window.roadmapJokeInterval) {
+        clearInterval(window.roadmapJokeInterval);
+    }
+    
+    // Show loading with ETA countdown and rotating jokes
     const roadmapContent = document.getElementById('roadmapContent');
+    
+    // Initialize loading state
+    let currentJokeIndex = 0;
+    let eta = Math.floor(Math.random() * 11) + 15; // Random 15-25 seconds
+    
     roadmapContent.innerHTML = `
         <div class="loading-state">
             <div class="spinner"></div>
             <p>Building your personalized ${certName.split(' - ')[0]} roadmap...</p>
             <p class="loading-subtext">Analyzing your weaknesses and creating a custom learning path</p>
+            <div class="loading-eta">
+                ⏱️ ETA: <span id="etaCountdown">${eta}</span> seconds
+            </div>
+            <div class="dev-joke" id="devJoke">
+                ${DEV_JOKES[0]}
+            </div>
         </div>
     `;
+    
+    // Countdown timer - store globally for cleanup
+    const etaCountdownEl = document.getElementById('etaCountdown');
+    window.roadmapCountdownInterval = setInterval(() => {
+        eta--;
+        if (etaCountdownEl && eta > 0) {
+            etaCountdownEl.textContent = eta;
+        } else {
+            clearInterval(window.roadmapCountdownInterval);
+        }
+    }, 1000);
+    
+    // Rotate jokes every 3 seconds - store globally for cleanup
+    window.roadmapJokeInterval = setInterval(() => {
+        currentJokeIndex = (currentJokeIndex + 1) % DEV_JOKES.length;
+        const devJokeEl = document.getElementById('devJoke');
+        if (devJokeEl) {
+            devJokeEl.style.opacity = '0';
+            setTimeout(() => {
+                devJokeEl.textContent = DEV_JOKES[currentJokeIndex];
+                devJokeEl.style.opacity = '1';
+            }, 300);
+        }
+    }, 3000);
     
     try {
         const data = await callBackendAPI('/api/generate-roadmap', {
@@ -1509,6 +1570,10 @@ async function generateRoadmapForCert(certId) {
             weaknesses: weaknesses,
             cert: certName
         });
+        
+        // Clear intervals
+        if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
+        if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
         
         appState.roadmap = data.roadmap;
         displayRoadmap(data.roadmap);
@@ -1526,11 +1591,20 @@ async function generateRoadmapForCert(certId) {
         showSuccess('Roadmap generated successfully!');
     } catch (error) {
         console.error('Error generating roadmap:', error);
+        
+        // Clear intervals
+        if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
+        if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
+        
+        // Show friendly error message (not technical details)
+        const errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
+        
         roadmapContent.innerHTML = `
             <div class="error-state">
-                <div class="error-icon">❌</div>
-                <h3>Failed to Generate Roadmap</h3>
-                <p>${error.message || 'Please try again.'}</p>
+                <div class="error-icon">⏳</div>
+                <h3>Roadmap Generation Delayed</h3>
+                <p class="error-message-main">${errorMessage}</p>
+                <p class="error-message-sub">The AI service might be experiencing high demand. This usually resolves in a few minutes.</p>
                 <button class="btn btn-primary" onclick="openCertModal()">Try Again</button>
             </div>
         `;

@@ -309,10 +309,10 @@ def call_openai_api(system_prompt, user_message):
     Returns:
         AI response as string, or error message
     """
-    # Get developer's API key from environment or use the provided key
-    api_key = os.getenv('GOOGLE_API_KEY', 'AIzaSyDzj6Asw6m5Ki_VAOOT1bEbb0HHPVQDXZA')
+    # Get API key from environment variables
+    api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
     if not api_key:
-        return "⚠️ **Configuration Error**: API key not configured. Please contact the developer."
+        return "⚠️ **Configuration Error**: API key not configured. Please set GOOGLE_API_KEY or GEMINI_API_KEY environment variable."
     
     # Rate limiting check (stricter for shared key)
     allowed, message = check_rate_limit()

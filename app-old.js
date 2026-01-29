@@ -17,7 +17,9 @@
 // CONFIG & CONSTANTS
 // ============================================================================
 
-const API_KEY = 'AIzaSyDzj6Asw6m5Ki_VAOOT1bEbb0HHPVQDXZA';
+// DEPRECATED FILE: This is a legacy version
+// Use app.js and server-v2.js for production
+const API_KEY = ''; // REMOVED: Use environment variables in server-v2.js
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
 const CERTIFICATIONS = [

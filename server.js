@@ -32,7 +32,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Gemini API Configuration
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDzj6Asw6m5Ki_VAOOT1bEbb0HHPVQDXZA';
+// Load environment variables
+require('dotenv').config();
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+if (!GEMINI_API_KEY) {
+    console.error('❌ ERROR: No Gemini API key found!');
+    console.error('   Please set GEMINI_API_KEY or GOOGLE_API_KEY in your .env file');
+    process.exit(1);
+}
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
 // ============================================================================

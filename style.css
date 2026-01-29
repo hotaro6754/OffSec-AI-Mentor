@@ -556,6 +556,29 @@ body.mode-oscp .form-group input { background: #0d1117; color: #c9d1d9; border-c
     opacity: 0.8;
 }
 
+/* Loading ETA and Dev Jokes */
+.loading-eta {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.dev-joke {
+    margin-top: 25px;
+    padding: 15px;
+    background: rgba(255, 107, 53, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    color: #ff6b35;
+    font-style: italic;
+    transition: opacity 0.3s ease-in-out;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Spinner */
 .spinner {
     width: 50px;
@@ -594,6 +617,16 @@ body.mode-oscp .form-group input { background: #0d1117; color: #c9d1d9; border-c
 .error-state p {
     margin-bottom: 20px;
     color: var(--gray-dark);
+}
+.error-message-main {
+    font-size: 16px;
+    color: #666;
+    margin: 15px 0;
+}
+.error-message-sub {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 20px;
 }
 
 .cyber-loader {

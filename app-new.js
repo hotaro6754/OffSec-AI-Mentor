@@ -6,8 +6,10 @@
  */
 
 // ============ CONFIG ============
+// DEPRECATED FILE: Use app.js and server-v2.js for production
+// This file kept for reference only - DO NOT USE
 const CONFIG = {
-    API_KEY: 'AIzaSyARqNSFp8fPoFPVWd5DT6vqFB9UgeiFK1o',
+    API_KEY: '', // REMOVED: Use environment variables in server-v2.js
     API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
     CERTIFICATIONS: [
         {
