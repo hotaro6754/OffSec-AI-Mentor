@@ -966,6 +966,15 @@ async function callBackendAPI(endpoint, data = {}) {
         const text = await response.text();
         console.log(`📄 Raw response from ${endpoint}:`, text.substring(0, 200));
 
+        // SAFETY CHECK: Detect if response is HTML instead of JSON
+        if (text.trim().startsWith('<')) {
+            console.error('🚨 ROUTING ERROR: API returned HTML instead of JSON!');
+            console.error(`   Endpoint: ${endpoint}`);
+            console.error(`   This means the API route is missing or misconfigured on the server.`);
+            console.error(`   The catch-all route returned index.html instead of JSON.`);
+            throw new Error(`Server routing error: API endpoint ${endpoint} returned HTML instead of JSON. Please check server configuration.`);
+        }
+
         // Check response status before parsing JSON
         if (!response.ok) {
             console.error(`❌ API Error (${response.status}):`, text);
