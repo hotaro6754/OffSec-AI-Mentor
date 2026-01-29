@@ -620,38 +620,48 @@ function parseJsonResponse(text) {
 // ============================================================================
 
 app.post('/api/register', async (req, res) => {
-    const { email, username, password } = req.body;
-    
-    if (!email || !username || !password) {
-        return res.status(400).json({ error: 'Email, username, and password required' });
+    try {
+        const { email, username, password } = req.body;
+        
+        if (!email || !username || !password) {
+            return res.status(400).json({ error: 'Email, username, and password required' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+        
+        const result = db.registerUser(email, username, password);
+        if (!result.success) {
+            return res.status(400).json({ error: result.error });
+        }
+        
+        // Auto-login after registration
+        const login = db.loginUser(email, password);
+        res.json(login);
+    } catch (error) {
+        console.error('❌ Registration error:', error);
+        res.status(500).json({ error: 'Registration failed. Please try again.' });
     }
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-    
-    const result = db.registerUser(email, username, password);
-    if (!result.success) {
-        return res.status(400).json({ error: result.error });
-    }
-    
-    // Auto-login after registration
-    const login = db.loginUser(email, password);
-    res.json(login);
 });
 
 app.post('/api/login', async (req, res) => {
-    const { emailOrUsername, password } = req.body;
-    
-    if (!emailOrUsername || !password) {
-        return res.status(400).json({ error: 'Email/username and password required' });
+    try {
+        const { emailOrUsername, password } = req.body;
+        
+        if (!emailOrUsername || !password) {
+            return res.status(400).json({ error: 'Email/username and password required' });
+        }
+        
+        const result = db.loginUser(emailOrUsername, password);
+        if (!result.success) {
+            return res.status(401).json({ error: result.error });
+        }
+        
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Login error:', error);
+        res.status(500).json({ error: 'Login failed. Please try again.' });
     }
-    
-    const result = db.loginUser(emailOrUsername, password);
-    if (!result.success) {
-        return res.status(401).json({ error: result.error });
-    }
-    
-    res.json(result);
 });
 
 app.post('/api/logout', (req, res) => {
