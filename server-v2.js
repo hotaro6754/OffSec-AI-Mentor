@@ -1015,8 +1015,7 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         };
         
         console.log('✅ Returning fallback evaluation due to unexpected error');
-        return res.json(fallbackEvaluation); 
-        });
+        return res.json(fallbackEvaluation);
     }
 });
 
