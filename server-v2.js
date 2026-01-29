@@ -1198,6 +1198,15 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// API 404 handler - MUST come before SPA catch-all
+app.use('/api/*', (req, res) => {
+    console.error(`❌ API endpoint not found: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ 
+        success: false,
+        error: `Endpoint not found: ${req.method} ${req.originalUrl}` 
+    });
+});
+
 // SPA fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
