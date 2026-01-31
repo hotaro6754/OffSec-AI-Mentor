@@ -68,6 +68,38 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content settings-modal">
+            <button class="modal-close" id="closeSettingsModal">&times;</button>
+            <h3>⚙️ API Settings</h3>
+            <p class="settings-desc">Provide your own API keys to bypass global rate limits. Keys are stored locally in your browser.</p>
+
+            <div class="form-group">
+                <label for="openaiKey">OpenAI API Key</label>
+                <input type="password" id="openaiKey" placeholder="sk-...">
+            </div>
+            <div class="form-group">
+                <label for="groqKey">Groq API Key</label>
+                <input type="password" id="groqKey" placeholder="gsk_...">
+            </div>
+            <div class="form-group">
+                <label for="geminiKey">Gemini API Key</label>
+                <input type="password" id="geminiKey" placeholder="AIza...">
+            </div>
+            <div class="form-group">
+                <label for="deepseekKey">Deepseek API Key</label>
+                <input type="password" id="deepseekKey" placeholder="sk-...">
+            </div>
+
+            <div class="settings-actions">
+                <button class="btn btn-primary btn-full" id="saveSettingsBtn">Save Settings</button>
+                <button class="btn btn-outline btn-full" id="clearSettingsBtn">Clear Keys</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="loading-content">
@@ -102,6 +134,7 @@
                 <span class="nav-title">OffSec <span class="nav-highlight">AI Mentor</span></span>
             </div>
             <div class="nav-links">
+                <button class="btn btn-outline btn-sm" id="settingsBtn">⚙️ Settings</button>
                 <div id="navAuth" class="nav-auth">
                     <button class="btn btn-outline btn-sm" id="loginBtn">Login</button>
                 </div>

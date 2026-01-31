@@ -98,9 +98,9 @@ if (GROQ_API_KEY) {
 } else if (GEMINI_API_KEY) {
     AI_PROVIDER = 'gemini';
     AI_API_KEY = GEMINI_API_KEY;
-    AI_MODEL = 'gemini-2.5-flash';
-    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-    console.log('✅ Using Google Gemini API (2.5 Flash)');
+    AI_MODEL = 'gemini-1.5-flash';
+    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    console.log('✅ Using Google Gemini API (1.5 Flash)');
 } else {
     AI_PROVIDER = 'none';
     AI_API_KEY = '';
@@ -145,6 +145,17 @@ app.use((req, res, next) => {
     if (sessionId) {
         req.user = db.validateSession(sessionId);
     }
+    next();
+});
+
+// API Key middleware - extracts custom API keys from headers
+app.use((req, res, next) => {
+    req.customKeys = {
+        openai: req.headers['x-openai-api-key'],
+        groq: req.headers['x-groq-api-key'],
+        gemini: req.headers['x-gemini-api-key'],
+        deepseek: req.headers['x-deepseek-api-key']
+    };
     next();
 });
 
@@ -542,53 +553,59 @@ MUST INCLUDE:
 2. **6-8 Learning Phases** with:
    - Clear outcomes and capabilities gained
    - Week-by-week topics and labs
-   - Platforms: TryHackMe, HackTheBox, PortSwigger
-   - Estimated weekly hours
+   - Tools to learn with purpose and steps
+   - Recommended labs with difficulty and hours
    
 3. **Tools Mastery Guide** (Nmap, Burp, Linux, etc):
    - When and why to use each tool
-   - Key commands for beginners
-   - Advanced techniques for later phases
+   - Key commands and learning progression
 
 4. **Curated Resources**:
-   - YouTube channels (John Hammond, IppSec, NetworkChuck, etc)
-   - Essential books with why they matter
-   - Platforms comparison (cost, what to use each for)
+   - YouTube channels, Books, and Platforms
 
 5. **Daily Study Schedule**: Realistic routine mixing theory and hands-on
 
 6. **Success Metrics**: Weekly checkpoints and capability gains
 
-7. **Addressing Weaknesses**: How each phase tackles their specific gaps
-
-8. **Motivation Tips**: Common challenges and how to overcome them
+7. **Motivation & Mindset**: Why people succeed and real-world applications
 
 RESPOND WITH VALID JSON (no markdown blocks, pure JSON only):
 {
+  "targetCertification": "${cert}",
+  "currentLevel": "${level}",
+  "totalDuration": "20-24 weeks",
+  "difficulty_progression": "Beginner to Intermediate",
   "executive_summary": "[2-3 sentences on journey]",
-  "phases": [
+  "roadmap": [
     {
       "phase": 1,
-      "name": "[Name]",
-      "duration": "3-4 weeks",
-      "outcomes": ["[Outcome 1]", "[Outcome 2]"],
-      "weeks": [{"week": 1, "topics": ["[Topic]"], "labs": ["[Lab]"]}],
-      "tools": ["[Tool 1]", "[Tool 2]"],
-      "hours_per_week": 15
+      "phase_name": "[Name]",
+      "duration_weeks": 3,
+      "total_hours": 60,
+      "prerequisites": "[Prerequisites]",
+      "weekly_hours": 20,
+      "learning_outcomes": ["[Outcome 1]", "[Outcome 2]"],
+      "weekly_breakdown": [{"week": 1, "topics": ["[Topic]"], "labs": ["[Lab]"], "hours": 20, "checkpoint": "[Goal]"}],
+      "essential_tools": [{"name": "[Tool]", "purpose": "[Why]", "learning_path": {"beginner": "[Step1]", "intermediate": "[Step2]", "advanced": "[Step3]"}, "key_features": ["[F1]"], "practice_exercise": "[Ex]"}],
+      "recommended_labs": [{"name": "[Lab]", "platform": "[HTB/THM]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[Skill]"]}],
+      "resources_for_phase": [{"type": "YouTube", "name": "[Name]", "topic": "[Topic]", "link": "[URL]"}],
+      "outcome": "[Summary of achievement]"
     }
   ],
-  "tools_guide": [
-    {"name": "[Tool]", "purpose": "[Why]", "commands": ["[cmd1]", "[cmd2]"], "when": "[When to use]"}
+  "tools_mastery_guide": [
+    {"tool_name": "[Tool]", "category": "[Category]", "importance": "High", "when_to_use": "[When]", "learning_progression": {"phase_1": "[Step1]", "phase_2": "[Step2]", "phase_3": "[Step3]"}, "critical_commands": [{"command": "[cmd]", "purpose": "[Why]", "example": "[ex]"}]}
   ],
-  "resources": {
-    "youtube": [{"channel": "[Name]", "why": "[Value]"}],
-    "books": [{"title": "[Title]", "author": "[Author]", "for_what": "[Purpose]"}],
-    "platforms": [{"name": "[Platform]", "cost": "[Free/Paid]", "for": "[Purpose]"}]
+  "curated_resources": {
+    "youtube_channels": [{"name": "[Name]", "focus": "[Focus]", "level": "All", "link": "[URL]"}],
+    "essential_books": [{"title": "[Title]", "author": "[Author]", "topic": "[Topic]", "level": "Beginner"}],
+    "learning_platforms": [{"name": "[Platform]", "type": "Lab", "best_for": "[Purpose]", "link": "[URL]"}]
   },
-  "daily_schedule": "[Morning theory, afternoon labs, evening practice]",
-  "success_metrics": ["[Milestone 1]", "[Milestone 2]"],
-  "address_weaknesses": {"focus": "${weaknesses.join(', ')}", "how": "[Addressed in phases X, Y, Z]"},
-  "motivation": "[Handle common challenges and celebrate wins]"
+  "daily_study_schedule": {
+    "recommended_schedule": {"morning_session": "[Activity]", "midday_session": "[Activity]", "evening_session": "[Activity]", "weekly_review": "[Activity]"},
+    "study_tips": ["[Tip 1]", "[Tip 2]"]
+  },
+  "success_metrics": [{"phase": "Phase 1", "completed_when": "[Criteria]", "checkpoint_assessment": "[Test]"}],
+  "motivation_and_mindset": {"why_people_succeed": "[Explanation]", "real_world_applications": "[Context]"}
 }`,
 
     /**
@@ -645,10 +662,22 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
 }
 
 // Call only primary AI provider (no fallback) - for roadmap generation
-async function callAIPrimary(prompt, expectJson = false, retries = 3) {
-    console.log(`📤 Calling ${AI_PROVIDER.toUpperCase()} API (Primary Only - No Fallback)...`);
+async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys = {}) {
+    let provider = AI_PROVIDER;
+    let apiKey = customKeys[provider] || AI_API_KEY;
+    let model = AI_MODEL;
+    let apiUrl = AI_API_URL;
+
+    // If user provided a specific key for a provider, we might want to switch to it
+    if (customKeys.groq && provider !== 'groq') {
+        provider = 'groq'; apiKey = customKeys.groq; model = 'llama-3.3-70b-versatile'; apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    } else if (customKeys.openai && provider === 'none') {
+        provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-3.5-turbo'; apiUrl = 'https://api.openai.com/v1/chat/completions';
+    }
+
+    console.log(`📤 Calling ${provider.toUpperCase()} API (Primary Only - No Fallback)...`);
     
-    const result = await tryCallAI(AI_PROVIDER, AI_API_KEY, AI_MODEL, AI_API_URL, prompt, expectJson, retries);
+    const result = await tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson, retries);
     
     if (result.success) {
         return result.data;
@@ -657,40 +686,61 @@ async function callAIPrimary(prompt, expectJson = false, retries = 3) {
     throw new Error(result.error);
 }
 
-async function callAI(prompt, expectJson = false, retries = 3) {
-    console.log(`📤 Calling ${AI_PROVIDER.toUpperCase()} API...`);
-    
-    // Try with primary provider first
-    const result = await tryCallAI(AI_PROVIDER, AI_API_KEY, AI_MODEL, AI_API_URL, prompt, expectJson, retries);
-    
-    // If primary fails with rate limit and fallback available, try fallback
-    if (!result.success && result.rateLimit && FALLBACK_PROVIDER !== 'none') {
-        console.log(`🔄 Switching to fallback ${FALLBACK_PROVIDER.toUpperCase()} API...`);
-        const fallbackResult = await tryCallAI(FALLBACK_PROVIDER, FALLBACK_API_KEY, FALLBACK_MODEL, FALLBACK_API_URL, prompt, expectJson, retries);
-        if (fallbackResult.success) {
-            console.log(`✅ ${FALLBACK_PROVIDER.toUpperCase()} API succeeded!`);
-            return fallbackResult.data;
+async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
+    // Determine which AI provider to use, prioritizing custom keys
+    let currentProvider = AI_PROVIDER;
+    let currentApiKey = customKeys[currentProvider] || AI_API_KEY;
+    let currentModel = AI_MODEL;
+    let currentApiUrl = AI_API_URL;
+
+    // Override with custom keys if available and primary is 'none'
+    if (currentProvider === 'none') {
+        if (customKeys.groq) {
+            currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+        } else if (customKeys.openai) {
+            currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
+        } else if (customKeys.gemini) {
+            currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-1.5-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        } else if (customKeys.deepseek) {
+            currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
         }
-        
-        // If first fallback also fails with rate limit and second fallback available, try it
-        if (!fallbackResult.success && fallbackResult.rateLimit && FALLBACK2_PROVIDER !== 'none') {
-            console.log(`🔄 Switching to secondary fallback ${FALLBACK2_PROVIDER.toUpperCase()} API...`);
-            const fallback2Result = await tryCallAI(FALLBACK2_PROVIDER, FALLBACK2_API_KEY, FALLBACK2_MODEL, FALLBACK2_API_URL, prompt, expectJson, retries);
-            if (fallback2Result.success) {
-                console.log(`✅ ${FALLBACK2_PROVIDER.toUpperCase()} API succeeded!`);
-                return fallback2Result.data;
+    }
+
+    console.log(`📤 Calling ${currentProvider.toUpperCase()} API...`);
+    
+    // Try with chosen provider first
+    const result = await tryCallAI(currentProvider, currentApiKey, currentModel, currentApiUrl, prompt, expectJson, retries);
+    
+    // Fallback logic
+    if (!result.success && result.rateLimit) {
+        // Try fallback 1
+        if (FALLBACK_PROVIDER !== 'none') {
+            console.log(`🔄 Switching to fallback ${FALLBACK_PROVIDER.toUpperCase()} API...`);
+            const fbApiKey = customKeys[FALLBACK_PROVIDER] || FALLBACK_API_KEY;
+            const fallbackResult = await tryCallAI(FALLBACK_PROVIDER, fbApiKey, FALLBACK_MODEL, FALLBACK_API_URL, prompt, expectJson, retries);
+            if (fallbackResult.success) {
+                console.log(`✅ ${FALLBACK_PROVIDER.toUpperCase()} API succeeded!`);
+                return fallbackResult.data;
+            }
+
+            // Try fallback 2
+            if (!fallbackResult.success && fallbackResult.rateLimit && FALLBACK2_PROVIDER !== 'none') {
+                console.log(`🔄 Switching to secondary fallback ${FALLBACK2_PROVIDER.toUpperCase()} API...`);
+                const fb2ApiKey = customKeys[FALLBACK2_PROVIDER] || FALLBACK2_API_KEY;
+                const fallback2Result = await tryCallAI(FALLBACK2_PROVIDER, fb2ApiKey, FALLBACK2_MODEL, FALLBACK2_API_URL, prompt, expectJson, retries);
+                if (fallback2Result.success) {
+                    console.log(`✅ ${FALLBACK2_PROVIDER.toUpperCase()} API succeeded!`);
+                    return fallback2Result.data;
+                }
             }
         }
-        
-        // If all APIs fail, throw error
-        throw new Error(result.error);
     }
     
     if (result.success) {
         return result.data;
     }
     
-    throw new Error(result.error);
+    throw new Error(result.error || "AI call failed");
 }
 
 async function tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
@@ -906,7 +956,7 @@ app.post('/api/generate-questions', async (req, res) => {
             
             console.log('📤 Calling AI API for question generation...');
             // Use retries=1 to fail fast when APIs are rate-limited
-            const response = await callAI(prompt, true, 1);
+            const response = await callAI(prompt, true, 1, req.customKeys);
             console.log('📄 AI response received, length:', response?.length || 0);
             const parsed = parseJsonResponse(response);
             
@@ -967,9 +1017,9 @@ app.post('/api/evaluate-assessment', async (req, res) => {
 
         const prompt = `${PROMPTS.evaluation}\n\nAssessment:\n${answersText}`;
         
-        console.log('📤 Calling Groq API for evaluation...');
-        const response = await callAI(prompt, true);
-        console.log('📄 Groq response received, length:', response?.length || 0);
+        console.log('📤 Calling AI API for evaluation...');
+        const response = await callAI(prompt, true, 3, req.customKeys);
+        console.log('📄 AI response received, length:', response?.length || 0);
         const parsed = parseJsonResponse(response);
         
         // Save to database if logged in
@@ -1045,7 +1095,7 @@ app.post('/api/generate-roadmap', async (req, res) => {
             try {
                 console.log(`📤 Calling AI API for roadmap generation (attempt ${retryCount + 1}/${maxRetries})...`);
                 // Use fallback chain with only 1 retry per attempt for fast response
-                response = await callAI(prompt, false, 1);
+                response = await callAI(prompt, false, 1, req.customKeys);
                 console.log('📄 Roadmap response received, length:', response?.length || 0);
                 
                 // Validate response - check for meaningful content
@@ -1145,10 +1195,10 @@ app.post('/api/mentor-chat', async (req, res) => {
 
         const prompt = `${PROMPTS.mentorChat}${contextInfo}\n\nUser: "${message}"`;
         
-        console.log('📤 Calling Groq API for mentor chat...');
+        console.log('📤 Calling AI API for mentor chat...');
         // Use fewer retries for mentor chat to fail faster and fallback quicker
-        const response = await callAI(prompt, false, 1);
-        console.log('📄 Groq response received');
+        const response = await callAI(prompt, false, 1, req.customKeys);
+        console.log('📄 AI response received');
 
         // Save chat history if logged in
         try {
@@ -1268,6 +1318,7 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
 
 // Serve static files (CSS, images, etc.) 
 app.use(express.static(path.join(__dirname)));

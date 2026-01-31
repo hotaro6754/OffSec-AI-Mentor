@@ -225,6 +225,13 @@ const elements = {
     // Auth Modal
     authModal: document.getElementById('authModal'),
     closeAuthModal: document.getElementById('closeAuthModal'),
+
+    // Settings Modal
+    settingsModal: document.getElementById('settingsModal'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    closeSettingsModal: document.getElementById('closeSettingsModal'),
+    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+    clearSettingsBtn: document.getElementById('clearSettingsBtn'),
     loginForm: document.getElementById('loginForm'),
     registerForm: document.getElementById('registerForm'),
     loginError: document.getElementById('loginError'),
@@ -283,6 +290,12 @@ function init() {
 
 function setupEventListeners() {
     elements.startBtn?.addEventListener('click', startAssessment);
+
+    // Settings
+    elements.settingsBtn?.addEventListener('click', showSettingsModal);
+    elements.closeSettingsModal?.addEventListener('click', hideSettingsModal);
+    elements.saveSettingsBtn?.addEventListener('click', saveSettings);
+    elements.clearSettingsBtn?.addEventListener('click', clearSettings);
     elements.nextBtn?.addEventListener('click', nextQuestion);
     elements.prevBtn?.addEventListener('click', prevQuestion);
     elements.copyRoadmapBtn?.addEventListener('click', copyRoadmap);
@@ -967,6 +980,47 @@ async function safeResponseJSON(response, endpoint) {
 }
 
 /**
+ * Settings Management
+ */
+function showSettingsModal() {
+    elements.settingsModal?.classList.remove('hidden');
+
+    // Load existing keys
+    document.getElementById('openaiKey').value = localStorage.getItem('openaiKey') || '';
+    document.getElementById('groqKey').value = localStorage.getItem('groqKey') || '';
+    document.getElementById('geminiKey').value = localStorage.getItem('geminiKey') || '';
+    document.getElementById('deepseekKey').value = localStorage.getItem('deepseekKey') || '';
+}
+
+function hideSettingsModal() {
+    elements.settingsModal?.classList.add('hidden');
+}
+
+function saveSettings() {
+    localStorage.setItem('openaiKey', document.getElementById('openaiKey').value.trim());
+    localStorage.setItem('groqKey', document.getElementById('groqKey').value.trim());
+    localStorage.setItem('geminiKey', document.getElementById('geminiKey').value.trim());
+    localStorage.setItem('deepseekKey', document.getElementById('deepseekKey').value.trim());
+
+    showNotification('Settings saved successfully', 'success');
+    hideSettingsModal();
+}
+
+function clearSettings() {
+    localStorage.removeItem('openaiKey');
+    localStorage.removeItem('groqKey');
+    localStorage.removeItem('geminiKey');
+    localStorage.removeItem('deepseekKey');
+
+    document.getElementById('openaiKey').value = '';
+    document.getElementById('groqKey').value = '';
+    document.getElementById('geminiKey').value = '';
+    document.getElementById('deepseekKey').value = '';
+
+    showNotification('API keys cleared', 'info');
+}
+
+/**
  * Call backend API endpoint
  * @param {string} endpoint - API endpoint (e.g., '/api/generate-questions')
  * @param {object} data - Request body data
@@ -980,6 +1034,17 @@ async function callBackendAPI(endpoint, data = {}) {
             'Content-Type': 'application/json'
         };
         
+        // Add custom API keys if present
+        const openaiKey = localStorage.getItem('openaiKey');
+        const groqKey = localStorage.getItem('groqKey');
+        const geminiKey = localStorage.getItem('geminiKey');
+        const deepseekKey = localStorage.getItem('deepseekKey');
+
+        if (openaiKey) headers['X-OpenAI-API-Key'] = openaiKey;
+        if (groqKey) headers['X-Groq-API-Key'] = groqKey;
+        if (geminiKey) headers['X-Gemini-API-Key'] = geminiKey;
+        if (deepseekKey) headers['X-Deepseek-API-Key'] = deepseekKey;
+
         // Add authorization header if logged in
         if (appState.sessionId) {
             headers['Authorization'] = `Bearer ${appState.sessionId}`;
@@ -1920,6 +1985,11 @@ function displayRoadmap(roadmapData) {
             return;
         }
     }
+
+    if (!roadmapObj) {
+        displayRoadmapMarkdown(typeof roadmapData === 'string' ? roadmapData : "Error: Roadmap data is empty");
+        return;
+    }
     
     // Store for later use (PDF, copy, etc)
     appState.roadmapJSON = roadmapObj;
@@ -1928,33 +1998,36 @@ function displayRoadmap(roadmapData) {
     const header = document.createElement('div');
     header.className = 'roadmap-header';
     header.innerHTML = `
-        <h1>🗺️ Your ${roadmapObj.targetCertification} Mastery Roadmap</h1>
+        <h1>🗺️ Your ${roadmapObj.targetCertification || 'Cybersecurity'} Mastery Roadmap</h1>
         <div class="executive-summary">
             <h2>Your Journey</h2>
-            <p>${roadmapObj.executive_summary || roadmapObj.overallSummary || ''}</p>
+            <p>${roadmapObj.executive_summary || roadmapObj.overallSummary || 'Personalized learning path based on your assessment.'}</p>
         </div>
         <div class="roadmap-meta">
-            <span>📊 Current Level: <strong>${roadmapObj.currentLevel}</strong></span>
-            <span>🎯 Target: <strong>${roadmapObj.targetCertification}</strong></span>
-            <span>⏱️ Duration: <strong>${roadmapObj.totalDuration}</strong></span>
+            <span>📊 Current Level: <strong>${roadmapObj.currentLevel || 'Analyzing...'}</strong></span>
+            <span>🎯 Target: <strong>${roadmapObj.targetCertification || 'Certification'}</strong></span>
+            <span>⏱️ Duration: <strong>${roadmapObj.totalDuration || '20-24 weeks'}</strong></span>
             <span>📈 Progression: <strong>${roadmapObj.difficulty_progression || 'Beginner → Advanced'}</strong></span>
         </div>
     `;
     elements.roadmapContent.appendChild(header);
     
+    // Handle either 'roadmap' (new) or 'phases' (legacy) key
+    const phases = roadmapObj.roadmap || roadmapObj.phases;
+
     // Render phases with detailed information
-    if (roadmapObj.roadmap && roadmapObj.roadmap.length > 0) {
+    if (phases && Array.isArray(phases) && phases.length > 0) {
         const phasesSection = document.createElement('div');
         phasesSection.className = 'phases-section';
         phasesSection.innerHTML = '<h2 style="margin-top: 40px; margin-bottom: 20px;">📚 Learning Phases</h2>';
         
-        roadmapObj.roadmap.forEach((phase, idx) => {
+        phases.forEach((phase, idx) => {
             const phaseBlock = document.createElement('div');
             phaseBlock.className = 'phase-block';
             phaseBlock.setAttribute('data-aos', 'fade-up');
             phaseBlock.setAttribute('data-aos-delay', idx * 100);
             
-            const phaseName = phase.phase_name || phase.phase || `Phase ${phase.phase_number || idx + 1}`;
+            const phaseName = phase.phase_name || phase.name || phase.phase || `Phase ${phase.phase_number || idx + 1}`;
             const duration = phase.duration_weeks ? `${phase.duration_weeks} weeks` : phase.duration || '';
             const totalHours = phase.total_hours || '';
             
@@ -1978,19 +2051,20 @@ function displayRoadmap(roadmapData) {
             }
             
             // Learning outcomes
-            if (phase.learning_outcomes && phase.learning_outcomes.length > 0) {
+            const outcomes = phase.learning_outcomes || phase.outcomes;
+            if (outcomes && Array.isArray(outcomes) && outcomes.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>✅ Learning Outcomes</h3>
                         <ul class="goals-list">
-                            ${phase.learning_outcomes.map(outcome => `<li>${outcome}</li>`).join('')}
+                            ${outcomes.map(outcome => `<li>${outcome}</li>`).join('')}
                         </ul>
                     </div>
                 `;
             }
             
             // Goals section (legacy)
-            if (phase.goals && phase.goals.length > 0) {
+            if (phase.goals && Array.isArray(phase.goals) && phase.goals.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>🎯 Goals</h3>
@@ -2002,18 +2076,19 @@ function displayRoadmap(roadmapData) {
             }
             
             // Weekly breakdown
-            if (phase.weekly_breakdown && phase.weekly_breakdown.length > 0) {
+            const weeklyBreakdown = phase.weekly_breakdown || phase.weeks;
+            if (weeklyBreakdown && Array.isArray(weeklyBreakdown) && weeklyBreakdown.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>📅 Weekly Breakdown</h3>
                         <div class="weekly-breakdown">
-                            ${phase.weekly_breakdown.map(week => `
+                            ${weeklyBreakdown.map(week => `
                                 <div class="week-card">
-                                    <h4>Week ${week.week}</h4>
+                                    <h4>Week ${week.week || ''}</h4>
                                     <div><strong>Topics:</strong> ${(week.topics || []).join(', ')}</div>
                                     <div><strong>Labs:</strong> ${(week.labs || []).join(', ')}</div>
-                                    <div><strong>Hours:</strong> ${week.hours || 15}</div>
-                                    <div><strong>Checkpoint:</strong> ${week.checkpoint || ''}</div>
+                                    <div><strong>Hours:</strong> ${week.hours || week.hours_per_week || 15}</div>
+                                    ${week.checkpoint ? `<div><strong>Checkpoint:</strong> ${week.checkpoint}</div>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -2022,7 +2097,7 @@ function displayRoadmap(roadmapData) {
             }
             
             // Daily breakdown (legacy)
-            if (phase.dailyBreakdown && phase.dailyBreakdown.length > 0) {
+            if (phase.dailyBreakdown && Array.isArray(phase.dailyBreakdown) && phase.dailyBreakdown.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>📅 Daily Breakdown</h3>
@@ -2034,15 +2109,18 @@ function displayRoadmap(roadmapData) {
             }
             
             // Tools to learn
-            if (phase.essential_tools && phase.essential_tools.length > 0) {
+            const tools = phase.essential_tools || phase.tools;
+            if (tools && Array.isArray(tools) && tools.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>🛠️ Essential Tools</h3>
                         <div class="tools-container">
-                            ${phase.essential_tools.map(tool => `
+                            ${tools.map(tool => {
+                                if (typeof tool === 'string') return `<div class="tool-card"><h4>${tool}</h4></div>`;
+                                return `
                                 <div class="tool-card">
-                                    <h4>${tool.name}</h4>
-                                    <div class="tool-purpose"><strong>Purpose:</strong> ${tool.purpose}</div>
+                                    <h4>${tool.name || tool.tool_name || ''}</h4>
+                                    ${tool.purpose ? `<div class="tool-purpose"><strong>Purpose:</strong> ${tool.purpose}</div>` : ''}
                                     ${tool.learning_path ? `
                                         <div class="learning-path">
                                             <strong>Learning Path:</strong>
@@ -2053,35 +2131,19 @@ function displayRoadmap(roadmapData) {
                                             </ul>
                                         </div>
                                     ` : ''}
+                                    ${tool.step ? `<div class="tool-steps"><em>Steps:</em> ${tool.step}</div>` : ''}
                                     ${tool.key_features ? `<div><strong>Key Features:</strong> ${tool.key_features.join(', ')}</div>` : ''}
                                     ${tool.practice_exercise ? `<div><strong>Practice:</strong> ${tool.practice_exercise}</div>` : ''}
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Legacy tools section
-            if (phase.tools && phase.tools.length > 0 && (!phase.essential_tools || phase.essential_tools.length === 0)) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>🛠️ Tools to Learn</h3>
-                        <div class="tools-container">
-                            ${phase.tools.map(tool => `
-                                <div class="tool-card">
-                                    <div class="tool-name"><strong>${tool.name}</strong></div>
-                                    <div class="tool-purpose"><em>Purpose:</em> ${tool.purpose}</div>
-                                    <div class="tool-steps"><em>Steps:</em> ${tool.step}</div>
-                                </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     </div>
                 `;
             }
             
             // Recommended labs
-            if (phase.recommended_labs && phase.recommended_labs.length > 0) {
+            const labs = phase.recommended_labs || phase.labs;
+            if (labs && Array.isArray(labs) && labs.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>🎮 Hands-On Labs</h3>
@@ -2096,42 +2158,13 @@ function displayRoadmap(roadmapData) {
                                 </tr>
                             </thead>
                             <tbody>
-                                ${phase.recommended_labs.map(lab => `
+                                ${labs.map(lab => `
                                     <tr>
-                                        <td><strong>${lab.name}</strong></td>
-                                        <td>${lab.platform}</td>
+                                        <td><strong>${lab.name || lab.lab || ''}</strong></td>
+                                        <td>${lab.platform || ''}</td>
                                         <td><span class="difficulty-badge difficulty-${(lab.difficulty || '').toLowerCase()}">${lab.difficulty || 'N/A'}</span></td>
-                                        <td>${lab.hours || 'N/A'}</td>
-                                        <td>${(lab.skills_gained || []).join(', ')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            // Legacy labs section
-            if (phase.labs && phase.labs.length > 0 && (!phase.recommended_labs || phase.recommended_labs.length === 0)) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>🎮 Hands-On Labs</h3>
-                        <table class="phase-table labs-table">
-                            <thead>
-                                <tr>
-                                    <th>Platform</th>
-                                    <th>Lab/Machine</th>
-                                    ${phase.labs[0].difficulty ? '<th>Difficulty</th>' : ''}
-                                    ${phase.labs[0].duration ? '<th>Duration</th>' : ''}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${phase.labs.map(lab => `
-                                    <tr>
-                                        <td><strong>${lab.platform}</strong></td>
-                                        <td>${lab.lab}</td>
-                                        ${lab.difficulty ? `<td><span class="difficulty-badge difficulty-${lab.difficulty.toLowerCase()}">${lab.difficulty}</span></td>` : ''}
-                                        ${lab.duration ? `<td>${lab.duration}</td>` : ''}
+                                        <td>${lab.hours || lab.duration || 'N/A'}</td>
+                                        <td>${Array.isArray(lab.skills_gained) ? lab.skills_gained.join(', ') : (lab.skills_gained || 'N/A')}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -2141,7 +2174,8 @@ function displayRoadmap(roadmapData) {
             }
             
             // Resources for phase
-            if (phase.resources_for_phase && phase.resources_for_phase.length > 0) {
+            const phaseResources = phase.resources_for_phase || phase.resources;
+            if (phaseResources && Array.isArray(phaseResources) && phaseResources.length > 0) {
                 phaseHTML += `
                     <div class="phase-section">
                         <h3>📖 Resources for This Phase</h3>
@@ -2150,44 +2184,15 @@ function displayRoadmap(roadmapData) {
                                 <tr>
                                     <th>Type</th>
                                     <th>Name</th>
-                                    <th>Topic</th>
-                                    <th>Link</th>
+                                    <th>Topic/Link</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${phase.resources_for_phase.map(res => `
+                                ${phaseResources.map(res => `
                                     <tr>
-                                        <td><span class="badge">${res.type}</span></td>
-                                        <td>${res.name}</td>
-                                        <td>${res.topic}</td>
-                                        <td>${res.link ? `<a href="${res.link}" target="_blank" rel="noopener">Visit →</a>` : 'N/A'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            // Legacy resources section
-            if (phase.resources && phase.resources.length > 0 && (!phase.resources_for_phase || phase.resources_for_phase.length === 0)) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>📚 Resources</h3>
-                        <table class="phase-table resources-table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Name</th>
-                                    <th>Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${phase.resources.map(res => `
-                                    <tr>
-                                        <td><span class="badge">${res.type}</span></td>
-                                        <td>${res.name}</td>
-                                        <td><a href="${res.link}" target="_blank" rel="noopener">Visit →</a></td>
+                                        <td><span class="badge">${res.type || ''}</span></td>
+                                        <td>${res.name || ''}</td>
+                                        <td>${res.topic || ''} ${res.link ? `<a href="${res.link}" target="_blank" rel="noopener">Visit →</a>` : ''}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -2214,21 +2219,22 @@ function displayRoadmap(roadmapData) {
     }
     
     // Tools Mastery Guide
-    if (roadmapObj.tools_mastery_guide && roadmapObj.tools_mastery_guide.length > 0) {
+    const toolsGuide = roadmapObj.tools_mastery_guide || roadmapObj.tools_guide;
+    if (toolsGuide && Array.isArray(toolsGuide) && toolsGuide.length > 0) {
         const toolsSection = document.createElement('div');
         toolsSection.className = 'tools-mastery-section';
         toolsSection.innerHTML = '<h2 style="margin-top: 40px;">🔧 Tools Mastery Guide</h2>';
         
-        roadmapObj.tools_mastery_guide.forEach(tool => {
+        toolsGuide.forEach(tool => {
             const toolDiv = document.createElement('div');
             toolDiv.className = 'mastery-tool';
             let toolHTML = `
-                <h3>${tool.tool_name}</h3>
+                <h3>${tool.tool_name || tool.name || ''}</h3>
                 <div class="tool-meta">
-                    <span class="badge">${tool.category}</span>
-                    <span class="importance importance-${tool.importance.toLowerCase()}">${tool.importance}</span>
+                    ${tool.category ? `<span class="badge">${tool.category}</span>` : ''}
+                    ${tool.importance ? `<span class="importance importance-${(tool.importance || '').toLowerCase()}">${tool.importance}</span>` : ''}
                 </div>
-                <p><strong>When to use:</strong> ${tool.when_to_use}</p>
+                ${tool.when_to_use ? `<p><strong>When to use:</strong> ${tool.when_to_use}</p>` : ''}
             `;
             
             if (tool.learning_progression) {
@@ -2244,7 +2250,8 @@ function displayRoadmap(roadmapData) {
                 `;
             }
             
-            if (tool.critical_commands && tool.critical_commands.length > 0) {
+            const commands = tool.critical_commands || tool.commands;
+            if (commands && Array.isArray(commands) && commands.length > 0) {
                 toolHTML += `
                     <div>
                         <h4>Critical Commands:</h4>
@@ -2254,13 +2261,15 @@ function displayRoadmap(roadmapData) {
                                 <th>Purpose</th>
                                 <th>Example</th>
                             </tr>
-                            ${tool.critical_commands.map(cmd => `
+                            ${commands.map(cmd => {
+                                if (typeof cmd === 'string') return `<tr><td colspan="3"><code>${cmd}</code></td></tr>`;
+                                return `
                                 <tr>
-                                    <td><code>${cmd.command}</code></td>
-                                    <td>${cmd.purpose}</td>
-                                    <td><code>${cmd.example}</code></td>
+                                    <td><code>${cmd.command || ''}</code></td>
+                                    <td>${cmd.purpose || ''}</td>
+                                    <td><code>${cmd.example || ''}</code></td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </table>
                     </div>
                 `;
@@ -2274,15 +2283,15 @@ function displayRoadmap(roadmapData) {
     }
     
     // Curated Resources Section
-    if (roadmapObj.curated_resources) {
+    const resources = roadmapObj.curated_resources || roadmapObj.resources;
+    if (resources) {
         const resourcesSection = document.createElement('div');
         resourcesSection.className = 'curated-resources-section';
         resourcesSection.innerHTML = '<h2 style="margin-top: 40px;">📚 Curated Learning Resources</h2>';
         
-        const resources = roadmapObj.curated_resources;
-        
         // YouTube channels
-        if (resources.youtube_channels && resources.youtube_channels.length > 0) {
+        const ytChannels = resources.youtube_channels || resources.youtube;
+        if (ytChannels && Array.isArray(ytChannels) && ytChannels.length > 0) {
             const ytDiv = document.createElement('div');
             ytDiv.className = 'resource-subsection';
             ytDiv.innerHTML = `
@@ -2291,18 +2300,16 @@ function displayRoadmap(roadmapData) {
                     <thead>
                         <tr>
                             <th>Channel</th>
-                            <th>Focus</th>
-                            <th>Level</th>
+                            <th>Focus/Why</th>
                             <th>Link</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${resources.youtube_channels.map(yt => `
+                        ${ytChannels.map(yt => `
                             <tr>
-                                <td><strong>${yt.name}</strong></td>
-                                <td>${yt.focus}</td>
-                                <td>${yt.level}</td>
-                                <td><a href="${yt.link}" target="_blank" rel="noopener">Watch →</a></td>
+                                <td><strong>${yt.name || yt.channel || ''}</strong></td>
+                                <td>${yt.focus || yt.why || ''} ${yt.level ? `(${yt.level})` : ''}</td>
+                                <td>${yt.link ? `<a href="${yt.link}" target="_blank" rel="noopener">Watch →</a>` : ''}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2312,7 +2319,7 @@ function displayRoadmap(roadmapData) {
         }
         
         // Books
-        if (resources.essential_books && resources.essential_books.length > 0) {
+        if (resources.essential_books && Array.isArray(resources.essential_books) && resources.essential_books.length > 0) {
             const booksDiv = document.createElement('div');
             booksDiv.className = 'resource-subsection';
             booksDiv.innerHTML = `
@@ -2323,16 +2330,14 @@ function displayRoadmap(roadmapData) {
                             <th>Title</th>
                             <th>Author</th>
                             <th>Topic</th>
-                            <th>Level</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${resources.essential_books.map(book => `
                             <tr>
-                                <td><strong>${book.title}</strong></td>
-                                <td>${book.author}</td>
-                                <td>${book.topic}</td>
-                                <td>${book.level}</td>
+                                <td><strong>${book.title || ''}</strong></td>
+                                <td>${book.author || ''}</td>
+                                <td>${book.topic || book.for_what || ''} ${book.level ? `(${book.level})` : ''}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2342,7 +2347,8 @@ function displayRoadmap(roadmapData) {
         }
         
         // Learning platforms
-        if (resources.learning_platforms && resources.learning_platforms.length > 0) {
+        const platforms = resources.learning_platforms || resources.platforms;
+        if (platforms && Array.isArray(platforms) && platforms.length > 0) {
             const platformsDiv = document.createElement('div');
             platformsDiv.className = 'resource-subsection';
             platformsDiv.innerHTML = `
@@ -2351,18 +2357,17 @@ function displayRoadmap(roadmapData) {
                     <thead>
                         <tr>
                             <th>Platform</th>
-                            <th>Type</th>
-                            <th>Best For</th>
-                            <th>Link</th>
+                            <th>Type/Cost</th>
+                            <th>Best For/Purpose</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${resources.learning_platforms.map(platform => `
+                        ${platforms.map(platform => `
                             <tr>
-                                <td><strong>${platform.name}</strong></td>
-                                <td><span class="badge">${platform.type}</span></td>
-                                <td>${platform.best_for}</td>
-                                <td><a href="${platform.link}" target="_blank" rel="noopener">Visit →</a></td>
+                                <td><strong>${platform.name || ''}</strong></td>
+                                <td><span class="badge">${platform.type || platform.cost || ''}</span></td>
+                                <td>${platform.best_for || platform.for || ''}</td>
+                                <td>${platform.link ? `<a href="${platform.link}" target="_blank" rel="noopener">Visit →</a>` : ''}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2375,34 +2380,38 @@ function displayRoadmap(roadmapData) {
     }
     
     // Study Plan & Daily Schedule
-    if (roadmapObj.daily_study_schedule) {
+    const dailySchedule = roadmapObj.daily_study_schedule || roadmapObj.daily_schedule;
+    if (dailySchedule) {
         const scheduleSection = document.createElement('div');
         scheduleSection.className = 'study-schedule-section';
-        scheduleSection.innerHTML = `
-            <h2 style="margin-top: 40px;">📅 Daily Study Schedule</h2>
-            <div class="schedule-card">
-                <h3>Recommended Schedule</h3>
-                <div style="margin: 15px 0;">
-                    ${roadmapObj.daily_study_schedule.recommended_schedule ? `
-                        <div><strong>🌅 Morning:</strong> ${roadmapObj.daily_study_schedule.recommended_schedule.morning_session}</div>
-                        <div><strong>☀️ Midday:</strong> ${roadmapObj.daily_study_schedule.recommended_schedule.midday_session}</div>
-                        <div><strong>🌙 Evening:</strong> ${roadmapObj.daily_study_schedule.recommended_schedule.evening_session}</div>
-                        <div><strong>📊 Weekly Review:</strong> ${roadmapObj.daily_study_schedule.recommended_schedule.weekly_review}</div>
-                    ` : ''}
-                </div>
-                ${roadmapObj.daily_study_schedule.study_tips && roadmapObj.daily_study_schedule.study_tips.length > 0 ? `
-                    <h4>💡 Study Tips</h4>
-                    <ul>
-                        ${roadmapObj.daily_study_schedule.study_tips.map(tip => `<li>${tip}</li>`).join('')}
-                    </ul>
-                ` : ''}
-            </div>
-        `;
+
+        const schedule = dailySchedule.recommended_schedule || dailySchedule;
+        const tips = dailySchedule.study_tips || [];
+
+        let scheduleHTML = `<h2 style="margin-top: 40px;">📅 Daily Study Schedule</h2><div class="schedule-card"><h3>Recommended Schedule</h3><div style="margin: 15px 0;">`;
+
+        if (typeof schedule === 'string') {
+            scheduleHTML += `<p>${schedule}</p>`;
+        } else {
+            if (schedule.morning_session) scheduleHTML += `<div><strong>🌅 Morning:</strong> ${schedule.morning_session}</div>`;
+            if (schedule.midday_session) scheduleHTML += `<div><strong>☀️ Midday:</strong> ${schedule.midday_session}</div>`;
+            if (schedule.evening_session) scheduleHTML += `<div><strong>🌙 Evening:</strong> ${schedule.evening_session}</div>`;
+            if (schedule.weekly_review) scheduleHTML += `<div><strong>📊 Weekly Review:</strong> ${schedule.weekly_review}</div>`;
+        }
+
+        scheduleHTML += `</div>`;
+
+        if (Array.isArray(tips) && tips.length > 0) {
+            scheduleHTML += `<h4>💡 Study Tips</h4><ul>${tips.map(tip => `<li>${tip}</li>`).join('')}</ul>`;
+        }
+
+        scheduleHTML += `</div>`;
+        scheduleSection.innerHTML = scheduleHTML;
         elements.roadmapContent.appendChild(scheduleSection);
     }
     
     // Success metrics
-    if (roadmapObj.success_metrics && roadmapObj.success_metrics.length > 0) {
+    if (roadmapObj.success_metrics && Array.isArray(roadmapObj.success_metrics) && roadmapObj.success_metrics.length > 0) {
         const metricsSection = document.createElement('div');
         metricsSection.className = 'success-metrics-section';
         metricsSection.innerHTML = `
@@ -2418,9 +2427,9 @@ function displayRoadmap(roadmapData) {
                 <tbody>
                     ${roadmapObj.success_metrics.map(metric => `
                         <tr>
-                            <td><strong>${metric.phase}</strong></td>
-                            <td>${metric.completed_when}</td>
-                            <td>${metric.checkpoint_assessment}</td>
+                            <td><strong>${metric.phase || ''}</strong></td>
+                            <td>${metric.completed_when || ''}</td>
+                            <td>${metric.checkpoint_assessment || ''}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -2430,22 +2439,26 @@ function displayRoadmap(roadmapData) {
     }
     
     // Motivation section
-    if (roadmapObj.motivation_and_mindset) {
+    const motivation = roadmapObj.motivation_and_mindset || roadmapObj.motivation;
+    if (motivation) {
         const motivationSection = document.createElement('div');
         motivationSection.className = 'motivation-section';
-        motivationSection.innerHTML = `
-            <h2 style="margin-top: 40px;">🚀 Motivation & Mindset</h2>
-            <div class="motivation-card">
-                ${roadmapObj.motivation_and_mindset.why_people_succeed ? `
-                    <h3>Why People Succeed:</h3>
-                    <p>${roadmapObj.motivation_and_mindset.why_people_succeed}</p>
-                ` : ''}
-                ${roadmapObj.motivation_and_mindset.real_world_applications ? `
-                    <h3>Real-World Applications:</h3>
-                    <p>${roadmapObj.motivation_and_mindset.real_world_applications}</p>
-                ` : ''}
-            </div>
-        `;
+
+        let motivationHTML = `<h2 style="margin-top: 40px;">🚀 Motivation & Mindset</h2><div class="motivation-card">`;
+
+        if (typeof motivation === 'string') {
+            motivationHTML += `<p>${motivation}</p>`;
+        } else {
+            if (motivation.why_people_succeed) {
+                motivationHTML += `<h3>Why People Succeed:</h3><p>${motivation.why_people_succeed}</p>`;
+            }
+            if (motivation.real_world_applications) {
+                motivationHTML += `<h3>Real-World Applications:</h3><p>${motivation.real_world_applications}</p>`;
+            }
+        }
+
+        motivationHTML += `</div>`;
+        motivationSection.innerHTML = motivationHTML;
         elements.roadmapContent.appendChild(motivationSection);
     }
 }
