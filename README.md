@@ -121,6 +121,7 @@ This is an **educational guidance tool only**—not a hacking tutorial, not a vu
 - No build step required
 - Deploy as-is to any static host or cloud platform
 - **One-click deployment to Render supported** (see [DEPLOY_RENDER.md](DEPLOY_RENDER.md))
+- **Alternative deployment to Vercel supported** (see [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md))
 
 ---
 
