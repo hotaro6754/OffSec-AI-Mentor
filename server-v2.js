@@ -124,12 +124,17 @@ if (AI_PROVIDER !== 'none') {
 // MIDDLEWARE
 // ============================================================================
 
-app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:8000', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000'],
+// CORS Configuration - allows localhost for development and any origin in production (managed by deployment)
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? true // Reflect origin in production (allowing any origin to connect)
+        : ['http://localhost:3000', 'http://localhost:8000', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-OpenAI-API-Key', 'X-Groq-API-Key', 'X-Gemini-API-Key', 'X-Deepseek-API-Key'],
     credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
