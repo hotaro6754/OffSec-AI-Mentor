@@ -119,7 +119,8 @@ This is an **educational guidance tool only**—not a hacking tutorial, not a vu
 ### **Deployment**
 - Works in any modern browser
 - No build step required
-- Deploy as-is to any static host (GitHub Pages, Netlify, Vercel, etc.)
+- Deploy as-is to any static host or cloud platform
+- **One-click deployment to Render supported** (see [DEPLOY_RENDER.md](DEPLOY_RENDER.md))
 
 ---
 

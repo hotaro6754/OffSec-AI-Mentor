@@ -1,0 +1,34 @@
+# Render Blueprint for OffSec AI Mentor
+# https://render.com/docs/blueprints
+
+services:
+  - type: web
+    name: offsec-ai-mentor
+    env: node
+    plan: free # Note: Free tier does not support persistent disks.
+               # Upgrade to "Starter" or higher if using the disk below.
+    buildCommand: npm install
+    startCommand: node server-v2.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /var/data/offsec_mentor.db
+      - key: GROQ_API_KEY
+        sync: false # Set manually in Render Dashboard
+      - key: OPENAI_API_KEY
+        sync: false # Set manually in Render Dashboard
+      - key: GEMINI_API_KEY
+        sync: false # Set manually in Render Dashboard
+      - key: DEEPSEEK_API_KEY
+        sync: false # Set manually in Render Dashboard
+
+    # IMPORTANT: Persistent disks require a paid Render plan (Starter or higher)
+    # If using the Free tier, data will be lost on every restart.
+    # Comment out or remove the disk section if you are on the Free tier.
+    disk:
+      name: mentor-data
+      mountPath: /var/data
+      sizeGB: 1
