@@ -663,84 +663,98 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
 
 // Call only primary AI provider (no fallback) - for roadmap generation
 async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys = {}) {
-    let provider = AI_PROVIDER;
-    let apiKey = customKeys[provider] || AI_API_KEY;
-    let model = AI_MODEL;
-    let apiUrl = AI_API_URL;
+    // Configuration for available providers
+    const providers = {
+        groq: { model: 'llama-3.3-70b-versatile', url: 'https://api.groq.com/openai/v1/chat/completions' },
+        openai: { model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo', url: 'https://api.openai.com/v1/chat/completions' },
+        deepseek: { model: 'deepseek-chat', url: 'https://api.deepseek.com/chat/completions' },
+        gemini: { model: 'gemini-1.5-flash', url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent' }
+    };
 
-    // If user provided a specific key for a provider, we might want to switch to it
-    if (customKeys.groq && provider !== 'groq') {
-        provider = 'groq'; apiKey = customKeys.groq; model = 'llama-3.3-70b-versatile'; apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    } else if (customKeys.openai && provider === 'none') {
-        provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-3.5-turbo'; apiUrl = 'https://api.openai.com/v1/chat/completions';
+    let provider = 'none';
+    let apiKey = '';
+    let model = '';
+    let apiUrl = '';
+
+    // Priority 1: User-provided keys (customKeys)
+    if (customKeys.groq) {
+        provider = 'groq'; apiKey = customKeys.groq;
+    } else if (customKeys.openai) {
+        provider = 'openai'; apiKey = customKeys.openai;
+    } else if (customKeys.deepseek) {
+        provider = 'deepseek'; apiKey = customKeys.deepseek;
+    } else if (customKeys.gemini) {
+        provider = 'gemini'; apiKey = customKeys.gemini;
     }
+    // Priority 2: System-configured primary provider
+    else if (AI_PROVIDER !== 'none') {
+        provider = AI_PROVIDER; apiKey = AI_API_KEY;
+    }
+
+    if (provider === 'none') throw new Error("No AI API key available");
+
+    model = providers[provider].model;
+    apiUrl = providers[provider].url;
 
     console.log(`📤 Calling ${provider.toUpperCase()} API (Primary Only - No Fallback)...`);
-    
     const result = await tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson, retries);
     
-    if (result.success) {
-        return result.data;
-    }
-    
+    if (result.success) return result.data;
     throw new Error(result.error);
 }
 
 async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
-    // Determine which AI provider to use, prioritizing custom keys
-    let currentProvider = AI_PROVIDER;
-    let currentApiKey = customKeys[currentProvider] || AI_API_KEY;
-    let currentModel = AI_MODEL;
-    let currentApiUrl = AI_API_URL;
+    const providers = {
+        groq: { model: 'llama-3.3-70b-versatile', url: 'https://api.groq.com/openai/v1/chat/completions' },
+        openai: { model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo', url: 'https://api.openai.com/v1/chat/completions' },
+        deepseek: { model: 'deepseek-chat', url: 'https://api.deepseek.com/chat/completions' },
+        gemini: { model: 'gemini-1.5-flash', url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent' }
+    };
 
-    // Override with custom keys if available and primary is 'none'
-    if (currentProvider === 'none') {
-        if (customKeys.groq) {
-            currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-        } else if (customKeys.openai) {
-            currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
-        } else if (customKeys.gemini) {
-            currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-1.5-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-        } else if (customKeys.deepseek) {
-            currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
+    // Build a list of available providers (user keys first, then system keys)
+    const available = [];
+    
+    // User keys
+    if (customKeys.groq) available.push({ id: 'groq', key: customKeys.groq });
+    if (customKeys.openai) available.push({ id: 'openai', key: customKeys.openai });
+    if (customKeys.deepseek) available.push({ id: 'deepseek', key: customKeys.deepseek });
+    if (customKeys.gemini) available.push({ id: 'gemini', key: customKeys.gemini });
+
+    // System keys (only if not already added by user)
+    if (AI_PROVIDER !== 'none' && !available.find(a => a.id === AI_PROVIDER)) {
+        available.push({ id: AI_PROVIDER, key: AI_API_KEY });
+    }
+    if (FALLBACK_PROVIDER !== 'none' && !available.find(a => a.id === FALLBACK_PROVIDER)) {
+        available.push({ id: FALLBACK_PROVIDER, key: FALLBACK_API_KEY });
+    }
+    if (FALLBACK2_PROVIDER !== 'none' && !available.find(a => a.id === FALLBACK2_PROVIDER)) {
+        available.push({ id: FALLBACK2_PROVIDER, key: FALLBACK2_API_KEY });
+    }
+
+    if (available.length === 0) throw new Error("No AI API key available");
+
+    // Try providers in sequence
+    for (let i = 0; i < available.length; i++) {
+        const current = available[i];
+        const config = providers[current.id];
+
+        console.log(`📤 Calling ${current.id.toUpperCase()} API (${i === 0 ? 'Primary' : 'Fallback ' + i})...`);
+        const result = await tryCallAI(current.id, current.key, config.model, config.url, prompt, expectJson, retries);
+
+        if (result.success) {
+            console.log(`✅ ${current.id.toUpperCase()} API succeeded!`);
+            return result.data;
         }
-    }
 
-    console.log(`📤 Calling ${currentProvider.toUpperCase()} API...`);
-    
-    // Try with chosen provider first
-    const result = await tryCallAI(currentProvider, currentApiKey, currentModel, currentApiUrl, prompt, expectJson, retries);
-    
-    // Fallback logic
-    if (!result.success && result.rateLimit) {
-        // Try fallback 1
-        if (FALLBACK_PROVIDER !== 'none') {
-            console.log(`🔄 Switching to fallback ${FALLBACK_PROVIDER.toUpperCase()} API...`);
-            const fbApiKey = customKeys[FALLBACK_PROVIDER] || FALLBACK_API_KEY;
-            const fallbackResult = await tryCallAI(FALLBACK_PROVIDER, fbApiKey, FALLBACK_MODEL, FALLBACK_API_URL, prompt, expectJson, retries);
-            if (fallbackResult.success) {
-                console.log(`✅ ${FALLBACK_PROVIDER.toUpperCase()} API succeeded!`);
-                return fallbackResult.data;
-            }
-
-            // Try fallback 2
-            if (!fallbackResult.success && fallbackResult.rateLimit && FALLBACK2_PROVIDER !== 'none') {
-                console.log(`🔄 Switching to secondary fallback ${FALLBACK2_PROVIDER.toUpperCase()} API...`);
-                const fb2ApiKey = customKeys[FALLBACK2_PROVIDER] || FALLBACK2_API_KEY;
-                const fallback2Result = await tryCallAI(FALLBACK2_PROVIDER, fb2ApiKey, FALLBACK2_MODEL, FALLBACK2_API_URL, prompt, expectJson, retries);
-                if (fallback2Result.success) {
-                    console.log(`✅ ${FALLBACK2_PROVIDER.toUpperCase()} API succeeded!`);
-                    return fallback2Result.data;
-                }
-            }
+        // Only continue if it was a rate limit error and we have more providers
+        if (!result.rateLimit || i === available.length - 1) {
+            throw new Error(result.error || `${current.id.toUpperCase()} API failed`);
         }
+
+        console.log(`🔄 Switching from ${current.id.toUpperCase()} due to rate limit...`);
     }
-    
-    if (result.success) {
-        return result.data;
-    }
-    
-    throw new Error(result.error || "AI call failed");
+
+    throw new Error("All AI providers failed");
 }
 
 async function tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
@@ -1318,6 +1332,7 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
 
 
 // Serve static files (CSS, images, etc.) 
