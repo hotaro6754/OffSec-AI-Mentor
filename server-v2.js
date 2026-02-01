@@ -548,7 +548,14 @@ Be encouraging but honest. Output ONLY valid JSON.`,
 
 IMPORTANT INSTRUCTIONS:
 - If level is "Beginner", provide 2-3x more foundational tasks and a longer timeline (can vary from 6 months to 1 year or even 2 to 3 years depending on depth).
-- FOR OSCP: Strictly align with the official OSCP (PEN-200) syllabus topics: Information Gathering, Vulnerability Research, Web App Attacks, SQL Injection, Client-Side Attacks, Locating/Fixing Exploits, Antivirus Evasion, Privilege Escalation (Linux/Windows), Password Attacks, Pivoting/Tunneling, Active Directory Attacks, Metasploit, and Report Writing.
+- SYLLABUS ALIGNMENT: Strictly align the roadmap phases with the official syllabus of the target certification (${cert}).
+  * For OSCP (PEN-200): Information Gathering, Vulnerability Research, Web App Attacks, SQL Injection, Client-Side Attacks, Locating/Fixing Exploits, Antivirus Evasion, Privilege Escalation, Password Attacks, Pivoting/Tunneling, Active Directory, Metasploit.
+  * For PNPT: OSINT, External Pentest, Internal Pentest (Active Directory), Web App Pentest, Report Writing & Debrief.
+  * For CPTS: Pentest Process, Information Gathering, Vulnerability Analysis, Exploitation, Post-Exploitation, AD, Web App, Reporting.
+  * For eJPT: Assessment Methodologies, Host and Network Auditing, Host and Network Pentesting, Web Application Pentesting.
+  * For OSEP: Evasion Techniques, Advanced AD Attacks, Client-Side Attacks, Process Injection, Lateral Movement, AppLocker Bypass.
+  * For OSWE: Web App Security, Source Code Review, Auth Bypass, Deserialization, SQLi, XSS, White-box Testing.
+  * For others: Research and follow the official domain-specific syllabus.
 - Provide REAL, CLICKABLE URLs for all resources (TryHackMe, HackTheBox, OverTheWire, YouTube).
 - Mandate at least 3-5 specific HTB/THM/OTW labs for EACH learning phase with direct URLs.
 - Include specific OverTheWire (OTW) wargames like Bandit, Leviathan for Linux foundations.
