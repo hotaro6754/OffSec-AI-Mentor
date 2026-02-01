@@ -102,56 +102,54 @@ app.use((req, res, next) => {
 const RESOURCES = {
     youtube: {
         channels: [
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, malware analysis, general hacking' },
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HTB walkthroughs, methodology' },
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking, beginner-friendly' },
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, career guidance' },
-            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, CTFs' },
-            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, certifications' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials' },
-            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug bounty, web security' },
-            { name: 'Nahamsec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug bounty, recon' },
-            { name: '13Cubed', url: 'https://www.youtube.com/@13Cubed', focus: 'DFIR, forensics' }
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware Analysis, General Hacking' },
+            { name: 'Null Byte', url: 'https://www.youtube.com/@NullByteWHT', focus: 'Wider range of hacking tutorials, hardware hacking' },
+            { name: 'Hak5', url: 'https://www.youtube.com/@Hak5', focus: 'Hardware hacking tools, security news' },
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals, IT careers' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HTB walkthroughs, advanced methodology' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, Cisco, Python, Certifications' },
+            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, Reverse Engineering, CTFs' },
+            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug Bounty, Web Security, Mindset' },
+            { name: 'zSecurity', url: 'https://www.youtube.com/@zSecurity', focus: 'Ethical Hacking, WiFi Security' },
+            { name: 'The PC Security Channel', url: 'https://www.youtube.com/@thepcsecuritychannel', focus: 'Malware testing, Antivirus reviews' },
+            { name: 'Security Weekly', url: 'https://www.youtube.com/@SecurityWeekly', focus: 'Security news, interviews, technical segments' },
+            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Wireless security, assembly, Pentester Academy founder' },
+            { name: 'Cyber Yodha', url: 'https://www.youtube.com/@CyberYodha', focus: 'Hacking tutorials in Hindi/English' },
+            { name: 'Bhargav Tandel', url: 'https://www.youtube.com/@bhargavtandel', focus: 'Cyber Security, Career advice' },
+            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', focus: 'Bug Bounty, Web App Security' },
+            { name: 'Bugcrowd', url: 'https://www.youtube.com/@Bugcrowd', focus: 'Bug Bounty education, researcher spotlights' },
+            { name: 'OWASP Foundation', url: 'https://www.youtube.com/@OWASPGlobal', focus: 'Web application security standards' },
+            { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Deep technical security training' },
+            { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' }
         ]
     },
     platforms: {
-        free: [
-            { name: 'TryHackMe', url: 'https://tryhackme.com', type: 'Guided learning', difficulty: 'Beginner-Intermediate' },
-            { name: 'HackTheBox', url: 'https://hackthebox.com', type: 'CTF machines', difficulty: 'Intermediate-Advanced' },
-            { name: 'PicoCTF', url: 'https://picoctf.org', type: 'Beginner CTF', difficulty: 'Beginner' },
-            { name: 'OverTheWire', url: 'https://overthewire.org/wargames', type: 'Linux wargames', difficulty: 'Beginner' },
-            { name: 'VulnHub', url: 'https://vulnhub.com', type: 'Downloadable VMs', difficulty: 'All levels' },
-            { name: 'PortSwigger Academy', url: 'https://portswigger.net/web-security', type: 'Web security', difficulty: 'All levels' },
-            { name: 'Pwn.College', url: 'https://pwn.college', type: 'Binary exploitation', difficulty: 'Intermediate' },
-            { name: 'CryptoHack', url: 'https://cryptohack.org', type: 'Cryptography', difficulty: 'Intermediate' }
-        ],
-        paid: [
-            { name: 'HTB Academy', url: 'https://academy.hackthebox.com', type: 'Structured courses', price: '$$' },
-            { name: 'TCM Security', url: 'https://academy.tcm-sec.com', type: 'Pentesting courses', price: '$$' },
-            { name: 'Offensive Security', url: 'https://offsec.com', type: 'OSCP/OSWE prep', price: '$$$' },
-            { name: 'PentesterLab', url: 'https://pentesterlab.com', type: 'Web pentesting', price: '$$' }
-        ]
+        htb: {
+            name: 'Hack The Box (HTB)',
+            practiceLabs: ['Starting Point', 'Machines', 'Challenges', 'Endgames', 'Fortresses', 'Pro Labs', 'Battlegrounds', 'CTF', 'Bug Bounty Labs'],
+            proLabs: ['Dante', 'Offshore', 'Cybernetics', 'RastaLabs', 'APTLabs', 'Enterprise', 'Zephyr'],
+            academyPaths: ['Penetration Tester', 'Bug Bounty Hunter', 'SOC Analyst', 'Incident Responder', 'Defensive Security Analyst', 'Active Directory Penetration Tester', 'Web Application Penetration Tester', 'Cloud Security Specialist', 'Security Engineer'],
+            academyModules: ['Getting Started', 'Linux Fundamentals', 'Windows Fundamentals', 'Networking Fundamentals', 'Web Requests', 'Web Attacks', 'Authentication & Authorization', 'Databases', 'Active Directory', 'Pivoting & Tunneling', 'Privilege Escalation', 'Password Attacks', 'Vulnerability Assessment', 'Metasploit Framework', 'Shells & Payloads', 'File Transfers', 'Post-Exploitation', 'Threat Hunting', 'SIEM Fundamentals', 'Malware Analysis', 'Digital Forensics', 'Binary Exploitation', 'Reverse Engineering', 'Cryptography', 'Cloud Security', 'DevOps Security', 'Mobile Security'],
+            certs: ['CPTS', 'CWEE', 'CBBH', 'CAPE', 'CDSA']
+        },
+        thm: {
+            name: 'TryHackMe (THM)',
+            practiceLabs: ['Rooms', 'CTF Rooms', 'Boot2Root Rooms', 'Walkthrough Rooms', 'Challenge Rooms'],
+            learningPaths: ['Pre Security', 'Introduction to Cyber Security', 'Complete Beginner', 'Jr Penetration Tester', 'Web Fundamentals', 'Offensive Pentesting', 'Red Teaming', 'Blue Teaming', 'Cyber Defense', 'SOC Level 1', 'Security Engineer', 'DevSecOps', 'Cloud Security', 'Threat Intelligence', 'Incident Response', 'Digital Forensics'],
+            coreSeries: ['Advent of Cyber', 'OWASP Top 10', 'Red Team Fundamentals', 'Blue Team Fundamentals', 'Cyber Defense Frameworks'],
+            domains: ['Linux', 'Windows', 'Networking', 'Web', 'Active Directory', 'Cloud', 'DevOps', 'Mobile', 'OSINT', 'Cryptography', 'Reverse Engineering', 'Binary Exploitation', 'Malware Analysis', 'Digital Forensics', 'Incident Response', 'Threat Detection', 'SIEM'],
+            certs: ['eJPT', 'PNPT', 'CEH', 'Security+', 'Blue Team Level 1']
+        },
+        otw: {
+            name: 'OverTheWire (OTW)',
+            practiceGames: ['Bandit', 'Leviathan', 'Natas', 'Krypton', 'Narnia', 'Behemoth', 'Utumno', 'Maze', 'Vortex', 'Manpage'],
+            structure: ['Levels', 'SSH Access', 'Progressive Difficulty'],
+            topics: ['Linux Command Line', 'File Permissions', 'Users & Groups', 'Environment Variables', 'Process Management', 'Networking Basics', 'Manual Enumeration', 'Password Discovery', 'Encoding & Decoding', 'Symmetric Cryptography', 'Asymmetric Cryptography', 'Binary Permissions', 'SUID Exploitation', 'Basic Buffer Overflows', 'Memory Concepts'],
+            foundationFor: ['Linux+', 'Network+', 'Security+', 'eJPT']
+        }
     },
-    htbPaths: [
-        { name: 'Penetration Tester', url: 'https://academy.hackthebox.com/path/preview/penetration-tester', cert: 'HTB CPTS' },
-        { name: 'Bug Bounty Hunter', url: 'https://academy.hackthebox.com/path/preview/web-penetration-tester', cert: 'HTB CBBH' },
-        { name: 'SOC Analyst', url: 'https://academy.hackthebox.com/path/preview/soc-analyst', cert: 'HTB CDSA' }
-    ],
-    thmPaths: [
-        { name: 'Pre-Security', url: 'https://tryhackme.com/path/outline/presecurity', level: 'Beginner', focus: 'Basics' },
-        { name: 'Complete Beginner', url: 'https://tryhackme.com/path/outline/beginner', level: 'Beginner', focus: 'Linux, web, scripting' },
-        { name: 'Jr Penetration Tester', url: 'https://tryhackme.com/path/outline/jrpenetrationtester', level: 'Intermediate', focus: 'Pentesting methodology' },
-        { name: 'Offensive Pentesting', url: 'https://tryhackme.com/path/outline/pentesting', level: 'Intermediate', focus: 'OSCP prep' },
-        { name: 'Red Teaming', url: 'https://tryhackme.com/path/outline/redteaming', level: 'Advanced', focus: 'Red team ops' },
-        { name: 'Cyber Defense', url: 'https://tryhackme.com/path/outline/cyberdefense', level: 'Intermediate', focus: 'Blue team' }
-    ],
-    htbProLabs: [
-        { name: 'Dante', difficulty: 'Beginner', focus: 'AD basics, pivoting intro', machines: 14 },
-        { name: 'Offshore', difficulty: 'Intermediate', focus: 'Full AD attack chain', machines: 17 },
-        { name: 'RastaLabs', difficulty: 'Advanced', focus: 'Realistic red team', machines: 15 },
-        { name: 'Cybernetics', difficulty: 'Advanced', focus: 'Enterprise environment', machines: 22 },
-        { name: 'APTLabs', difficulty: 'Expert', focus: 'APT simulation', machines: 18 }
-    ],
     certifications: {
         beginner: [
             { name: 'CompTIA Security+', provider: 'CompTIA', focus: 'Security fundamentals', duration: '2-3 months' },
@@ -489,30 +487,19 @@ Be appropriate to the selected mode. Output ONLY valid JSON.`,
         const beginnerInstructions = `
 IMPORTANT INSTRUCTIONS FOR BEGINNER MODE (ABSOLUTE ZERO):
 - ASSUME ZERO KNOWLEDGE: This user knows NOTHING.
+- SYLLABUS ANALYSIS: Analyze the ${cert} syllabus and ensure the roadmap covers all required domains.
 - START FROM SCRATCH: Begin with Computer basics, OS fundamentals, and Networking.
 - NO SHORTCUTS: Do NOT compress phases. User needs to learn everything.
-- DETAILED PATH: Provide 8-12 Progressive Phases:
-  1. Computer & Hardware Basics
-  2. Networking Fundamentals (TCP/IP, Ports)
-  3. Linux Basics & CLI Usage
-  4. Windows Basics & Administration
-  5. Web Fundamentals (HTTP/HTML/JS)
-  6. Basic Scripting (Python/Bash)
-  7. Security Fundamentals (CIA, Auth)
-  8. Intermediate Certification: THM Junior Penetration Tester
-  9. Intermediate Certification: PNPT (Practical Network Penetration Tester)
-  10. Advanced Enumeration & Methodology
-  11. Active Directory Foundations
-  12. Preparation for ${cert}
-- MANDATORY LABS: Must include OverTheWire (Bandit), TryHackMe (Pre-Security, Complete Beginner), and HTB Academy modules.
-- ALL LINKS MUST BE REAL: Use verified URLs from ${JSON.stringify(resources.thmPaths)} and ${JSON.stringify(resources.htbPaths)}.`;
+- DETAILED PATH: Provide 8-12 Progressive Phases covering computer basics, networking, Linux/Windows fundamentals, CLI, and scripting.
+- MANDATORY LABS: Use lab names from ${JSON.stringify(resources.platforms)}. DO NOT provide direct URLs for labs.
+- RESOURCES: Suggest YouTube channels from ${JSON.stringify(resources.youtube.channels)}.`;
 
         const oscpInstructions = `
 IMPORTANT INSTRUCTIONS FOR OSCP MODE:
-- BRUTAL & ADVANCED: Focus specifically on the exam level.
+- BRUTAL & ADVANCED: Focus specifically on the OSCP (PEN-200) exam level.
 - ADAPTIVE DESIGN: Focus ONLY on the identified gaps: ${weaknesses.join(', ')}.
 - OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200 syllabus.
-- MANDATORY LABS: Include specific HTB (Dante, Offshore, etc.) and THM Offensive Pentesting links.
+- MANDATORY LABS: Use lab names from ${JSON.stringify(resources.platforms.htb.proLabs)} and ${JSON.stringify(resources.platforms.thm.learningPaths)}. DO NOT provide direct URLs for labs.
 - PRE-OSCP ALIGNMENT: Recommend PNPT or CPTS as bridges if gaps are significant.`;
 
         return `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
@@ -529,11 +516,17 @@ MUST INCLUDE IN JSON:
 1. **Gap Analysis**: Checklist of missing skills and weak areas.
 2. **Dynamic Phases** (8-12 for Beginners, 4-6 for OSCP Mode):
    - Phase Name and "Why it matters for ${cert}".
-   - Outcomes, Tools, and Mandatory Labs (with URLs).
+   - Outcomes, Tools, and Mandatory Labs (ONLY names, no URLs).
    - Resources with button-style links.
 3. **Pre-OSCP Recommendations**: Aligned certifications with mapping to user gaps.
 4. **Tools Mastery Guide**: Deep dive into critical tools with commands.
 5. **Success Metrics**: Phase-wise indicators of readiness.
+6. **Special Resource**: AT THE VERY END, include a "Secret Cyber Wisdom" resource with the URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+STRICT RULES:
+- Analyze the ${cert} syllabus and structure the roadmap accordingly.
+- DO NOT provide direct URLs for labs, only use their names.
+- Ensure each certification has a unique roadmap based on its specific syllabus.
 
 RESPOND WITH VALID JSON (pure JSON only):
 {
@@ -552,11 +545,15 @@ RESPOND WITH VALID JSON (pure JSON only):
       "duration_weeks": 4,
       "learning_outcomes": [],
       "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
-      "mandatory_labs": [{"name": "", "platform": "HTB|THM", "url": "", "skills": []}],
+      "mandatory_labs": [{"name": "", "platform": "HTB|THM", "skills": []}],
       "resources": [{"type": "YouTube|Blog", "name": "", "url": ""}],
       "completion_checklist": []
     }
   ],
+  "special_resource": {
+    "name": "Secret Cyber Wisdom",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
   "pre_oscp_alignment": [
     {"cert": "PNPT|CRTP|eJPT", "reason": "", "overlap_with_oscp": "", "gap_it_bridges": ""}
   ],
