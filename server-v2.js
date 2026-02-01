@@ -1110,6 +1110,44 @@ function parseJsonResponse(text) {
     }
 }
 
+// Validate and clean resources to fix undefined names
+function validateAndCleanResources(resources) {
+    if (!Array.isArray(resources)) return [];
+    
+    return resources.map(res => {
+        // Ensure resource has a name
+        const name = res.name || res.channel || res.title || 'Resource';
+        const type = res.type || 'Resource';
+        const url = res.url || '#';
+        const description = res.why || res.description || res.recommended || '';
+        
+        return {
+            type,
+            name,
+            url,
+            description
+        };
+    }).filter(res => res.name !== 'Resource' && res.url !== '#');
+}
+
+// Validate and clean roadmap data structure
+function validateRoadmapData(roadmapObj) {
+    if (!roadmapObj || typeof roadmapObj !== 'object') {
+        return roadmapObj;
+    }
+    
+    // Clean phases if they exist
+    if (Array.isArray(roadmapObj.phases)) {
+        roadmapObj.phases = roadmapObj.phases.map(phase => {
+            if (phase.resources) {
+                phase.resources = validateAndCleanResources(phase.resources);
+            }
+            return phase;
+        });
+    }
+    
+    return roadmapObj;
+}
 
 // ============================================================================
 // AUTH ENDPOINTS
@@ -1380,9 +1418,12 @@ app.post('/api/generate-roadmap', async (req, res) => {
 
         // Clean and parse the AI response to ensure valid JSON is sent to the frontend
         const parsedRoadmap = parseJsonResponse(response);
+        
+        // Validate and clean the roadmap data
+        const cleanedRoadmap = validateRoadmapData(parsedRoadmap);
 
         console.log('✅ Roadmap generated and parsed successfully');
-        res.json({ roadmap: parsedRoadmap });
+        res.json({ roadmap: cleanedRoadmap });
     } catch (error) {
         console.error('❌ Error in generate-roadmap:', error.message);
         console.error('Stack:', error.stack);

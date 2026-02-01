@@ -188,6 +188,20 @@ const CERTIFICATIONS = [
     }
 ];
 
+// Motivational Cyber Quotes
+const CYBER_QUOTES = [
+    "The best way to predict the future is to invent it. - Alan Kay",
+    "Security is not a product, but a process. - Bruce Schneier",
+    "In the world of hacking, knowledge is the ultimate exploit.",
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Try Harder. - Offensive Security",
+    "Persistence breaks resistance.",
+    "Every expert was once a beginner who refused to give up.",
+    "Cybersecurity is much more than a matter of IT. - Stephane Nappo",
+    "The quieter you become, the more you can hear. - Kali Linux",
+    "Knowledge is power, but applied knowledge is unstoppable."
+];
+
 // ============================================================================
 // GLOBAL STATE
 // ============================================================================
@@ -1366,6 +1380,13 @@ async function proceedToEvaluation() {
         showEvaluation();
         showSection('evaluationSection');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 10% chance to show easter egg after assessment completion
+        if (Math.random() < 0.1) {
+            setTimeout(() => {
+                showRandomEasterEgg();
+            }, 2000);
+        }
     } catch (error) {
         console.error('Error evaluating assessment:', error);
         showError('Failed to evaluate assessment. Please try again.');
@@ -2366,28 +2387,27 @@ function displayRoadmap(roadmapData) {
         container.appendChild(guideGrid);
     }
 
-    // 6. Special Resource (Rickroll)
+    // 6. Special Resource (Rickroll Easter Egg)
     if (roadmapObj.special_resource) {
-        const specialSection = document.createElement('div');
-        specialSection.className = 'section-header-v3';
-        specialSection.innerHTML = `
-            <i data-lucide="sparkles" class="w-8 h-8"></i>
-            <h2>${roadmapObj.special_resource.name || 'Secret Cyber Wisdom'}</h2>
-        `;
-        container.appendChild(specialSection);
-
-        const specialCard = document.createElement('div');
-        specialCard.className = 'phase-card-v3 success-mindset-card-v3';
-        specialCard.style.cursor = 'pointer';
-        specialCard.innerHTML = `
-            <div class="mindset-quote">
-                <p>Unlock the final secret of your journey...</p>
+        const randomQuote = getRandomQuote();
+        
+        const motivationalSection = document.createElement('div');
+        motivationalSection.className = 'motivational-section';
+        motivationalSection.innerHTML = `
+            <blockquote class="cyber-quote">
+                "${randomQuote}"
+            </blockquote>
+            <div class="secret-wisdom-container">
+                <p class="wisdom-prompt">🎯 Completed your roadmap? Here's a special gift...</p>
+                <button class="btn-reveal-secret" onclick="revealSecret('secret-content-roadmap')">
+                    🎁 Reveal Cyber Wisdom
+                </button>
+                <div id="secret-content-roadmap" class="hidden">
+                    <!-- QR Code and link will be generated here -->
+                </div>
             </div>
-            <div class="mindset-footer">
-                <a href="${roadmapObj.special_resource.url}" target="_blank" class="btn btn-primary">Reveal Secret</a>
-            </div>
         `;
-        container.appendChild(specialCard);
+        container.appendChild(motivationalSection);
     }
 
     elements.roadmapContent.appendChild(container);
@@ -2661,6 +2681,16 @@ async function sendMentorMessage(overrideText = null) {
     
     if (!userText) return;
     
+    // Check for easter egg trigger words
+    const lowerText = userText.toLowerCase();
+    if (lowerText.includes('wisdom') || lowerText.includes('surprise') || lowerText.includes('secret')) {
+        showRandomEasterEgg();
+        if (elements.mentorInput) {
+            elements.mentorInput.value = '';
+        }
+        return;
+    }
+    
     // Add user message
     const userMsg = { role: 'user', text: userText };
     appState.mentorChat.push(userMsg);
@@ -2842,6 +2872,111 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ============================================================================
+// EASTER EGG FUNCTIONS
+// ============================================================================
+
+function getRandomQuote() {
+    return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
+}
+
+function revealSecret(containerId) {
+    const secretDiv = document.getElementById(containerId || 'secret-content');
+    if (!secretDiv) return;
+    
+    secretDiv.classList.remove('hidden');
+    secretDiv.classList.add('revealed');
+    
+    // Generate QR code
+    const qrContainer = document.createElement('div');
+    qrContainer.id = 'qr-code-' + Date.now();
+    
+    // Create rickroll reveal content
+    secretDiv.innerHTML = `
+        <div class="rickroll-reveal">
+            <p class="reveal-text">🎉 Your Cyber Wisdom Awaits! 🎉</p>
+            <div class="qr-wrapper" id="qr-wrapper-${Date.now()}">
+                <div id="${qrContainer.id}"></div>
+                <p style="margin-top: 12px; color: #333; font-weight: 600;">Scan the QR code</p>
+            </div>
+            <p class="or-text">OR</p>
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+               target="_blank" 
+               class="btn btn-wisdom">
+                🎵 Click for Ultimate Hacking Knowledge
+            </a>
+        </div>
+    `;
+    
+    // Generate QR code after DOM is updated
+    setTimeout(() => {
+        if (typeof QRCode !== 'undefined') {
+            try {
+                new QRCode(qrContainer.id, {
+                    text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (e) {
+                console.error('QR Code generation failed:', e);
+                qrContainer.innerHTML = '<p style="padding: 20px;">QR Code unavailable</p>';
+            }
+        } else {
+            qrContainer.innerHTML = '<p style="padding: 20px;">QR Code library not loaded</p>';
+        }
+    }, 100);
+    
+    // Add confetti animation (optional)
+    addConfetti();
+}
+
+function addConfetti() {
+    // Simple confetti effect using emoji
+    const confettiCount = 30;
+    const confettiEmojis = ['🎉', '🎊', '✨', '🌟', '💫', '🎯', '🔥'];
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.fontSize = (Math.random() * 20 + 20) + 'px';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+function showRandomEasterEgg() {
+    const randomQuote = getRandomQuote();
+    const modal = document.createElement('div');
+    modal.className = 'easter-egg-modal';
+    modal.innerHTML = `
+        <div class="easter-egg-content">
+            <div class="motivational-section">
+                <button class="close-modal" onclick="this.closest('.easter-egg-modal').remove()">×</button>
+                <blockquote class="cyber-quote">
+                    "${randomQuote}"
+                </blockquote>
+                <div class="secret-wisdom-container">
+                    <p class="wisdom-prompt">💡 You've unlocked a special surprise!</p>
+                    <button class="btn-reveal-secret" onclick="revealSecret('secret-content-modal')">
+                        🎁 Reveal Cyber Wisdom
+                    </button>
+                    <div id="secret-content-modal" class="hidden">
+                        <!-- QR Code and link will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
 
 // ============================================================================
 // STARTUP
