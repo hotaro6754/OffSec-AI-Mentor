@@ -102,16 +102,16 @@ app.use((req, res, next) => {
 const RESOURCES = {
     youtube: {
         channels: [
-            { name: 'John Hammond', url: 'https://youtube.com/@_JohnHammond', focus: 'CTFs, malware analysis, general hacking' },
-            { name: 'IppSec', url: 'https://youtube.com/@ippsec', focus: 'HTB walkthroughs, methodology' },
-            { name: 'NetworkChuck', url: 'https://youtube.com/@NetworkChuck', focus: 'Networking, beginner-friendly' },
-            { name: 'The Cyber Mentor', url: 'https://youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, career guidance' },
-            { name: 'LiveOverflow', url: 'https://youtube.com/@LiveOverflow', focus: 'Binary exploitation, CTFs' },
-            { name: 'David Bombal', url: 'https://youtube.com/@davidbombal', focus: 'Networking, certifications' },
-            { name: 'HackerSploit', url: 'https://youtube.com/@HackerSploit', focus: 'Pentesting tutorials' },
-            { name: 'STÖK', url: 'https://youtube.com/@STOKfredrik', focus: 'Bug bounty, web security' },
-            { name: 'Nahamsec', url: 'https://youtube.com/@NahamSec', focus: 'Bug bounty, recon' },
-            { name: '13Cubed', url: 'https://youtube.com/@13Cubed', focus: 'DFIR, forensics' }
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, malware analysis, general hacking' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HTB walkthroughs, methodology' },
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking, beginner-friendly' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, career guidance' },
+            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, CTFs' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, certifications' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials' },
+            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug bounty, web security' },
+            { name: 'Nahamsec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug bounty, recon' },
+            { name: '13Cubed', url: 'https://www.youtube.com/@13Cubed', focus: 'DFIR, forensics' }
         ]
     },
     platforms: {
@@ -133,17 +133,17 @@ const RESOURCES = {
         ]
     },
     htbPaths: [
-        { name: 'Penetration Tester', machines: 'Starting Point → Easy → Medium', cert: 'HTB CPTS' },
-        { name: 'Bug Bounty Hunter', machines: 'Web challenges + machines', cert: 'HTB CBBH' },
-        { name: 'SOC Analyst', machines: 'Sherlock challenges', cert: 'HTB CDSA' }
+        { name: 'Penetration Tester', url: 'https://academy.hackthebox.com/path/preview/penetration-tester', cert: 'HTB CPTS' },
+        { name: 'Bug Bounty Hunter', url: 'https://academy.hackthebox.com/path/preview/web-penetration-tester', cert: 'HTB CBBH' },
+        { name: 'SOC Analyst', url: 'https://academy.hackthebox.com/path/preview/soc-analyst', cert: 'HTB CDSA' }
     ],
     thmPaths: [
-        { name: 'Pre-Security', duration: '40 hours', level: 'Beginner', focus: 'Basics' },
-        { name: 'Complete Beginner', duration: '64 hours', level: 'Beginner', focus: 'Linux, web, scripting' },
-        { name: 'Jr Penetration Tester', duration: '56 hours', level: 'Intermediate', focus: 'Pentesting methodology' },
-        { name: 'Offensive Pentesting', duration: '47 hours', level: 'Intermediate', focus: 'OSCP prep' },
-        { name: 'Red Teaming', duration: '48 hours', level: 'Advanced', focus: 'Red team ops' },
-        { name: 'Cyber Defense', duration: '48 hours', level: 'Intermediate', focus: 'Blue team' }
+        { name: 'Pre-Security', url: 'https://tryhackme.com/path/outline/presecurity', level: 'Beginner', focus: 'Basics' },
+        { name: 'Complete Beginner', url: 'https://tryhackme.com/path/outline/beginner', level: 'Beginner', focus: 'Linux, web, scripting' },
+        { name: 'Jr Penetration Tester', url: 'https://tryhackme.com/path/outline/jrpenetrationtester', level: 'Intermediate', focus: 'Pentesting methodology' },
+        { name: 'Offensive Pentesting', url: 'https://tryhackme.com/path/outline/pentesting', level: 'Intermediate', focus: 'OSCP prep' },
+        { name: 'Red Teaming', url: 'https://tryhackme.com/path/outline/redteaming', level: 'Advanced', focus: 'Red team ops' },
+        { name: 'Cyber Defense', url: 'https://tryhackme.com/path/outline/cyberdefense', level: 'Intermediate', focus: 'Blue team' }
     ],
     htbProLabs: [
         { name: 'Dante', difficulty: 'Beginner', focus: 'AD basics, pivoting intro', machines: 14 },
@@ -408,13 +408,13 @@ QUESTION STYLE FOR OSCP MODE:
 
         const beginnerTopics = `
 BEGINNER-LEVEL TOPICS (foundational):
-1. Networking: TCP/IP, OSI, Ports, Subnetting.
-2. Linux: Permissions, CLI basics, directory structure.
-3. Web Security: HTTP, OWASP Top 10 concepts.
-4. Security Fundamentals: CIA triad, Auth types, Encryption.
-5. Reconnaissance: Active/Passive basics.`;
+1. Computer Basics: RAM vs CPU, Operating Systems, File Systems.
+2. Networking: What is an IP, what is a port, basic TCP/UDP.
+3. Linux: Basic commands (ls, cd, cat), absolute vs relative paths.
+4. Web: What is a URL, what is a browser, basics of HTTP.
+5. Security: What is a password, basic CIA triad (Confidentiality, Integrity, Availability).`;
 
-        return `You are creating a FRESH, BRUTAL assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'beginner cybersecurity learners'}.
+        return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'absolute beginner cybersecurity learners (ZERO KNOWLEDGE)'}.
 
 CRITICAL: Generate COMPLETELY NEW questions. This is retake #${retakeCount + 1}.
 ${usedHashes.length > 0 ? `\nAVOID these previously used question patterns - create entirely different scenarios.` : ''}
@@ -422,10 +422,11 @@ ${usedHashes.length > 0 ? `\nAVOID these previously used question patterns - cre
 ${isOscp ? oscpTopics : beginnerTopics}
 
 REQUIREMENTS:
-- 10 questions total: 5 multiple choice (HARD), 5 short answer (DEEP).
-- Each question must be UNIQUE and SCENARIO-BASED.
-- OSCP MODE must be exam-level, unforgiving, and multi-step.
-- Test understanding and methodology, not memorization.
+- 10 questions total: 5 multiple choice, 5 short answer.
+- Each question must be UNIQUE and appropriate for the level.
+- BEGINNER MODE: Questions must be GENTLE, FOUNDATIONAL, and EASY. NO ADVANCED jargon.
+- OSCP MODE: Questions must be BRUTAL, EXAM-LEVEL, UNFORGIVING, and SCENARIO-BASED.
+- Test understanding and methodology.
 
 JSON OUTPUT FORMAT:
 {
@@ -451,34 +452,33 @@ STRICT RULES:
     /**
      * Evaluation prompt - enhanced with Readiness Analysis
      */
-    evaluation: `You are evaluating a cybersecurity assessment with BRUTAL honesty. Analyze carefully and provide a detailed JSON response.
+    evaluation: `You are a helpful cybersecurity mentor evaluating an assessment.
 
-OUTPUT FORMAT:
+MODE-SPECIFIC INSTRUCTIONS:
+- BEGINNER MODE: Be ENCOURAGING, FRIENDLY, and supportive. Focus on identifying what they already know and what foundations they need to build.
+- OSCP MODE: Be BRUTALLY HONEST, RIGOROUS, and exam-focused. Analyze gaps specifically against the PEN-200 syllabus.
+
+OUTPUT FORMAT (JSON):
 {
-  "readinessScore": <number 0-100>,
-  "readinessStatus": "Ready" | "Almost Ready" | "Not Ready",
-  "level": "Beginner" | "Foundation" | "Intermediate" | "Advanced",
+  "readinessScore": <number 0-100, only relevant for OSCP mode, else 0>,
+  "readinessStatus": "Ready" | "Almost Ready" | "Not Ready" | "N/A",
+  "level": "Absolute Beginner" | "Beginner" | "Intermediate" | "Advanced",
   "score": <number 0-100>,
   "strengths": ["Specific skill 1", "Skill 2"],
   "weaknesses": ["Growth area 1", "Growth area 2"],
   "confidenceGaps": ["Area where user shows hesitation or partial knowledge"],
   "skillBreakdown": {
-    "Enumeration": <0-100>,
-    "Privilege Escalation": <0-100>,
-    "Active Directory": <0-100>,
-    "Web Exploitation": <0-100>,
-    "Methodology/Mindset": <0-100>
+    "Foundations": <0-100>,
+    "Linux/Windows": <0-100>,
+    "Networking": <0-100>,
+    "Web Security": <0-100>,
+    "Methodology": <0-100>
   },
-  "focusSuggestion": "Direct, actionable advice on what to fix first.",
-  "oscpAlignment": "How well the user aligns with PEN-200 syllabus."
+  "focusSuggestion": "Personalized advice on what to learn next.",
+  "oscpAlignment": "Alignment with PEN-200 syllabus (only for OSCP mode)."
 }
 
-CRITERIA FOR READY:
-- Score > 85% in OSCP Mode
-- Strong performance in AD and PrivEsc
-- Solid methodology identified
-
-Be brutally honest. If they are not ready, say so clearly. Output ONLY valid JSON.`,
+Be appropriate to the selected mode. Output ONLY valid JSON.`,
 
     /**
      * Adaptive Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
@@ -487,20 +487,33 @@ Be brutally honest. If they are not ready, say so clearly. Output ONLY valid JSO
         const isOscp = mode === 'oscp';
 
         const beginnerInstructions = `
-IMPORTANT INSTRUCTIONS FOR BEGINNER MODE:
-- START FROM SCRATCH: This user is a beginner. The roadmap MUST start with foundations (Networking, Linux/Windows basics, Scripting/Automation).
-- SKILLS MAPPING: Show a clear journey from Zero to ${cert} level.
-- ADAPTIVE DESIGN: While focusing on foundations, also address the identified gaps: ${weaknesses.join(', ')}.
-- MANDATORY LABS: Include absolute beginner-friendly labs: OverTheWire (Bandit), TryHackMe (Pre-Security, Complete Beginner), and HTB Starting Point.
-- DO NOT jump straight into advanced Pro Labs or PEN-200 syllabus until foundational phases are completed.`;
+IMPORTANT INSTRUCTIONS FOR BEGINNER MODE (ABSOLUTE ZERO):
+- ASSUME ZERO KNOWLEDGE: This user knows NOTHING.
+- START FROM SCRATCH: Begin with Computer basics, OS fundamentals, and Networking.
+- NO SHORTCUTS: Do NOT compress phases. User needs to learn everything.
+- DETAILED PATH: Provide 8-12 Progressive Phases:
+  1. Computer & Hardware Basics
+  2. Networking Fundamentals (TCP/IP, Ports)
+  3. Linux Basics & CLI Usage
+  4. Windows Basics & Administration
+  5. Web Fundamentals (HTTP/HTML/JS)
+  6. Basic Scripting (Python/Bash)
+  7. Security Fundamentals (CIA, Auth)
+  8. Intermediate Certification: THM Junior Penetration Tester
+  9. Intermediate Certification: PNPT (Practical Network Penetration Tester)
+  10. Advanced Enumeration & Methodology
+  11. Active Directory Foundations
+  12. Preparation for ${cert}
+- MANDATORY LABS: Must include OverTheWire (Bandit), TryHackMe (Pre-Security, Complete Beginner), and HTB Academy modules.
+- ALL LINKS MUST BE REAL: Use verified URLs from ${JSON.stringify(resources.thmPaths)} and ${JSON.stringify(resources.htbPaths)}.`;
 
         const oscpInstructions = `
 IMPORTANT INSTRUCTIONS FOR OSCP MODE:
-- BRUTAL & ADVANCED: This user is preparing specifically for the exam or advanced level.
-- ADAPTIVE DESIGN: Focus ONLY on the identified gaps: ${weaknesses.join(', ')}. Remove topics the user has already mastered.
-- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200 syllabus for the target certification.
-- MANDATORY LABS: Include specific, clickable HTB (e.g., Dante, Pro Labs) and THM links for every phase.
-- PRE-OSCP ALIGNMENT: If readiness score < 70%, recommend PNPT, CRTP, or eJPT as bridges.`;
+- BRUTAL & ADVANCED: Focus specifically on the exam level.
+- ADAPTIVE DESIGN: Focus ONLY on the identified gaps: ${weaknesses.join(', ')}.
+- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200 syllabus.
+- MANDATORY LABS: Include specific HTB (Dante, Offshore, etc.) and THM Offensive Pentesting links.
+- PRE-OSCP ALIGNMENT: Recommend PNPT or CPTS as bridges if gaps are significant.`;
 
         return `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
 
@@ -514,7 +527,7 @@ ${isOscp ? oscpInstructions : beginnerInstructions}
 
 MUST INCLUDE IN JSON:
 1. **Gap Analysis**: Checklist of missing skills and weak areas.
-2. **4-6 Dynamic Phases**:
+2. **Dynamic Phases** (8-12 for Beginners, 4-6 for OSCP Mode):
    - Phase Name and "Why it matters for ${cert}".
    - Outcomes, Tools, and Mandatory Labs (with URLs).
    - Resources with button-style links.
@@ -548,7 +561,12 @@ RESPOND WITH VALID JSON (pure JSON only):
     {"cert": "PNPT|CRTP|eJPT", "reason": "", "overlap_with_oscp": "", "gap_it_bridges": ""}
   ],
   "tools_mastery_guide": [
-    {"tool": "", "commands": [{"cmd": "", "purpose": ""}]}
+    {
+      "category": "Recon|Exploitation|Post-Exploitation",
+      "tool": "",
+      "skill_level": "Beginner|Intermediate|Advanced",
+      "commands": [{"cmd": "", "purpose": ""}]
+    }
   ],
   "daily_study_schedule": [],
   "success_metrics": []
