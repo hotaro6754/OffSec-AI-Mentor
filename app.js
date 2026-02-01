@@ -2070,8 +2070,17 @@ function displayRoadmap(roadmapData) {
             card.className = 'phase-card-v3';
             
             const phaseName = phase.phase_name || phase.name || `Phase ${idx + 1}`;
+            const duration = phase.duration_weeks || phase.weeks || phase.duration || '?';
+            const hours = phase.total_hours || phase.hours || '?';
+
             let html = `
-                <div class="phase-badge-v3">PHASE ${idx + 1}: ${phaseName.toUpperCase()}</div>
+                <div class="flex justify-between items-start flex-wrap gap-2 mb-4">
+                    <div class="phase-badge-v3">PHASE ${idx + 1}: ${phaseName.toUpperCase()}</div>
+                    <div class="flex gap-3">
+                        <div class="phase-meta-tag">⏱️ ${duration} Weeks</div>
+                        <div class="phase-meta-tag">🔥 ${hours} Hours</div>
+                    </div>
+                </div>
                 <div class="mb-4">
                     <p><strong>Goal:</strong> ${phase.outcome || 'Master phase objectives.'}</p>
                 </div>
@@ -2169,6 +2178,31 @@ function displayRoadmap(roadmapData) {
                 });
                 html += `</div>`;
             }
+
+            // Phase Resources (YouTube, Blogs, etc)
+            const phaseResources = phase.resources_for_phase || phase.resources;
+            if (phaseResources && Array.isArray(phaseResources)) {
+                html += `
+                    <div class="mt-6">
+                        <div class="flex items-center gap-2 mb-3 font-bold">
+                            <i data-lucide="library" class="w-5 h-5 text-primary"></i>
+                            Phase Study Resources
+                        </div>
+                        <div class="labs-grid-v3">
+                            ${phaseResources.map(res => `
+                                <div class="lab-mini-card">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="lab-platform-tag">${res.type || 'Resource'}</span>
+                                    </div>
+                                    <div class="font-bold text-sm">${res.name || res.topic}</div>
+                                    <div class="text-xs opacity-80 mt-1">${res.topic || ''}</div>
+                                    ${res.link ? `<a href="${res.link}" target="_blank" class="lab-link-v3 mt-2">View <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             card.innerHTML = html;
             timeline.appendChild(card);
@@ -2197,6 +2231,51 @@ function displayRoadmap(roadmapData) {
             </div>
         `).join('');
         container.appendChild(schedGrid);
+    }
+
+    // 4.5 Tools Mastery Guide
+    const masteryGuide = roadmapObj.tools_mastery_guide;
+    if (masteryGuide && Array.isArray(masteryGuide)) {
+        const guideHeader = document.createElement('div');
+        guideHeader.className = 'section-header-v3';
+        guideHeader.innerHTML = `
+            <i data-lucide="wrench" class="w-8 h-8"></i>
+            <h2>Tools Mastery Guide</h2>
+        `;
+        container.appendChild(guideHeader);
+
+        const guideGrid = document.createElement('div');
+        guideGrid.className = 'resources-grid-v3';
+        guideGrid.innerHTML = masteryGuide.map(tool => `
+            <div class="resource-card-v3">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="res-icon-wrapper">
+                            <i data-lucide="terminal" class="w-5 h-5"></i>
+                        </div>
+                        <h4 class="m-0">${tool.tool_name}</h4>
+                    </div>
+                    <span class="lab-diff-tag ${tool.importance?.toLowerCase() === 'high' ? 'hard' : 'medium'}">${tool.importance || 'Essential'}</span>
+                </div>
+                <div class="text-xs font-bold uppercase opacity-60 mb-1">When to use:</div>
+                <p class="res-focus mb-3">${tool.when_to_use}</p>
+
+                <div class="text-xs font-bold uppercase opacity-60 mb-2">Critical Commands:</div>
+                <div class="flex flex-col gap-2">
+                    ${(tool.critical_commands || []).slice(0, 4).map(cmd => {
+                        const cmdText = typeof cmd === 'string' ? cmd : (cmd.command || '');
+                        const cmdPurpose = typeof cmd === 'string' ? '' : (cmd.purpose || '');
+                        return `
+                            <div class="p-2 bg-gray-light-v3 border-2 border-black text-xs font-mono">
+                                <div class="text-primary">${cmdText}</div>
+                                ${cmdPurpose ? `<div class="opacity-70 mt-1" style="font-family: sans-serif;">${cmdPurpose}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `).join('');
+        container.appendChild(guideGrid);
     }
 
     // 5. Curated Resources (New Grid Cards)

@@ -1164,8 +1164,11 @@ app.post('/api/generate-roadmap', async (req, res) => {
             console.warn('⚠️  Could not save roadmap to database:', dbError.message);
         }
 
-        console.log('✅ Roadmap generated successfully');
-        res.json({ roadmap: response });
+        // Clean and parse the AI response to ensure valid JSON is sent to the frontend
+        const parsedRoadmap = parseJsonResponse(response);
+
+        console.log('✅ Roadmap generated and parsed successfully');
+        res.json({ roadmap: parsedRoadmap });
     } catch (error) {
         console.error('❌ Error in generate-roadmap:', error.message);
         console.error('Stack:', error.stack);
