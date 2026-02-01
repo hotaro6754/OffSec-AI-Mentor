@@ -487,19 +487,18 @@ Be appropriate to the selected mode. Output ONLY valid JSON.`,
         const beginnerInstructions = `
 IMPORTANT INSTRUCTIONS FOR BEGINNER MODE (ABSOLUTE ZERO):
 - ASSUME ZERO KNOWLEDGE: This user knows NOTHING.
-- SYLLABUS ANALYSIS: Analyze the ${cert} syllabus and ensure the roadmap covers all required domains.
+- SYLLABUS ANALYSIS: Analyze the ${cert} syllabus and cover all required domains.
 - START FROM SCRATCH: Begin with Computer basics, OS fundamentals, and Networking.
-- NO SHORTCUTS: Do NOT compress phases. User needs to learn everything.
-- DETAILED PATH: Provide 8-12 Progressive Phases covering computer basics, networking, Linux/Windows fundamentals, CLI, and scripting.
-- MANDATORY LABS: Use lab names from ${JSON.stringify(resources.platforms)}. DO NOT provide direct URLs for labs.
-- RESOURCES: Suggest YouTube channels from ${JSON.stringify(resources.youtube.channels)}.`;
+- DETAILED PATH: Provide 8-12 Progressive Phases from zero to hero.
+- MANDATORY LABS: Suggest real labs from Hack The Box (Starting Point), TryHackMe (Pre-Security, Intro), and OverTheWire (Bandit). DO NOT provide URLs.
+- RESOURCES: Recommend channels like The Cyber Mentor, John Hammond, HackerSploit, or David Bombal.`;
 
         const oscpInstructions = `
 IMPORTANT INSTRUCTIONS FOR OSCP MODE:
-- BRUTAL & ADVANCED: Focus specifically on the OSCP (PEN-200) exam level.
-- ADAPTIVE DESIGN: Focus ONLY on the identified gaps: ${weaknesses.join(', ')}.
-- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200 syllabus.
-- MANDATORY LABS: Use lab names from ${JSON.stringify(resources.platforms.htb.proLabs)} and ${JSON.stringify(resources.platforms.thm.learningPaths)}. DO NOT provide direct URLs for labs.
+- BRUTAL & ADVANCED: Focus strictly on PEN-200 / OSCP level.
+- ADAPTIVE DESIGN: Focus primarily on identified gaps: ${weaknesses.join(', ')}.
+- SYLLABUS ALIGNMENT: Align with current PEN-200 domains.
+- MANDATORY LABS: Suggest advanced labs from HTB (Pro Labs like Dante, Zephyr) and THM (Offensive Pentesting path). DO NOT provide URLs.
 - PRE-OSCP ALIGNMENT: Recommend PNPT or CPTS as bridges if gaps are significant.`;
 
         return `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
@@ -661,7 +660,7 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                 model: model,
                 messages,
                 temperature: expectJson ? 0.1 : 0.7,
-                max_tokens: 8192
+                max_tokens: 4000
             };
 
             response = await fetchWithTimeout(apiUrl, {
@@ -686,9 +685,9 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
             const errorData = await response.json().catch(() => ({}));
             if (response.status === 429) {
                 if (attempt < retries) {
-                    // Exponential backoff: 5s, 15s, 30s for rate limits
-                    const waitTimes = [5, 15, 30];
-                    const waitTime = waitTimes[Math.min(attempt, waitTimes.length - 1)];
+                    // Optimized backoff for Render 30s timeout: 2s, 5s, 10s
+                    const waitTimes = [2, 5, 10];
+                    const waitTime = waitTimes[Math.min(attempt - 1, waitTimes.length - 1)];
                     console.log(`⏳ GROQ rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
@@ -785,6 +784,7 @@ function parseJsonResponse(text) {
         }
     }
 }
+
 
 // ============================================================================
 // AUTH ENDPOINTS
@@ -991,10 +991,10 @@ app.post('/api/evaluate-assessment', async (req, res) => {
                 retryAfter: 300
             });
         }
-        
-        res.status(500).json({ 
-            error: 'Failed to evaluate assessment', 
-            details: error.message 
+
+        res.status(500).json({
+            error: 'Failed to evaluate assessment',
+            details: error.message
         });
     }
 });
@@ -1010,7 +1010,7 @@ app.post('/api/generate-roadmap', async (req, res) => {
     const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
 
     if (AI_PROVIDER === 'none' && !hasCustomKey) {
-        return res.status(503).json({ 
+        return res.status(503).json({
             error: 'AI service not available. Please configure an API key.',
             userMessage: 'Roadmap generation requires AI. Please configure your API key in Settings.'
         });
@@ -1025,45 +1025,18 @@ app.post('/api/generate-roadmap', async (req, res) => {
 
         const prompt = PROMPTS.roadmap(mode, level, weaknesses, cert, RESOURCES, assessmentResult);
         
-        let response;
-        let retryCount = 0;
-        const maxRetries = 2;
+        console.log(`📤 Calling AI API for roadmap generation...`);
+        // Use default retries (3) which now has optimized backoff for Render
+        const response = await callAI(prompt, true, 3, req.customKeys);
+        console.log('📄 Roadmap response received, length:', response?.length || 0);
         
-        // Retry loop for AI API calls
-        while (retryCount < maxRetries) {
-            try {
-                console.log(`📤 Calling AI API for roadmap generation (attempt ${retryCount + 1}/${maxRetries})...`);
-                // Use fallback chain with only 1 retry per attempt for fast response
-                // CRITICAL: Set expectJson to true to ensure strict JSON output from LLM
-                response = await callAI(prompt, true, 1, req.customKeys);
-                console.log('📄 Roadmap response received, length:', response?.length || 0);
-                
-                // Validate response - check for meaningful content
-                if (!response || response.length < 200) {
-                    throw new Error('Roadmap response too short or empty - expected at least 200 characters');
-                }
-                
-                // Check for basic JSON structure (expecting a JSON object)
-                if (!response.trim().startsWith('{') && !response.includes('{')) {
-                    throw new Error('Invalid roadmap format - expected JSON structure');
-                }
-                
-                // Success - break out of retry loop
-                break;
-            } catch (attemptError) {
-                retryCount++;
-                console.log(`⚠️  Attempt ${retryCount} failed:`, attemptError.message);
-                
-                if (retryCount >= maxRetries) {
-                    // All retries exhausted
-                    throw attemptError;
-                }
-                
-                // Wait before retrying with exponential backoff
-                const waitTime = Math.pow(2, retryCount - 1) * 1000; // 1s, 2s exponential
-                console.log(`⏳ Waiting ${waitTime}ms before retry...`);
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-            }
+        // Validate response
+        if (!response || response.length < 200) {
+            throw new Error('Roadmap response too short or empty');
+        }
+
+        if (!response.trim().startsWith('{') && !response.includes('{')) {
+            throw new Error('Invalid roadmap format - expected JSON structure');
         }
 
         // Save roadmap if logged in
@@ -1090,10 +1063,10 @@ app.post('/api/generate-roadmap', async (req, res) => {
         console.error('Stack:', error.stack);
         
         // Return user-friendly error message (NO static fallback roadmap)
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'AI is taking longer than expected. Please try again.',
             userMessage: 'AI is taking longer than expected. Please try again.',
-            technicalDetails: error.message 
+            technicalDetails: error.message
         });
     }
 });
@@ -1182,9 +1155,9 @@ app.post('/api/mentor-chat', async (req, res) => {
             return res.status(200).json({ reply: demoReply });
         }
         
-        res.status(500).json({ 
-            error: 'Failed to get response', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Failed to get response',
+            details: error.message
         });
     }
 });
