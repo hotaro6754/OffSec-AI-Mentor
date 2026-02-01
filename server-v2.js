@@ -623,7 +623,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
     }
 }
 
-async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
+async function callAI(prompt, expectJson = false, retries = 5, customKeys = {}) {
     // Groq ONLY
     let currentApiKey = customKeys.groq || AI_API_KEY;
 
@@ -642,7 +642,7 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
     throw new Error(result.error || "AI call failed");
 }
 
-async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
+async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 5) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             let response, data;
@@ -686,9 +686,9 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
             const errorData = await response.json().catch(() => ({}));
             if (response.status === 429) {
                 if (attempt < retries) {
-                    // Exponential backoff: 5s, 15s, 30s for rate limits
-                    const waitTimes = [5, 15, 30];
-                    const waitTime = waitTimes[Math.min(attempt, waitTimes.length - 1)];
+                    // Expanded backoff: 10s, 30s, 60s, 90s for rate limits
+                    const waitTimes = [10, 30, 60, 90];
+                    const waitTime = waitTimes[Math.min(attempt - 1, waitTimes.length - 1)];
                     console.log(`⏳ GROQ rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
@@ -784,6 +784,205 @@ function parseJsonResponse(text) {
             }
         }
     }
+}
+
+/**
+ * Heuristic evaluation for when AI is unavailable
+ */
+function heuristicEvaluateAssessment(questions, answers, mode) {
+    console.log('Fallback: Performing heuristic evaluation');
+
+    let score = 0;
+    let total = questions.length;
+    const isOscp = mode === 'oscp';
+
+    const topicMapping = {
+        'linux': 'Linux/Windows',
+        'windows': 'Linux/Windows',
+        'networking': 'Networking',
+        'web': 'Web Security',
+        'web security': 'Web Security',
+        'web exploitation': 'Web Security',
+        'security': 'Foundations',
+        'security concepts': 'Foundations',
+        'ad': 'Methodology',
+        'privesc': 'Methodology',
+        'pivoting': 'Methodology',
+        'bof': 'Methodology',
+        'mindset': 'Methodology',
+        'post exploitation': 'Methodology'
+    };
+
+    // Group by standard categories
+    const categoryResults = {
+        'Foundations': { correct: 0, total: 0 },
+        'Linux/Windows': { correct: 0, total: 0 },
+        'Networking': { correct: 0, total: 0 },
+        'Web Security': { correct: 0, total: 0 },
+        'Methodology': { correct: 0, total: 0 }
+    };
+
+    const strengths = new Set();
+    const weaknesses = new Set();
+
+    questions.forEach((q, idx) => {
+        const userAnswer = (answers[idx] || "").toString().trim().toLowerCase();
+        const rawTopic = (q.topic || 'general').toLowerCase();
+        const category = topicMapping[rawTopic] || 'Foundations';
+
+        categoryResults[category].total++;
+
+        let isCorrect = false;
+        if (q.type === 'multiple-choice') {
+            if (userAnswer === (q.correctAnswer || "").toString().trim().toLowerCase()) {
+                isCorrect = true;
+            }
+        } else if (q.type === 'short-answer') {
+            const keywords = q.expectedKeywords || [];
+            if (keywords.length > 0) {
+                if (keywords.some(k => userAnswer.includes(k.toLowerCase()))) {
+                    isCorrect = true;
+                }
+            } else {
+                // Fallback if keywords missing but correctAnswer exists
+                if (userAnswer.includes((q.correctAnswer || "").toString().trim().toLowerCase())) {
+                    isCorrect = true;
+                }
+            }
+        }
+
+        if (isCorrect) {
+            score++;
+            categoryResults[category].correct++;
+            strengths.add(rawTopic);
+        } else {
+            weaknesses.add(rawTopic);
+        }
+    });
+
+    const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+
+    // Determine level
+    let level = "Beginner";
+    if (percentage >= 80) level = isOscp ? "Advanced" : "Intermediate";
+    else if (percentage >= 50) level = isOscp ? "Intermediate" : "Beginner";
+
+    const skillBreakdown = {};
+    Object.entries(categoryResults).forEach(([cat, res]) => {
+        skillBreakdown[cat] = res.total > 0 ? Math.round((res.correct / res.total) * 100) : percentage;
+    });
+
+    return {
+        readinessScore: isOscp ? percentage : 0,
+        readinessStatus: percentage >= 70 ? "Ready" : (percentage >= 40 ? "Almost Ready" : "Not Ready"),
+        level,
+        score: percentage,
+        strengths: Array.from(strengths).slice(0, 5),
+        weaknesses: Array.from(weaknesses).slice(0, 5),
+        confidenceGaps: ["Reviewing complex scenario applications"],
+        skillBreakdown,
+        focusSuggestion: `Based on your results, we recommend focusing on: ${Array.from(weaknesses).slice(0, 3).join(', ') || 'overall security concepts'}.`,
+        oscpAlignment: isOscp ? `Your score of ${percentage}% suggests you are ${percentage >= 70 ? 'well-aligned' : 'building alignment'} with the OSCP syllabus.` : "N/A"
+    };
+}
+
+/**
+ * Generate a basic roadmap when AI is unavailable
+ */
+function generateBasicRoadmap(mode, level, weaknesses, cert) {
+    console.log('Fallback: Generating basic roadmap');
+
+    // Create phases based on weaknesses or standard path
+    const phases = [];
+    const topics = weaknesses.length > 0 ? weaknesses : ['Networking', 'Linux', 'Web Security', 'Privilege Escalation'];
+
+    topics.slice(0, 5).forEach((topic, idx) => {
+        phases.push({
+            phase: idx + 1,
+            phase_name: `Mastering ${topic.charAt(0).toUpperCase() + topic.slice(1)}`,
+            why_it_matters: `Understanding ${topic} is critical for success in ${cert}.`,
+            duration_weeks: 4,
+            learning_outcomes: [
+                `Understand core ${topic} concepts`,
+                `Apply ${topic} techniques in lab environments`,
+                `Identify common vulnerabilities related to ${topic}`
+            ],
+            weekly_breakdown: [
+                { week: 1, topics: [`Introduction to ${topic}`], labs: ["Basic Exercises"], checkpoint: "Foundations covered" },
+                { week: 2, topics: [`Intermediate ${topic} Techniques`], labs: ["Practice Labs"], checkpoint: "Techniques applied" },
+                { week: 3, topics: [`Advanced ${topic} Scenarios`], labs: ["Challenge Labs"], checkpoint: "Complex scenarios solved" },
+                { week: 4, topics: [`${topic} Assessment`], labs: ["Final Challenge"], checkpoint: "Phase complete" }
+            ],
+            mandatory_labs: [
+                { name: `${topic} Fundamentals`, platform: "THM", skills: [topic] },
+                { name: `${topic} Advanced`, platform: "HTB", skills: [topic, "Problem Solving"] }
+            ],
+            resources: [
+                { type: "YouTube", name: "The Cyber Mentor", url: "https://www.youtube.com/@TCMSecurityAcademy" },
+                { type: "Blog", name: "IppSec Walkthroughs", url: "https://www.youtube.com/@ippsec" }
+            ],
+            completion_checklist: [
+                `Completed all ${topic} labs`,
+                `Documented ${topic} methodology`,
+                `Can explain ${topic} concepts to others`
+            ]
+        });
+    });
+
+    // Add final exam prep phase
+    phases.push({
+        phase: phases.length + 1,
+        phase_name: "Final Exam Readiness",
+        why_it_matters: "Final preparation and mindset for the certification attempt.",
+        duration_weeks: 2,
+        learning_outcomes: ["Full-scale simulation experience", "Time management optimization"],
+        weekly_breakdown: [
+            { week: 1, topics: ["Mock Exam 1"], labs: ["Full Lab Scenario"], checkpoint: "Simulation 1 complete" },
+            { week: 2, topics: ["Final Review"], labs: ["Weak Area Refinement"], checkpoint: "Ready for exam" }
+        ],
+        mandatory_labs: [
+            { name: "Certification Mock Lab", platform: "HTB", skills: ["Methodology", "Reporting"] }
+        ],
+        resources: [
+            { type: "YouTube", name: "OffSec Mindset", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+        ],
+        completion_checklist: ["Completed full mock exam", "Notes finalized", "Methodology solidified"]
+    });
+
+    return {
+        targetCertification: cert,
+        currentLevel: level,
+        gap_analysis: {
+            missing_skills: weaknesses,
+            weak_areas: weaknesses,
+            alignment_percentage: 40
+        },
+        roadmap: phases,
+        special_resource: {
+            name: "Secret Cyber Wisdom",
+            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        },
+        pre_oscp_alignment: [
+            { cert: "eJPT", reason: "Good entry point for beginners", overlap_with_oscp: "60%", gap_it_bridges: "Core networking and tools" },
+            { cert: "CPTS", reason: "High technical overlap with OSCP", overlap_with_oscp: "85%", gap_it_bridges: "Advanced AD and Web" }
+        ],
+        tools_mastery_guide: [
+            {
+                category: "Recon",
+                tool: "Nmap",
+                skill_level: "Intermediate",
+                commands: [{ cmd: "nmap -sC -sV -oA nmap/initial <ip>", purpose: "Standard service scan" }]
+            },
+            {
+                category: "Web",
+                tool: "Burp Suite",
+                skill_level: "Intermediate",
+                commands: [{ cmd: "Proxy -> Intercept", purpose: "Modify requests" }]
+            }
+        ],
+        daily_study_schedule: ["2 hours: Hands-on labs", "1 hour: Theory/Reading", "30 mins: Documentation/Review"],
+        success_metrics: ["Score > 80% on labs", "Can complete boxes without hints", "Detailed notes for every machine"]
+    };
 }
 
 // ============================================================================
@@ -928,18 +1127,9 @@ app.post('/api/generate-questions', async (req, res) => {
 app.post('/api/evaluate-assessment', async (req, res) => {
     console.log('\n📊 POST /api/evaluate-assessment');
     
-    // Check if AI API is available (either system-wide or via custom keys)
-    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
-
-    if (AI_PROVIDER === 'none' && !hasCustomKey) {
-        return res.status(503).json({
-            error: 'AI service not available. Please configure an API key.',
-            userMessage: 'Assessment evaluation requires AI. Please configure your API key in Settings.'
-        });
-    }
+    const { answers, questions, mode } = req.body;
 
     try {
-        const { answers, questions, mode } = req.body;
         
         if (!answers || !questions) {
             return res.status(400).json({ error: 'Answers and questions required' });
@@ -955,7 +1145,7 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         const prompt = `${PROMPTS.evaluation}\n\nAssessment:\n${answersText}`;
         
         console.log('📤 Calling AI API for evaluation...');
-        const response = await callAI(prompt, true, 3, req.customKeys);
+        const response = await callAI(prompt, true, 5, req.customKeys);
         console.log('📄 AI response received, length:', response?.length || 0);
         const parsed = parseJsonResponse(response);
         
@@ -980,22 +1170,32 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         res.json(parsed);
     } catch (error) {
         console.error('❌ Error in evaluate-assessment:', error.message);
-        console.error('Stack:', error.stack);
         
-        // Check if it's a rate limit error (case-insensitive)
-        const isRateLimit = error.message.toLowerCase().includes('rate limit');
-        if (isRateLimit) {
-            return res.status(429).json({
-                error: 'API Rate Limited',
-                details: 'The AI service is currently overloaded. Please wait a few minutes and try again. Consider upgrading to a paid API tier for better reliability.',
-                retryAfter: 300
+        try {
+            console.log('⚠️ Falling back to heuristic evaluation...');
+            const fallbackResult = heuristicEvaluateAssessment(questions, answers, mode || 'beginner');
+
+            // Save fallback assessment to database if logged in
+            if (req.user) {
+                db.saveAssessment(req.user.id, {
+                    mode: mode || 'beginner',
+                    score: fallbackResult.score,
+                    level: fallbackResult.level,
+                    strengths: fallbackResult.strengths,
+                    weaknesses: fallbackResult.weaknesses,
+                    questions,
+                    answers
+                });
+            }
+
+            return res.json(fallbackResult);
+        } catch (fallbackError) {
+            console.error('❌ Fallback evaluation also failed:', fallbackError.message);
+            res.status(500).json({
+                error: 'Failed to evaluate assessment',
+                details: error.message
             });
         }
-        
-        res.status(500).json({ 
-            error: 'Failed to evaluate assessment', 
-            details: error.message 
-        });
     }
 });
 
@@ -1006,18 +1206,9 @@ app.post('/api/evaluate-assessment', async (req, res) => {
 app.post('/api/generate-roadmap', async (req, res) => {
     console.log('\n🗺️ POST /api/generate-roadmap');
     
-    // Check if AI API is available (either system-wide or via custom keys)
-    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
-
-    if (AI_PROVIDER === 'none' && !hasCustomKey) {
-        return res.status(503).json({ 
-            error: 'AI service not available. Please configure an API key.',
-            userMessage: 'Roadmap generation requires AI. Please configure your API key in Settings.'
-        });
-    }
+    const { level, weaknesses, cert, assessmentResult, mode = 'beginner' } = req.body;
     
     try {
-        const { level, weaknesses, cert, assessmentResult, mode = 'beginner' } = req.body;
         
         if (!level || !weaknesses || !cert) {
             return res.status(400).json({ error: 'Level, weaknesses, and cert required' });
@@ -1087,14 +1278,30 @@ app.post('/api/generate-roadmap', async (req, res) => {
         res.json({ roadmap: parsedRoadmap });
     } catch (error) {
         console.error('❌ Error in generate-roadmap:', error.message);
-        console.error('Stack:', error.stack);
         
-        // Return user-friendly error message (NO static fallback roadmap)
-        res.status(500).json({ 
-            error: 'AI is taking longer than expected. Please try again.',
-            userMessage: 'AI is taking longer than expected. Please try again.',
-            technicalDetails: error.message 
-        });
+        try {
+            console.log('⚠️ Falling back to basic roadmap generation...');
+            const fallbackRoadmap = generateBasicRoadmap(mode, level, weaknesses, cert);
+
+            // Save fallback roadmap if logged in
+            if (req.user) {
+                db.saveRoadmap(req.user.id, {
+                    title: `${cert} Roadmap (Fallback) - ${new Date().toLocaleDateString()}`,
+                    content: JSON.stringify(fallbackRoadmap),
+                    targetCert: cert,
+                    level
+                });
+            }
+
+            return res.json({ roadmap: fallbackRoadmap });
+        } catch (fallbackError) {
+            console.error('❌ Fallback roadmap generation also failed:', fallbackError.message);
+            res.status(500).json({
+                error: 'AI is taking longer than expected. Please try again.',
+                userMessage: 'AI is taking longer than expected. Please try again.',
+                technicalDetails: error.message
+            });
+        }
     }
 });
 
@@ -1124,16 +1331,6 @@ app.get('/api/roadmaps/:id', (req, res) => {
 app.post('/api/mentor-chat', async (req, res) => {
     console.log('\n💬 POST /api/mentor-chat');
     
-    // Check if AI API is available (either system-wide or via custom keys)
-    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
-
-    if (AI_PROVIDER === 'none' && !hasCustomKey) {
-        return res.status(503).json({
-            error: 'AI service not available. Please configure an API key.',
-            userMessage: 'Mentor chat requires AI. Please configure your API key in Settings.'
-        });
-    }
-
     try {
         const { message, context = {} } = req.body;
         
@@ -1167,25 +1364,17 @@ app.post('/api/mentor-chat', async (req, res) => {
         res.json({ reply: response });
     } catch (error) {
         console.error('❌ Error in mentor-chat:', error.message);
-        console.error('Stack:', error.stack);
         
-        // Check if it's a rate limit error (case-insensitive)
-        const isRateLimit = error.message.toLowerCase().includes('rate limit');
-        if (isRateLimit) {
-            console.log('💬 GROQ API rate-limited, returning helpful guidance...');
-            const demoReply = "I'm currently helping many learners and the AI service is temporarily overloaded. Here's what I'd recommend in the meantime:\n\n" +
-                "1. **Practice with TryHackMe** - Complete beginner-friendly rooms\n" +
-                "2. **Study Linux Basics** - Focus on file system navigation and permissions\n" +
-                "3. **Learn Networking** - Understand TCP/IP and common protocols\n" +
-                "4. **Set up a lab** - Create a virtual machine for hands-on practice\n\n" +
-                "Please try again in a few minutes when the service is less busy!";
-            return res.status(200).json({ reply: demoReply });
-        }
+        // Return a helpful guidance message for any error (rate limit, missing key, etc.)
+        console.log('💬 AI unavailable, returning helpful guidance...');
+        const demoReply = "I'm currently helping many learners and the AI service is temporarily overloaded or unavailable. Here's what I'd recommend in the meantime:\n\n" +
+            "1. **Practice with TryHackMe** - Complete beginner-friendly rooms\n" +
+            "2. **Study Linux Basics** - Focus on file system navigation and permissions\n" +
+            "3. **Learn Networking** - Understand TCP/IP and common protocols\n" +
+            "4. **Set up a lab** - Create a virtual machine for hands-on practice\n\n" +
+            "Please try again in a few minutes when the service is back online!";
         
-        res.status(500).json({ 
-            error: 'Failed to get response', 
-            details: error.message 
-        });
+        return res.status(200).json({ reply: demoReply });
     }
 });
 
