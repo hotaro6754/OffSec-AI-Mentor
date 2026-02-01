@@ -544,7 +544,13 @@ Be encouraging but honest. Output ONLY valid JSON.`,
     /**
      * Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
      */
-    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
+    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, highly detailed, and BEGINNER-FRIENDLY ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
+
+IMPORTANT:
+- Use simple, encouraging language suitable for beginners.
+- Provide actual, clickable URLs for all resources (TryHackMe, HackTheBox, YouTube, etc.).
+- Ensure all resources are high-quality and relevant to the target certification.
+- Format data strictly as JSON so it can be rendered into detailed tables.
 
 MUST INCLUDE:
 1. **Executive Summary**: 2-3 sentences on their learning journey and goals
@@ -552,14 +558,14 @@ MUST INCLUDE:
    - Clear outcomes and capabilities gained
    - Week-by-week topics and labs
    - Tools to learn with purpose and steps
-   - Recommended labs with difficulty and hours
+   - Recommended labs with difficulty and hours (e.g., TryHackMe 'Pre-Security' or HTB 'Starting Point')
    
 3. **Tools Mastery Guide** (Nmap, Burp, Linux, etc):
    - When and why to use each tool
    - Key commands and learning progression
 
 4. **Curated Resources**:
-   - YouTube channels, Books, and Platforms
+   - YouTube channels (e.g., NetworkChuck, John Hammond), Books, and Platforms (THM, HTB) with WORKING LINKS.
 
 5. **Daily Study Schedule**: Realistic routine mixing theory and hands-on
 
@@ -1008,6 +1014,16 @@ app.post('/api/generate-questions', async (req, res) => {
 app.post('/api/evaluate-assessment', async (req, res) => {
     console.log('\n📊 POST /api/evaluate-assessment');
     
+    // Check if AI API is available (either system-wide or via custom keys)
+    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
+
+    if (AI_PROVIDER === 'none' && !hasCustomKey) {
+        return res.status(503).json({
+            error: 'AI service not available. Please configure an API key.',
+            userMessage: 'Assessment evaluation requires AI. Please configure your API key in Settings.'
+        });
+    }
+
     try {
         const { answers, questions, mode } = req.body;
         
@@ -1076,11 +1092,13 @@ app.post('/api/evaluate-assessment', async (req, res) => {
 app.post('/api/generate-roadmap', async (req, res) => {
     console.log('\n🗺️ POST /api/generate-roadmap');
     
-    // Check if AI API is available
-    if (AI_PROVIDER === 'none') {
+    // Check if AI API is available (either system-wide or via custom keys)
+    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
+
+    if (AI_PROVIDER === 'none' && !hasCustomKey) {
         return res.status(503).json({ 
             error: 'AI service not available. Please configure an API key.',
-            userMessage: 'Roadmap generation requires AI. Please contact the administrator to configure an API key.'
+            userMessage: 'Roadmap generation requires AI. Please configure your API key in Settings.'
         });
     }
     
@@ -1102,7 +1120,8 @@ app.post('/api/generate-roadmap', async (req, res) => {
             try {
                 console.log(`📤 Calling AI API for roadmap generation (attempt ${retryCount + 1}/${maxRetries})...`);
                 // Use fallback chain with only 1 retry per attempt for fast response
-                response = await callAI(prompt, false, 1, req.customKeys);
+                // CRITICAL: Set expectJson to true to ensure strict JSON output from LLM
+                response = await callAI(prompt, true, 1, req.customKeys);
                 console.log('📄 Roadmap response received, length:', response?.length || 0);
                 
                 // Validate response - check for meaningful content
@@ -1110,9 +1129,9 @@ app.post('/api/generate-roadmap', async (req, res) => {
                     throw new Error('Roadmap response too short or empty - expected at least 200 characters');
                 }
                 
-                // Check for basic markdown structure
-                if (!response.includes('#') && !response.includes('*')) {
-                    throw new Error('Invalid roadmap format - missing expected markdown structure');
+                // Check for basic JSON structure (expecting a JSON object)
+                if (!response.trim().startsWith('{') && !response.includes('{')) {
+                    throw new Error('Invalid roadmap format - expected JSON structure');
                 }
                 
                 // Success - break out of retry loop
@@ -1188,6 +1207,16 @@ app.get('/api/roadmaps/:id', (req, res) => {
 app.post('/api/mentor-chat', async (req, res) => {
     console.log('\n💬 POST /api/mentor-chat');
     
+    // Check if AI API is available (either system-wide or via custom keys)
+    const hasCustomKey = req.customKeys && Object.values(req.customKeys).some(key => !!key);
+
+    if (AI_PROVIDER === 'none' && !hasCustomKey) {
+        return res.status(503).json({
+            error: 'AI service not available. Please configure an API key.',
+            userMessage: 'Mentor chat requires AI. Please configure your API key in Settings.'
+        });
+    }
+
     try {
         const { message, context = {} } = req.body;
         

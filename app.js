@@ -2173,9 +2173,9 @@ function displayRoadmap(roadmapData) {
                                 <tr>
                                     <th>Lab Name</th>
                                     <th>Platform</th>
+                                        <th>Skills Gained</th>
                                     <th>Difficulty</th>
-                                    <th>Duration</th>
-                                    <th>Skills Gained</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2183,9 +2183,9 @@ function displayRoadmap(roadmapData) {
                                     <tr>
                                         <td><strong>${lab.name || lab.lab || ''}</strong></td>
                                         <td>${lab.platform || ''}</td>
+                                        <td>${(lab.skills_gained || []).join(', ') || 'N/A'}</td>
                                         <td><span class="difficulty-badge difficulty-${(lab.difficulty || '').toLowerCase()}">${lab.difficulty || 'N/A'}</span></td>
-                                        <td>${lab.hours || lab.duration || 'N/A'}</td>
-                                        <td>${Array.isArray(lab.skills_gained) ? lab.skills_gained.join(', ') : (lab.skills_gained || 'N/A')}</td>
+                                        <td>${lab.link || lab.url ? `<a href="${lab.link || lab.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Start Lab ↗</a>` : (lab.hours || lab.duration || 'N/A')}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -2205,15 +2205,15 @@ function displayRoadmap(roadmapData) {
                                 <tr>
                                     <th>Type</th>
                                     <th>Name</th>
-                                    <th>Topic/Link</th>
+                                    <th>Resource Link</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${phaseResources.map(res => `
                                     <tr>
                                         <td><span class="badge">${res.type || ''}</span></td>
-                                        <td>${res.name || ''}</td>
-                                        <td>${res.topic || ''} ${res.link ? `<a href="${res.link}" target="_blank" rel="noopener">Visit →</a>` : ''}</td>
+                                        <td><strong>${res.name || ''}</strong><br><small>${res.topic || ''}</small></td>
+                                        <td>${res.link || res.url ? `<a href="${res.link || res.url}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Open Resource →</a>` : 'N/A'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -2322,7 +2322,7 @@ function displayRoadmap(roadmapData) {
                         <tr>
                             <th>Channel</th>
                             <th>Focus/Why</th>
-                            <th>Link</th>
+                            <th>Watch Now</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2330,7 +2330,7 @@ function displayRoadmap(roadmapData) {
                             <tr>
                                 <td><strong>${yt.name || yt.channel || ''}</strong></td>
                                 <td>${yt.focus || yt.why || ''} ${yt.level ? `(${yt.level})` : ''}</td>
-                                <td>${yt.link ? `<a href="${yt.link}" target="_blank" rel="noopener">Watch →</a>` : ''}</td>
+                                <td>${yt.link || yt.url ? `<a href="${yt.link || yt.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Watch Channel ↗</a>` : 'N/A'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2379,16 +2379,15 @@ function displayRoadmap(roadmapData) {
                         <tr>
                             <th>Platform</th>
                             <th>Type/Cost</th>
-                            <th>Best For/Purpose</th>
+                            <th>Access</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${platforms.map(platform => `
                             <tr>
-                                <td><strong>${platform.name || ''}</strong></td>
+                                <td><strong>${platform.name || ''}</strong><br><small>${platform.best_for || platform.for || ''}</small></td>
                                 <td><span class="badge">${platform.type || platform.cost || ''}</span></td>
-                                <td>${platform.best_for || platform.for || ''}</td>
-                                <td>${platform.link ? `<a href="${platform.link}" target="_blank" rel="noopener">Visit →</a>` : ''}</td>
+                                <td>${platform.link || platform.url ? `<a href="${platform.link || platform.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Visit Platform ↗</a>` : 'N/A'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
