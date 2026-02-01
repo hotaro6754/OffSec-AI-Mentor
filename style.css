@@ -1259,6 +1259,228 @@ body.mode-oscp .form-group input { background: #0d1117; color: #c9d1d9; border-c
     font-size: 18px;
 }
 
+/* Enhanced Multi-Stage Loading */
+.loading-state.enhanced {
+    padding: 50px 40px;
+    background: var(--cream);
+    border: 3px solid var(--black);
+    box-shadow: 6px 6px 0 var(--shadow);
+}
+
+.mode-oscp .loading-state.enhanced {
+    background: #1a1a1a;
+    border-color: var(--primary);
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.2);
+}
+
+.loading-header {
+    margin-bottom: 30px;
+}
+
+.loading-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 8px;
+}
+
+.mode-oscp .loading-header h3 {
+    color: var(--white);
+}
+
+.loading-cert-name {
+    font-size: 14px;
+    color: var(--gray-dark);
+    font-weight: 500;
+}
+
+.mode-oscp .loading-cert-name {
+    color: #888;
+}
+
+.loading-stages {
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stage-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.mode-oscp .stage-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.stage-item.active {
+    opacity: 1;
+    background: rgba(255, 107, 53, 0.1);
+    border-left: 3px solid var(--primary);
+}
+
+.mode-oscp .stage-item.active {
+    background: rgba(255, 107, 53, 0.15);
+}
+
+.stage-item.completed {
+    opacity: 0.8;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.mode-oscp .stage-item.completed {
+    background: rgba(76, 175, 80, 0.12);
+}
+
+.stage-indicator {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.stage-number,
+.stage-check {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.stage-number {
+    color: var(--gray-dark);
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--gray);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-oscp .stage-number {
+    color: #888;
+    border-color: #444;
+}
+
+.stage-check {
+    opacity: 0;
+    color: #4caf50;
+    font-size: 20px;
+}
+
+.stage-item.active .stage-number {
+    border-color: var(--primary);
+    color: var(--primary);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.stage-item.completed .stage-number {
+    opacity: 0;
+}
+
+.stage-item.completed .stage-check {
+    opacity: 1;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.stage-text {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--black);
+}
+
+.mode-oscp .stage-text {
+    color: #ccc;
+}
+
+.stage-item.active .stage-text {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.mode-oscp .stage-item.active .stage-text {
+    color: var(--primary);
+}
+
+.progress-bar-container {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    background: var(--gray);
+    border-radius: 15px;
+    margin: 25px 0;
+    overflow: hidden;
+    border: 2px solid var(--black);
+}
+
+.mode-oscp .progress-bar-container {
+    background: #333;
+    border-color: #555;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 15px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--black);
+    z-index: 2;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.mode-oscp .progress-percentage {
+    color: var(--white);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
 .cert-selected-overlay { display: none; }
 
 /* ============ SECTIONS ============ */
