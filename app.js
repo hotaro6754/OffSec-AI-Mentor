@@ -1995,491 +1995,316 @@ function getResourcesForCert(certId, level) {
 function displayRoadmap(roadmapData) {
     elements.roadmapContent.innerHTML = '';
     
-    // Handle both JSON and markdown formats
     let roadmapObj = roadmapData;
     if (typeof roadmapData === 'string') {
         try {
             roadmapObj = JSON.parse(roadmapData);
         } catch (e) {
-            // If not JSON, try to parse as markdown
             displayRoadmapMarkdown(roadmapData);
             return;
         }
     }
 
-    if (!roadmapObj) {
-        displayRoadmapMarkdown(typeof roadmapData === 'string' ? roadmapData : "Error: Roadmap data is empty");
-        return;
-    }
-    
-    // Store for later use (PDF, copy, etc)
+    if (!roadmapObj) return;
     appState.roadmapJSON = roadmapObj;
     
-    // Create header with executive summary
+    const container = document.createElement('div');
+    container.className = 'roadmap-v3-container';
+
+    // 1. Header Section
     const header = document.createElement('div');
-    header.className = 'roadmap-header';
+    header.className = 'roadmap-v3-header';
     header.innerHTML = `
-        <h1>🗺️ Your ${roadmapObj.targetCertification || 'Cybersecurity'} Mastery Roadmap</h1>
-        <div class="executive-summary">
-            <h2>Your Journey</h2>
-            <p>${roadmapObj.executive_summary || roadmapObj.overallSummary || 'Personalized learning path based on your assessment.'}</p>
+        <div class="flex items-center gap-4 mb-2">
+            <i data-lucide="map" class="text-primary w-10 h-10"></i>
+            <h1 class="m-0">${roadmapObj.targetCertification || 'Certification Roadmap'}</h1>
         </div>
-        <div class="roadmap-meta">
-            <span>📊 Current Level: <strong>${roadmapObj.currentLevel || 'Analyzing...'}</strong></span>
-            <span>🎯 Target: <strong>${roadmapObj.targetCertification || 'Certification'}</strong></span>
-            <span>⏱️ Duration: <strong>${roadmapObj.totalDuration || '20-24 weeks'}</strong></span>
-            <span>📈 Progression: <strong>${roadmapObj.difficulty_progression || 'Beginner → Advanced'}</strong></span>
+        <p>${roadmapObj.executive_summary || 'Your personalized learning path.'}</p>
+    `;
+    container.appendChild(header);
+
+    // 2. Quick Stats Section
+    const statsGrid = document.createElement('div');
+    statsGrid.className = 'quick-stats-grid';
+    statsGrid.innerHTML = `
+        <div class="stat-card">
+            <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="award" class="w-5 h-5"></i>
+                <h4 class="m-0">Current Level</h4>
+            </div>
+            <div class="value">${roadmapObj.currentLevel || 'Analyzing'}</div>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+                <h4 class="m-0">Duration</h4>
+            </div>
+            <div class="value">${roadmapObj.totalDuration || '24 Weeks'}</div>
+        </div>
+        <div class="stat-card">
+            <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                <h4 class="m-0">Progression</h4>
+            </div>
+            <div class="value">${roadmapObj.difficulty_progression || 'Growth'}</div>
         </div>
     `;
-    elements.roadmapContent.appendChild(header);
+    container.appendChild(statsGrid);
     
-    // Handle either 'roadmap' (new) or 'phases' (legacy) key
+    // 3. Phases Timeline
     const phases = roadmapObj.roadmap || roadmapObj.phases;
+    if (phases && Array.isArray(phases)) {
+        const phaseSectionHeader = document.createElement('div');
+        phaseSectionHeader.className = 'section-header-v3';
+        phaseSectionHeader.innerHTML = `
+            <i data-lucide="layers" class="w-8 h-8"></i>
+            <h2>Learning Phases</h2>
+        `;
+        container.appendChild(phaseSectionHeader);
 
-    // Render phases with detailed information
-    if (phases && Array.isArray(phases) && phases.length > 0) {
-        const phasesSection = document.createElement('div');
-        phasesSection.className = 'phases-section';
-        phasesSection.innerHTML = '<h2 style="margin-top: 40px; margin-bottom: 20px;">📚 Learning Phases</h2>';
+        const timeline = document.createElement('div');
+        timeline.className = 'phase-timeline-v3';
         
         phases.forEach((phase, idx) => {
-            const phaseBlock = document.createElement('div');
-            phaseBlock.className = 'phase-block';
-            phaseBlock.setAttribute('data-aos', 'fade-up');
-            phaseBlock.setAttribute('data-aos-delay', idx * 100);
+            const card = document.createElement('div');
+            card.className = 'phase-card-v3';
             
-            const phaseName = phase.phase_name || phase.name || phase.phase || `Phase ${phase.phase_number || idx + 1}`;
-            const duration = phase.duration_weeks ? `${phase.duration_weeks} weeks` : phase.duration || '';
-            const totalHours = phase.total_hours || '';
-            
-            let phaseHTML = `
-                <div class="phase-header-content">
-                    <h2>${phaseName}</h2>
-                    <span class="phase-duration">⏱️ ${duration}${totalHours ? ` (${totalHours})` : ''}</span>
+            const phaseName = phase.phase_name || phase.name || `Phase ${idx + 1}`;
+            let html = `
+                <div class="phase-badge-v3">PHASE ${idx + 1}: ${phaseName.toUpperCase()}</div>
+                <div class="mb-4">
+                    <p><strong>Goal:</strong> ${phase.outcome || 'Master phase objectives.'}</p>
                 </div>
             `;
             
-            // Prerequisites and hours info
-            if (phase.prerequisites || phase.weekly_hours || phase.weeklyHours) {
-                phaseHTML += `<div class="phase-info-bar">`;
-                if (phase.prerequisites) {
-                    phaseHTML += `<span class="info-badge">📋 Prerequisites: ${phase.prerequisites}</span>`;
-                }
-                if (phase.weekly_hours || phase.weeklyHours) {
-                    phaseHTML += `<span class="info-badge">⏱️ ${phase.weekly_hours || phase.weeklyHours}/week</span>`;
-                }
-                phaseHTML += `</div>`;
-            }
-            
-            // Learning outcomes
-            const outcomes = phase.learning_outcomes || phase.outcomes;
-            if (outcomes && Array.isArray(outcomes) && outcomes.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>✅ Learning Outcomes</h3>
-                        <ul class="goals-list">
-                            ${outcomes.map(outcome => `<li>${outcome}</li>`).join('')}
+            // Learning Outcomes
+            if (phase.learning_outcomes && Array.isArray(phase.learning_outcomes)) {
+                html += `
+                    <div class="mb-4">
+                        <div class="flex items-center gap-2 mb-2 font-bold">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-primary"></i>
+                            Key Outcomes
+                        </div>
+                        <ul class="outcomes-list-v3">
+                            ${phase.learning_outcomes.map(o => `<li>${o}</li>`).join('')}
                         </ul>
                     </div>
                 `;
             }
-            
-            // Goals section (legacy)
-            if (phase.goals && Array.isArray(phase.goals) && phase.goals.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>🎯 Goals</h3>
-                        <ul class="goals-list">
-                            ${phase.goals.map(goal => `<li>${goal}</li>`).join('')}
-                        </ul>
+
+            // Weekly breakdown table
+            const weeks = phase.weekly_breakdown || phase.weeks;
+            if (weeks) {
+                html += `
+                    <div class="mb-6">
+                        <table class="weekly-table-v3">
+                            <thead>
+                                <tr>
+                                    <th>Week</th>
+                                    <th>Topics & Labs</th>
+                                    <th>Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${weeks.map(w => `
+                                    <tr>
+                                        <td><strong>W${w.week}</strong></td>
+                                        <td>
+                                            <div><strong>Topics:</strong> ${(w.topics || []).join(', ')}</div>
+                                            <div class="mt-1"><strong>Labs:</strong> ${(w.labs || []).join(', ')}</div>
+                                            <div class="checkpoint-v3">Checkpoint: ${w.checkpoint || 'Ready'}</div>
+                                        </td>
+                                        <td>${w.hours || w.hours_per_week || '-'}h</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 `;
             }
             
-            // Weekly breakdown
-            const weeklyBreakdown = phase.weekly_breakdown || phase.weeks;
-            if (weeklyBreakdown && Array.isArray(weeklyBreakdown) && weeklyBreakdown.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>📅 Weekly Breakdown</h3>
-                        <div class="weekly-breakdown">
-                            ${weeklyBreakdown.map(week => `
-                                <div class="week-card">
-                                    <h4>Week ${week.week || ''}</h4>
-                                    <div><strong>Topics:</strong> ${(week.topics || []).join(', ')}</div>
-                                    <div><strong>Labs:</strong> ${(week.labs || []).join(', ')}</div>
-                                    <div><strong>Hours:</strong> ${week.hours || week.hours_per_week || 15}</div>
-                                    ${week.checkpoint ? `<div><strong>Checkpoint:</strong> ${week.checkpoint}</div>` : ''}
+            // Recommended Labs
+            if (phase.recommended_labs && Array.isArray(phase.recommended_labs)) {
+                html += `
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-3 font-bold">
+                            <i data-lucide="flask-conical" class="w-5 h-5 text-primary"></i>
+                            Recommended Hands-on Labs
+                        </div>
+                        <div class="labs-grid-v3">
+                            ${phase.recommended_labs.map(lab => `
+                                <div class="lab-mini-card">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="lab-platform-tag">${lab.platform}</span>
+                                        <span class="lab-diff-tag ${lab.difficulty?.toLowerCase()}">${lab.difficulty}</span>
+                                    </div>
+                                    <div class="font-bold text-sm">${lab.name}</div>
+                                    <div class="text-xs opacity-80 mt-1">${lab.skills_gained?.slice(0, 2).join(', ') || ''}</div>
+                                    ${lab.url ? `<a href="${lab.url}" target="_blank" class="lab-link-v3 mt-2">Start Lab <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
             }
-            
-            // Daily breakdown (legacy)
-            if (phase.dailyBreakdown && Array.isArray(phase.dailyBreakdown) && phase.dailyBreakdown.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>📅 Daily Breakdown</h3>
-                        <ul class="breakdown-list">
-                            ${phase.dailyBreakdown.map(day => `<li>${day}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
-            
-            // Tools to learn
+
+            // Tools grid
             const tools = phase.essential_tools || phase.tools;
-            if (tools && Array.isArray(tools) && tools.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>🛠️ Essential Tools</h3>
-                        <div class="tools-container">
-                            ${tools.map(tool => {
-                                if (typeof tool === 'string') return `<div class="tool-card"><h4>${tool}</h4></div>`;
-                                return `
-                                <div class="tool-card">
-                                    <h4>${tool.name || tool.tool_name || ''}</h4>
-                                    ${tool.purpose ? `<div class="tool-purpose"><strong>Purpose:</strong> ${tool.purpose}</div>` : ''}
-                                    ${tool.learning_path ? `
-                                        <div class="learning-path">
-                                            <strong>Learning Path:</strong>
-                                            <ul style="margin-left: 15px; font-size: 0.9em;">
-                                                ${tool.learning_path.beginner ? `<li><em>Beginner:</em> ${tool.learning_path.beginner}</li>` : ''}
-                                                ${tool.learning_path.intermediate ? `<li><em>Intermediate:</em> ${tool.learning_path.intermediate}</li>` : ''}
-                                                ${tool.learning_path.advanced ? `<li><em>Advanced:</em> ${tool.learning_path.advanced}</li>` : ''}
-                                            </ul>
-                                        </div>
-                                    ` : ''}
-                                    ${tool.step ? `<div class="tool-steps"><em>Steps:</em> ${tool.step}</div>` : ''}
-                                    ${tool.key_features ? `<div><strong>Key Features:</strong> ${tool.key_features.join(', ')}</div>` : ''}
-                                    ${tool.practice_exercise ? `<div><strong>Practice:</strong> ${tool.practice_exercise}</div>` : ''}
-                                </div>
-                            `}).join('')}
+            if (tools) {
+                html += `
+                    <div class="flex items-center gap-2 mb-3 font-bold">
+                        <i data-lucide="terminal" class="w-5 h-5 text-primary"></i>
+                        Core Tools
+                    </div>
+                    <div class="tools-grid-v3">
+                `;
+                tools.forEach(t => {
+                    const name = t.name || t.tool_name || t;
+                    html += `
+                        <div class="tool-card-v3">
+                            <strong>${name}</strong>
+                            <div style="font-size: 11px; opacity: 0.9;">${t.purpose || 'Phase tool'}</div>
                         </div>
-                    </div>
-                `;
+                    `;
+                });
+                html += `</div>`;
             }
             
-            // Recommended labs
-            const labs = phase.recommended_labs || phase.labs;
-            if (labs && Array.isArray(labs) && labs.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>🎮 Hands-On Labs</h3>
-                        <table class="phase-table labs-table">
-                            <thead>
-                                <tr>
-                                    <th>Lab Name</th>
-                                    <th>Platform</th>
-                                        <th>Skills Gained</th>
-                                    <th>Difficulty</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${labs.map(lab => `
-                                    <tr>
-                                        <td><strong>${lab.name || lab.lab || ''}</strong></td>
-                                        <td>${lab.platform || ''}</td>
-                                        <td>${(lab.skills_gained || []).join(', ') || 'N/A'}</td>
-                                        <td><span class="difficulty-badge difficulty-${(lab.difficulty || '').toLowerCase()}">${lab.difficulty || 'N/A'}</span></td>
-                                        <td>${lab.link || lab.url ? `<a href="${lab.link || lab.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Start Lab ↗</a>` : (lab.hours || lab.duration || 'N/A')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            // Resources for phase
-            const phaseResources = phase.resources_for_phase || phase.resources;
-            if (phaseResources && Array.isArray(phaseResources) && phaseResources.length > 0) {
-                phaseHTML += `
-                    <div class="phase-section">
-                        <h3>📖 Resources for This Phase</h3>
-                        <table class="phase-table resources-table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Name</th>
-                                    <th>Resource Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${phaseResources.map(res => `
-                                    <tr>
-                                        <td><span class="badge">${res.type || ''}</span></td>
-                                        <td><strong>${res.name || ''}</strong><br><small>${res.topic || ''}</small></td>
-                                        <td>${res.link || res.url ? `<a href="${res.link || res.url}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Open Resource →</a>` : 'N/A'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            // Outcome
-            if (phase.outcome) {
-                phaseHTML += `
-                    <div class="phase-section phase-outcome">
-                        <h3>🏆 What You'll Achieve</h3>
-                        <p>${phase.outcome}</p>
-                    </div>
-                `;
-            }
-            
-            phaseBlock.innerHTML = phaseHTML;
-            phasesSection.appendChild(phaseBlock);
+            card.innerHTML = html;
+            timeline.appendChild(card);
         });
-        
-        elements.roadmapContent.appendChild(phasesSection);
+        container.appendChild(timeline);
     }
     
-    // Tools Mastery Guide
-    const toolsGuide = roadmapObj.tools_mastery_guide || roadmapObj.tools_guide;
-    if (toolsGuide && Array.isArray(toolsGuide) && toolsGuide.length > 0) {
-        const toolsSection = document.createElement('div');
-        toolsSection.className = 'tools-mastery-section';
-        toolsSection.innerHTML = '<h2 style="margin-top: 40px;">🔧 Tools Mastery Guide</h2>';
+    // 4. Daily Study Schedule
+    const schedule = roadmapObj.daily_study_schedule;
+    if (schedule && Array.isArray(schedule)) {
+        const schedHeader = document.createElement('div');
+        schedHeader.className = 'section-header-v3';
+        schedHeader.innerHTML = `
+            <i data-lucide="clock" class="w-8 h-8"></i>
+            <h2>Daily Study Routine</h2>
+        `;
+        container.appendChild(schedHeader);
         
-        toolsGuide.forEach(tool => {
-            const toolDiv = document.createElement('div');
-            toolDiv.className = 'mastery-tool';
-            let toolHTML = `
-                <h3>${tool.tool_name || tool.name || ''}</h3>
-                <div class="tool-meta">
-                    ${tool.category ? `<span class="badge">${tool.category}</span>` : ''}
-                    ${tool.importance ? `<span class="importance importance-${(tool.importance || '').toLowerCase()}">${tool.importance}</span>` : ''}
+        const schedGrid = document.createElement('div');
+        schedGrid.className = 'schedule-grid-v3';
+        schedGrid.innerHTML = schedule.map(s => `
+            <div class="schedule-card-v3">
+                <div class="sched-time">${s.time || s.time_slot}</div>
+                <div class="sched-activity">${s.activity}</div>
+                ${s.focus ? `<div class="sched-focus">Focus: ${s.focus}</div>` : ''}
+            </div>
+        `).join('');
+        container.appendChild(schedGrid);
+    }
+
+    // 5. Curated Resources (New Grid Cards)
+    const resources = roadmapObj.curated_resources;
+    if (resources && (Array.isArray(resources) || typeof resources === 'object')) {
+        const resHeader = document.createElement('div');
+        resHeader.className = 'section-header-v3';
+        resHeader.innerHTML = `
+            <i data-lucide="book-open" class="w-8 h-8"></i>
+            <h2>Curated Learning Resources</h2>
+        `;
+        container.appendChild(resHeader);
+
+        const resGrid = document.createElement('div');
+        resGrid.className = 'resources-grid-v3';
+
+        // Handle both array and object formats for robustness
+        const resourceList = Array.isArray(resources) ? resources :
+                            Object.entries(resources).flatMap(([type, list]) =>
+                                Array.isArray(list) ? list.map(item => ({...item, type})) : []
+                            );
+
+        resGrid.innerHTML = resourceList.map(res => {
+            let icon = 'link';
+            if (res.type?.toLowerCase().includes('youtube')) icon = 'youtube';
+            if (res.type?.toLowerCase().includes('book')) icon = 'book';
+            if (res.type?.toLowerCase().includes('platform')) icon = 'globe';
+
+            return `
+                <div class="resource-card-v3">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="res-icon-wrapper">
+                            <i data-lucide="${icon}" class="w-5 h-5"></i>
+                        </div>
+                        <span class="res-type-tag">${res.type || 'Resource'}</span>
+                    </div>
+                    <h4 class="m-0 mb-1">${res.name || res.title}</h4>
+                    <p class="res-focus">${res.focus || res.topic || ''}</p>
+                    ${res.url && res.url !== 'N/A' ? `
+                        <a href="${res.url}" target="_blank" class="res-link-btn-v3">
+                            View Resource <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    ` : ''}
                 </div>
-                ${tool.when_to_use ? `<p><strong>When to use:</strong> ${tool.when_to_use}</p>` : ''}
             `;
-            
-            if (tool.learning_progression) {
-                toolHTML += `
-                    <div class="progression-table">
-                        <h4>Learning Progression:</h4>
-                        <ul>
-                            ${tool.learning_progression.phase_1 ? `<li><strong>Phase 1:</strong> ${tool.learning_progression.phase_1}</li>` : ''}
-                            ${tool.learning_progression.phase_2 ? `<li><strong>Phase 2:</strong> ${tool.learning_progression.phase_2}</li>` : ''}
-                            ${tool.learning_progression.phase_3 ? `<li><strong>Phase 3:</strong> ${tool.learning_progression.phase_3}</li>` : ''}
-                        </ul>
-                    </div>
-                `;
-            }
-            
-            const commands = tool.critical_commands || tool.commands;
-            if (commands && Array.isArray(commands) && commands.length > 0) {
-                toolHTML += `
-                    <div>
-                        <h4>Critical Commands:</h4>
-                        <table class="commands-table">
-                            <tr>
-                                <th>Command</th>
-                                <th>Purpose</th>
-                                <th>Example</th>
-                            </tr>
-                            ${commands.map(cmd => {
-                                if (typeof cmd === 'string') return `<tr><td colspan="3"><code>${cmd}</code></td></tr>`;
-                                return `
-                                <tr>
-                                    <td><code>${cmd.command || ''}</code></td>
-                                    <td>${cmd.purpose || ''}</td>
-                                    <td><code>${cmd.example || ''}</code></td>
-                                </tr>
-                            `}).join('')}
-                        </table>
-                    </div>
-                `;
-            }
-            
-            toolDiv.innerHTML = toolHTML;
-            toolsSection.appendChild(toolDiv);
-        });
-        
-        elements.roadmapContent.appendChild(toolsSection);
+        }).join('');
+        container.appendChild(resGrid);
     }
     
-    // Curated Resources Section
-    const resources = roadmapObj.curated_resources || roadmapObj.resources;
-    if (resources) {
-        const resourcesSection = document.createElement('div');
-        resourcesSection.className = 'curated-resources-section';
-        resourcesSection.innerHTML = '<h2 style="margin-top: 40px;">📚 Curated Learning Resources</h2>';
-        
-        // YouTube channels
-        const ytChannels = resources.youtube_channels || resources.youtube;
-        if (ytChannels && Array.isArray(ytChannels) && ytChannels.length > 0) {
-            const ytDiv = document.createElement('div');
-            ytDiv.className = 'resource-subsection';
-            ytDiv.innerHTML = `
-                <h3>🎥 YouTube Channels</h3>
-                <table class="resources-table">
-                    <thead>
-                        <tr>
-                            <th>Channel</th>
-                            <th>Focus/Why</th>
-                            <th>Watch Now</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${ytChannels.map(yt => `
-                            <tr>
-                                <td><strong>${yt.name || yt.channel || ''}</strong></td>
-                                <td>${yt.focus || yt.why || ''} ${yt.level ? `(${yt.level})` : ''}</td>
-                                <td>${yt.link || yt.url ? `<a href="${yt.link || yt.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Watch Channel ↗</a>` : 'N/A'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            resourcesSection.appendChild(ytDiv);
-        }
-        
-        // Books
-        if (resources.essential_books && Array.isArray(resources.essential_books) && resources.essential_books.length > 0) {
-            const booksDiv = document.createElement('div');
-            booksDiv.className = 'resource-subsection';
-            booksDiv.innerHTML = `
-                <h3>📖 Essential Books</h3>
-                <table class="resources-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>Topic</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${resources.essential_books.map(book => `
-                            <tr>
-                                <td><strong>${book.title || ''}</strong></td>
-                                <td>${book.author || ''}</td>
-                                <td>${book.topic || book.for_what || ''} ${book.level ? `(${book.level})` : ''}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            resourcesSection.appendChild(booksDiv);
-        }
-        
-        // Learning platforms
-        const platforms = resources.learning_platforms || resources.platforms;
-        if (platforms && Array.isArray(platforms) && platforms.length > 0) {
-            const platformsDiv = document.createElement('div');
-            platformsDiv.className = 'resource-subsection';
-            platformsDiv.innerHTML = `
-                <h3>🌐 Learning Platforms</h3>
-                <table class="resources-table">
-                    <thead>
-                        <tr>
-                            <th>Platform</th>
-                            <th>Type/Cost</th>
-                            <th>Access</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${platforms.map(platform => `
-                            <tr>
-                                <td><strong>${platform.name || ''}</strong><br><small>${platform.best_for || platform.for || ''}</small></td>
-                                <td><span class="badge">${platform.type || platform.cost || ''}</span></td>
-                                <td>${platform.link || platform.url ? `<a href="${platform.link || platform.url}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">Visit Platform ↗</a>` : 'N/A'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            resourcesSection.appendChild(platformsDiv);
-        }
-        
-        elements.roadmapContent.appendChild(resourcesSection);
-    }
-    
-    // Study Plan & Daily Schedule
-    const dailySchedule = roadmapObj.daily_study_schedule || roadmapObj.daily_schedule;
-    if (dailySchedule) {
-        const scheduleSection = document.createElement('div');
-        scheduleSection.className = 'study-schedule-section';
+    // 6. Success Benchmarks
+    const metrics = roadmapObj.success_metrics;
+    if (metrics && Array.isArray(metrics)) {
+        const metricsHeader = document.createElement('div');
+        metricsHeader.className = 'section-header-v3';
+        metricsHeader.innerHTML = `
+            <i data-lucide="target" class="w-8 h-8"></i>
+            <h2>Success Benchmarks</h2>
+        `;
+        container.appendChild(metricsHeader);
 
-        const schedule = dailySchedule.recommended_schedule || dailySchedule;
-        const tips = dailySchedule.study_tips || [];
-
-        let scheduleHTML = `<h2 style="margin-top: 40px;">📅 Daily Study Schedule</h2><div class="schedule-card"><h3>Recommended Schedule</h3><div style="margin: 15px 0;">`;
-
-        if (typeof schedule === 'string') {
-            scheduleHTML += `<p>${schedule}</p>`;
-        } else {
-            if (schedule.morning_session) scheduleHTML += `<div><strong>🌅 Morning:</strong> ${schedule.morning_session}</div>`;
-            if (schedule.midday_session) scheduleHTML += `<div><strong>☀️ Midday:</strong> ${schedule.midday_session}</div>`;
-            if (schedule.evening_session) scheduleHTML += `<div><strong>🌙 Evening:</strong> ${schedule.evening_session}</div>`;
-            if (schedule.weekly_review) scheduleHTML += `<div><strong>📊 Weekly Review:</strong> ${schedule.weekly_review}</div>`;
-        }
-
-        scheduleHTML += `</div>`;
-
-        if (Array.isArray(tips) && tips.length > 0) {
-            scheduleHTML += `<h4>💡 Study Tips</h4><ul>${tips.map(tip => `<li>${tip}</li>`).join('')}</ul>`;
-        }
-
-        scheduleHTML += `</div>`;
-        scheduleSection.innerHTML = scheduleHTML;
-        elements.roadmapContent.appendChild(scheduleSection);
-    }
-    
-    // Success metrics
-    if (roadmapObj.success_metrics && Array.isArray(roadmapObj.success_metrics) && roadmapObj.success_metrics.length > 0) {
-        const metricsSection = document.createElement('div');
-        metricsSection.className = 'success-metrics-section';
-        metricsSection.innerHTML = `
-            <h2 style="margin-top: 40px;">✅ Success Metrics & Checkpoints</h2>
-            <table class="metrics-table">
+        const metricsTable = document.createElement('div');
+        metricsTable.className = 'table-responsive-v3';
+        metricsTable.innerHTML = `
+            <table class="metrics-table-v3">
                 <thead>
                     <tr>
-                        <th>Phase</th>
-                        <th>Completed When</th>
-                        <th>Assessment</th>
+                        <th>Metric</th>
+                        <th>Target Goal</th>
+                        <th>Indicator</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${roadmapObj.success_metrics.map(metric => `
+                    ${metrics.map(m => `
                         <tr>
-                            <td><strong>${metric.phase || ''}</strong></td>
-                            <td>${metric.completed_when || ''}</td>
-                            <td>${metric.checkpoint_assessment || ''}</td>
+                            <td><strong>${m.metric || m.phase}</strong></td>
+                            <td>${m.target || m.completed_when}</td>
+                            <td>${m.indicator || m.checkpoint_assessment}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
-        elements.roadmapContent.appendChild(metricsSection);
+        container.appendChild(metricsTable);
     }
     
-    // Motivation section
-    const motivation = roadmapObj.motivation_and_mindset || roadmapObj.motivation;
-    if (motivation) {
-        const motivationSection = document.createElement('div');
-        motivationSection.className = 'motivation-section';
+    // 7. Success Mindset
+    const mindset = roadmapObj.motivation_and_mindset;
+    if (mindset) {
+        const mindsetCard = document.createElement('div');
+        mindsetCard.className = 'success-mindset-card-v3';
+        mindsetCard.innerHTML = `
+            <div class="mindset-quote">
+                <i data-lucide="quote" class="w-8 h-8 opacity-20 absolute top-4 left-4"></i>
+                <p>"${mindset.why_people_succeed || 'Persistence is the key to mastering offensive security. Embrace the challenge.'}"</p>
+            </div>
+            <div class="mindset-footer">
+                <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
+                <span><strong>Real-World Impact:</strong> ${mindset.real_world_applications || 'Career growth and elite problem-solving skills.'}</span>
+            </div>
+        `;
+        container.appendChild(mindsetCard);
+    }
 
-        let motivationHTML = `<h2 style="margin-top: 40px;">🚀 Motivation & Mindset</h2><div class="motivation-card">`;
+    elements.roadmapContent.appendChild(container);
 
-        if (typeof motivation === 'string') {
-            motivationHTML += `<p>${motivation}</p>`;
-        } else {
-            if (motivation.why_people_succeed) {
-                motivationHTML += `<h3>Why People Succeed:</h3><p>${motivation.why_people_succeed}</p>`;
-            }
-            if (motivation.real_world_applications) {
-                motivationHTML += `<h3>Real-World Applications:</h3><p>${motivation.real_world_applications}</p>`;
-            }
-        }
-
-        motivationHTML += `</div>`;
-        motivationSection.innerHTML = motivationHTML;
-        elements.roadmapContent.appendChild(motivationSection);
+    // Initialize icons
+    if (window.lucide) {
+        lucide.createIcons();
     }
 }
 
@@ -2562,124 +2387,46 @@ function downloadRoadmapPDF() {
         return;
     }
     
-    const roadmap = appState.roadmapJSON;
     const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // Check if html2pdf is available
     if (typeof html2pdf === 'undefined') {
         showError('PDF library not loaded. Please try exporting as JSON instead.');
         return;
     }
     
-    // Create HTML content for PDF
-    let htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 20px; }
-                h1 { color: #1a1a2e; border-bottom: 3px solid #0f3460; padding-bottom: 10px; }
-                h2 { color: #0f3460; margin-top: 30px; }
-                h3 { color: #e94560; margin-top: 15px; }
-                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                th { background: #1a1a2e; color: white; padding: 10px; text-align: left; }
-                td { border: 1px solid #ddd; padding: 10px; }
-                tr:nth-child(even) { background: #f9f9f9; }
-                .meta { background: #f0f0f0; padding: 10px; margin: 15px 0; border-left: 4px solid #0f3460; }
-                .phase { page-break-inside: avoid; margin: 20px 0; }
-                .badge { background: #e94560; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
-                ul { margin: 10px 0; padding-left: 20px; }
-                li { margin: 5px 0; }
-                .outcome { background: #f0fff0; padding: 15px; border-left: 4px solid #22c55e; margin: 15px 0; }
-            </style>
-        </head>
-        <body>
-            <h1>${roadmap.targetCertification} Learning Roadmap</h1>
-            <div class="meta">
-                <p><strong>Current Level:</strong> ${roadmap.currentLevel}</p>
-                <p><strong>Target:</strong> ${roadmap.targetCertification}</p>
-                <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-            </div>
-            <p><strong>Summary:</strong> ${roadmap.overallSummary}</p>
-    `;
+    showNotification('Preparing high-quality PDF...', 'info');
+
+    // Clone the element to avoid visual glitches on the page during capture
+    const element = elements.roadmapContent.cloneNode(true);
     
-    // Add phases
-    roadmap.roadmap.forEach(phase => {
-        htmlContent += `
-            <div class="phase">
-                <h2>${phase.phase}</h2>
-                <p><strong>Duration:</strong> ${phase.duration}</p>
-                
-                <h3>🎯 Goals</h3>
-                <ul>
-                    ${phase.goals.map(goal => `<li>${goal}</li>`).join('')}
-                </ul>
-                
-                <h3>📚 Resources</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Name</th>
-                            <th>Link</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${phase.resources.map(res => `
-                            <tr>
-                                <td><span class="badge">${res.type}</span></td>
-                                <td>${res.name}</td>
-                                <td>${res.link}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <h3>🎮 Hands-On Labs</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Platform</th>
-                            <th>Lab/Machine</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${phase.labs.map(lab => `
-                            <tr>
-                                <td><strong>${lab.platform}</strong></td>
-                                <td>${lab.lab}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="outcome">
-                    <h3>✅ Outcome</h3>
-                    <p>${phase.outcome}</p>
-                </div>
-            </div>
-        `;
-    });
+    // Create a wrapper to preserve theme context
+    const wrapper = document.createElement('div');
+    if (document.body.classList.contains('mode-oscp')) {
+        wrapper.className = 'mode-oscp';
+    }
     
-    htmlContent += `
-        </body>
-        </html>
-    `;
-    
-    // Generate PDF
-    const element = document.createElement('div');
-    element.innerHTML = htmlContent;
-    
+    // PDF-specific styling
+    wrapper.style.padding = '40px';
+    wrapper.style.background = document.body.classList.contains('mode-oscp') ? '#0d1117' : '#faf8f5';
+    wrapper.style.width = '850px';
+    wrapper.appendChild(element);
+
     const opt = {
         margin: 10,
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: document.body.classList.contains('mode-oscp') ? '#0d1117' : '#faf8f5'
+        },
+        jsPDF: { orientation: 'portrait', unit: 'px', format: 'a4', hotfixes: ['px_scaling'] }
     };
     
-    html2pdf().set(opt).from(element).save();
-    showSuccess('Roadmap downloaded as PDF!');
+    html2pdf().set(opt).from(wrapper).save().then(() => {
+        showSuccess('Roadmap downloaded as PDF!');
+    });
 }
 
 // ============================================================================

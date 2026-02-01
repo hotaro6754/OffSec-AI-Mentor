@@ -544,72 +544,70 @@ Be encouraging but honest. Output ONLY valid JSON.`,
     /**
      * Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
      */
-    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, highly detailed, and BEGINNER-FRIENDLY ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
+    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, visually stunning, and BEGINNER-FRIENDLY ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
 
 IMPORTANT:
 - Use simple, encouraging language suitable for beginners.
 - Provide actual, clickable URLs for all resources (TryHackMe, HackTheBox, YouTube, etc.).
 - Ensure all resources are high-quality and relevant to the target certification.
-- Format data strictly as JSON so it can be rendered into detailed tables.
+- Format data strictly as JSON so it can be rendered into professional dashboard components.
 
 MUST INCLUDE:
-1. **Executive Summary**: 2-3 sentences on their learning journey and goals
+1. **Executive Summary**: 2-3 sentences on their learning journey and goals.
 2. **6-8 Learning Phases** with:
-   - Clear outcomes and capabilities gained
-   - Week-by-week topics and labs
-   - Tools to learn with purpose and steps
-   - Recommended labs with difficulty and hours (e.g., TryHackMe 'Pre-Security' or HTB 'Starting Point')
-   
-3. **Tools Mastery Guide** (Nmap, Burp, Linux, etc):
-   - When and why to use each tool
-   - Key commands and learning progression
+   - Phase Name and clear Outcomes.
+   - Week-by-week breakdown (Topics, Labs, Hours).
+   - Essential Tools (Name, Purpose, Learning Path).
+   - Recommended Labs with Platform, Difficulty (Easy/Medium/Hard), and Skills Gained.
+   - Resource Links for each phase with Category (YouTube, Blog, Course).
 
-4. **Curated Resources**:
-   - YouTube channels (e.g., NetworkChuck, John Hammond), Books, and Platforms (THM, HTB) with WORKING LINKS.
+3. **Tools Mastery Guide**: Deep dive into critical tools (Nmap, Burp, etc) with commands.
 
-5. **Daily Study Schedule**: Realistic routine mixing theory and hands-on
+4. **Curated Resources**: Top-tier links for YouTube, Books, and Platforms.
 
-6. **Success Metrics**: Weekly checkpoints and capability gains
+5. **Daily Study Schedule**: A structured routine.
 
-7. **Motivation & Mindset**: Why people succeed and real-world applications
+6. **Success Metrics**: How to measure progress.
 
-RESPOND WITH VALID JSON (no markdown blocks, pure JSON only):
+7. **Motivation**: Encouragement and real-world context.
+
+RESPOND WITH VALID JSON (pure JSON only):
 {
   "targetCertification": "${cert}",
   "currentLevel": "${level}",
   "totalDuration": "20-24 weeks",
   "difficulty_progression": "Beginner to Intermediate",
-  "executive_summary": "[2-3 sentences on journey]",
+  "executive_summary": "[Summary]",
   "roadmap": [
     {
       "phase": 1,
       "phase_name": "[Name]",
       "duration_weeks": 3,
       "total_hours": 60,
-      "prerequisites": "[Prerequisites]",
-      "weekly_hours": 20,
-      "learning_outcomes": ["[Outcome 1]", "[Outcome 2]"],
-      "weekly_breakdown": [{"week": 1, "topics": ["[Topic]"], "labs": ["[Lab]"], "hours": 20, "checkpoint": "[Goal]"}],
-      "essential_tools": [{"name": "[Tool]", "purpose": "[Why]", "learning_path": {"beginner": "[Step1]", "intermediate": "[Step2]", "advanced": "[Step3]"}, "key_features": ["[F1]"], "practice_exercise": "[Ex]"}],
-      "recommended_labs": [{"name": "[Lab]", "platform": "[HTB/THM]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[Skill]"]}],
+      "learning_outcomes": ["[Skill 1]", "[Skill 2]"],
+      "weekly_breakdown": [{"week": 1, "topics": ["[T1]"], "labs": ["[L1]"], "hours": 20, "checkpoint": "[Goal]"}],
+      "essential_tools": [{"name": "[Tool]", "purpose": "[Why]", "learning_path": {"beginner": "[B]", "intermediate": "[I]", "advanced": "[A]"}, "key_features": ["[F]"], "practice_exercise": "[Ex]"}],
+      "recommended_labs": [{"name": "[Lab]", "platform": "[THM/HTB]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[S]"], "url": "[URL]"}],
       "resources_for_phase": [{"type": "YouTube", "name": "[Name]", "topic": "[Topic]", "link": "[URL]"}],
-      "outcome": "[Summary of achievement]"
+      "outcome": "[Achievement summary]"
     }
   ],
   "tools_mastery_guide": [
-    {"tool_name": "[Tool]", "category": "[Category]", "importance": "High", "when_to_use": "[When]", "learning_progression": {"phase_1": "[Step1]", "phase_2": "[Step2]", "phase_3": "[Step3]"}, "critical_commands": [{"command": "[cmd]", "purpose": "[Why]", "example": "[ex]"}]}
+    {"tool_name": "[Tool]", "category": "[Cat]", "importance": "High", "when_to_use": "[When]", "learning_progression": {"phase_1": "[P1]", "phase_2": "[P2]", "phase_3": "[P3]"}, "critical_commands": [{"command": "[cmd]", "purpose": "[Why]", "example": "[ex]"}]}
   ],
   "curated_resources": {
-    "youtube_channels": [{"name": "[Name]", "focus": "[Focus]", "level": "All", "link": "[URL]"}],
-    "essential_books": [{"title": "[Title]", "author": "[Author]", "topic": "[Topic]", "level": "Beginner"}],
+    "youtube_channels": [{"name": "[Name]", "focus": "[Focus]", "link": "[URL]"}],
+    "essential_books": [{"title": "[Title]", "author": "[Author]", "topic": "[Topic]"}],
     "learning_platforms": [{"name": "[Platform]", "type": "Lab", "best_for": "[Purpose]", "link": "[URL]"}]
   },
-  "daily_study_schedule": {
-    "recommended_schedule": {"morning_session": "[Activity]", "midday_session": "[Activity]", "evening_session": "[Activity]", "weekly_review": "[Activity]"},
-    "study_tips": ["[Tip 1]", "[Tip 2]"]
-  },
-  "success_metrics": [{"phase": "Phase 1", "completed_when": "[Criteria]", "checkpoint_assessment": "[Test]"}],
-  "motivation_and_mindset": {"why_people_succeed": "[Explanation]", "real_world_applications": "[Context]"}
+  "daily_study_schedule": [
+    {"time": "Morning (08:00 - 10:00)", "activity": "Theory & Concepts", "focus": "Reading documentation & watching tutorials"},
+    {"time": "Midday (12:00 - 14:00)", "activity": "Labs & Practice", "focus": "Hands-on exercises on THM/HTB"},
+    {"time": "Evening (18:00 - 20:00)", "activity": "Review & Documentation", "focus": "Writing notes and reviewing daily learnings"},
+    {"time": "Weekend", "activity": "Deep Dive", "focus": "Full machines and complex scenarios"}
+  ],
+  "success_metrics": [{"phase": "Phase 1", "completed_when": "[Crit]", "checkpoint_assessment": "[Test]"}],
+  "motivation_and_mindset": {"why_people_succeed": "[Why]", "real_world_applications": "[Context]"}
 }`,
 
     /**
