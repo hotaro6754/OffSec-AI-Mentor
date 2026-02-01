@@ -124,10 +124,11 @@ if (AI_PROVIDER !== 'none') {
 // MIDDLEWARE
 // ============================================================================
 
+// CORS - Allow all origins for this public learning app
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:8000', 'http://127.0.0.1:3000', 'http://127.0.0.1:8000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: true, // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-OpenAI-API-Key', 'X-Groq-API-Key', 'X-Gemini-API-Key', 'X-Deepseek-API-Key'],
     credentials: true
 }));
 
@@ -139,17 +140,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// Auth middleware - extracts user from session
+// Auth middleware - extracts user from session and custom API keys
 app.use((req, res, next) => {
     const sessionId = req.headers.authorization?.replace('Bearer ', '');
     if (sessionId) {
         req.user = db.validateSession(sessionId);
     }
-    next();
-});
-
-// API Key middleware - extracts custom API keys from headers
-app.use((req, res, next) => {
+    
+    // Extract custom API keys from request headers
     req.customKeys = {
         openai: req.headers['x-openai-api-key'],
         groq: req.headers['x-groq-api-key'],
@@ -1340,12 +1338,20 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log('║                                                                ║');
     console.log(`║   🚀 Server running on http://0.0.0.0:${PORT}                    ║`);
     console.log('║                                                                ║');
-    console.log('║   New Features:                                                ║');
+    console.log('║   📊 System Status:                                            ║');
+    console.log(`║   • AI Provider: ${AI_PROVIDER.toUpperCase() || 'FALLBACK ONLY'}${AI_PROVIDER !== 'none' ? ' ✅' : ' ⚠️ '}          ║`);
+    console.log('║   • Database: SQLite ✅                                        ║');
+    console.log('║   • CORS: Public Access ✅                                    ║');
+    console.log('║   • Authentication: Enabled ✅                                ║');
+    console.log('║                                                                ║');
+    console.log('║   ✨ Features:                                                 ║');
     console.log('║   • User authentication & sessions                            ║');
     console.log('║   • Question variation (no repeats!)                           ║');
     console.log('║   • Progress tracking & checklist                              ║');
     console.log('║   • Curated resources (YT, books, tools)                       ║');
     console.log('║   • OSCP mode with Pro Labs style questions                    ║');
+    console.log('║                                                                ║');
+    console.log('║   🌐 Ready for deployment!                                    ║');
     console.log('║                                                                ║');
     console.log('╚════════════════════════════════════════════════════════════════╝');
     console.log('');
