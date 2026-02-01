@@ -98,9 +98,9 @@ if (GROQ_API_KEY) {
 } else if (GEMINI_API_KEY) {
     AI_PROVIDER = 'gemini';
     AI_API_KEY = GEMINI_API_KEY;
-    AI_MODEL = 'gemini-2.5-flash';
-    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-    console.log('✅ Using Google Gemini API (2.5 Flash)');
+    AI_MODEL = 'gemini-2.0-flash';
+    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    console.log('✅ Using Google Gemini API (2.0 Flash)');
 } else {
     AI_PROVIDER = 'none';
     AI_API_KEY = '';
@@ -661,16 +661,24 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
 
 // Call only primary AI provider (no fallback) - for roadmap generation
 async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys = {}) {
+    // Determine which AI provider to use, prioritizing custom keys (BYOK)
     let provider = AI_PROVIDER;
-    let apiKey = customKeys[provider] || AI_API_KEY;
+    let apiKey = AI_API_KEY;
     let model = AI_MODEL;
     let apiUrl = AI_API_URL;
 
-    // If user provided a specific key for a provider, we might want to switch to it
-    if (customKeys.groq && provider !== 'groq') {
+    // Check for custom keys first - this allows users to override the system provider
+    if (customKeys.groq) {
         provider = 'groq'; apiKey = customKeys.groq; model = 'llama-3.3-70b-versatile'; apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    } else if (customKeys.openai && provider === 'none') {
+    } else if (customKeys.openai) {
         provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-3.5-turbo'; apiUrl = 'https://api.openai.com/v1/chat/completions';
+    } else if (customKeys.gemini) {
+        provider = 'gemini'; apiKey = customKeys.gemini; model = 'gemini-2.0-flash'; apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    } else if (customKeys.deepseek) {
+        provider = 'deepseek'; apiKey = customKeys.deepseek; model = 'deepseek-chat'; apiUrl = 'https://api.deepseek.com/chat/completions';
+    } else if (provider !== 'none') {
+        // If no custom key found for other providers, check if there's a custom key for the system provider
+        apiKey = customKeys[provider] || AI_API_KEY;
     }
 
     console.log(`📤 Calling ${provider.toUpperCase()} API (Primary Only - No Fallback)...`);
@@ -685,23 +693,24 @@ async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys
 }
 
 async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
-    // Determine which AI provider to use, prioritizing custom keys
+    // Determine which AI provider to use, prioritizing custom keys (BYOK)
     let currentProvider = AI_PROVIDER;
-    let currentApiKey = customKeys[currentProvider] || AI_API_KEY;
+    let currentApiKey = AI_API_KEY;
     let currentModel = AI_MODEL;
     let currentApiUrl = AI_API_URL;
 
-    // Override with custom keys if available and primary is 'none'
-    if (currentProvider === 'none') {
-        if (customKeys.groq) {
-            currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-        } else if (customKeys.openai) {
-            currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
-        } else if (customKeys.gemini) {
-            currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-2.5-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-        } else if (customKeys.deepseek) {
-            currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
-        }
+    // Check for custom keys first - this allows users to override the system provider
+    if (customKeys.groq) {
+        currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    } else if (customKeys.openai) {
+        currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
+    } else if (customKeys.gemini) {
+        currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-2.0-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    } else if (customKeys.deepseek) {
+        currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
+    } else if (currentProvider !== 'none') {
+        // If no custom key found for other providers, check if there's a custom key for the system provider
+        currentApiKey = customKeys[currentProvider] || AI_API_KEY;
     }
 
     console.log(`📤 Calling ${currentProvider.toUpperCase()} API...`);

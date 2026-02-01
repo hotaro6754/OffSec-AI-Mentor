@@ -11,7 +11,8 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
 // Initialize database
-const db = new Database(path.join(__dirname, 'offsec_mentor.db'));
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'offsec_mentor.db');
+const db = new Database(dbPath);
 db.pragma('journal_mode = WAL'); // Better performance
 
 // ============================================================================
