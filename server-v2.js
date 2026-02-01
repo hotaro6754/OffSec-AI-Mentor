@@ -483,23 +483,39 @@ Be brutally honest. If they are not ready, say so clearly. Output ONLY valid JSO
     /**
      * Adaptive Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
      */
-    roadmap: (level, weaknesses, cert, resources, assessmentResult = {}) => `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
+    roadmap: (mode, level, weaknesses, cert, resources, assessmentResult = {}) => {
+        const isOscp = mode === 'oscp';
+
+        const beginnerInstructions = `
+IMPORTANT INSTRUCTIONS FOR BEGINNER MODE:
+- START FROM SCRATCH: This user is a beginner. The roadmap MUST start with foundations (Networking, Linux/Windows basics, Scripting/Automation).
+- SKILLS MAPPING: Show a clear journey from Zero to ${cert} level.
+- ADAPTIVE DESIGN: While focusing on foundations, also address the identified gaps: ${weaknesses.join(', ')}.
+- MANDATORY LABS: Include absolute beginner-friendly labs: OverTheWire (Bandit), TryHackMe (Pre-Security, Complete Beginner), and HTB Starting Point.
+- DO NOT jump straight into advanced Pro Labs or PEN-200 syllabus until foundational phases are completed.`;
+
+        const oscpInstructions = `
+IMPORTANT INSTRUCTIONS FOR OSCP MODE:
+- BRUTAL & ADVANCED: This user is preparing specifically for the exam or advanced level.
+- ADAPTIVE DESIGN: Focus ONLY on the identified gaps: ${weaknesses.join(', ')}. Remove topics the user has already mastered.
+- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200 syllabus for the target certification.
+- MANDATORY LABS: Include specific, clickable HTB (e.g., Dante, Pro Labs) and THM links for every phase.
+- PRE-OSCP ALIGNMENT: If readiness score < 70%, recommend PNPT, CRTP, or eJPT as bridges.`;
+
+        return `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
 
 USER DATA:
+- Mode: ${mode.toUpperCase()}
 - Level: ${level}
 - Identified Gaps: ${weaknesses.join(', ')}
 - Readiness Score: ${assessmentResult.readinessScore || 'N/A'}%
 
-IMPORTANT INSTRUCTIONS:
-- ADAPTIVE DESIGN: Focus ONLY on the identified gaps. Remove topics the user has already mastered.
-- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200: Info Gathering, Vulnerability Research, Web App Attacks, SQLi, Client-Side, AV Evasion, PrivEsc (Win/Lin), Password Attacks, Pivoting, Active Directory, Metasploit, Report Writing.
-- MANDATORY LABS: Include specific, clickable HTB (e.g., Dante, Pro Labs) and THM links for every phase.
-- PRE-OSCP ALIGNMENT: If readiness score < 70%, recommend PNPT, CRTP, or eJPT. Explain the overlap and how they bridge the user's specific skill gaps.
+${isOscp ? oscpInstructions : beginnerInstructions}
 
 MUST INCLUDE IN JSON:
 1. **Gap Analysis**: Checklist of missing skills and weak areas.
 2. **4-6 Dynamic Phases**:
-   - Phase Name and "Why it matters for OSCP".
+   - Phase Name and "Why it matters for ${cert}".
    - Outcomes, Tools, and Mandatory Labs (with URLs).
    - Resources with button-style links.
 3. **Pre-OSCP Recommendations**: Aligned certifications with mapping to user gaps.
@@ -519,7 +535,7 @@ RESPOND WITH VALID JSON (pure JSON only):
     {
       "phase": 1,
       "phase_name": "[Name]",
-      "why_it_matters": "[Significance for OSCP]",
+      "why_it_matters": "[Significance for ${cert}]",
       "duration_weeks": 4,
       "learning_outcomes": [],
       "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
@@ -536,7 +552,8 @@ RESPOND WITH VALID JSON (pure JSON only):
   ],
   "daily_study_schedule": [],
   "success_metrics": []
-}`,
+}`;
+    },
 
     /**
      * Mentor chat - professional and structured
@@ -985,13 +1002,13 @@ app.post('/api/generate-roadmap', async (req, res) => {
     }
     
     try {
-        const { level, weaknesses, cert, assessmentResult } = req.body;
+        const { level, weaknesses, cert, assessmentResult, mode = 'beginner' } = req.body;
         
         if (!level || !weaknesses || !cert) {
             return res.status(400).json({ error: 'Level, weaknesses, and cert required' });
         }
 
-        const prompt = PROMPTS.roadmap(level, weaknesses, cert, RESOURCES, assessmentResult);
+        const prompt = PROMPTS.roadmap(mode, level, weaknesses, cert, RESOURCES, assessmentResult);
         
         let response;
         let retryCount = 0;
