@@ -2278,6 +2278,30 @@ function displayRoadmap(roadmapData) {
         container.appendChild(guideGrid);
     }
 
+    // 6. Special Resource (Rickroll)
+    if (roadmapObj.special_resource) {
+        const specialSection = document.createElement('div');
+        specialSection.className = 'section-header-v3';
+        specialSection.innerHTML = `
+            <i data-lucide="sparkles" class="w-8 h-8"></i>
+            <h2>${roadmapObj.special_resource.name || 'Secret Cyber Wisdom'}</h2>
+        `;
+        container.appendChild(specialSection);
+
+        const specialCard = document.createElement('div');
+        specialCard.className = 'phase-card-v3 success-mindset-card-v3';
+        specialCard.style.cursor = 'pointer';
+        specialCard.innerHTML = `
+            <div class="mindset-quote">
+                <p>Unlock the final secret of your journey...</p>
+            </div>
+            <div class="mindset-footer">
+                <a href="${roadmapObj.special_resource.url}" target="_blank" class="btn btn-primary">Reveal Secret</a>
+            </div>
+        `;
+        container.appendChild(specialCard);
+    }
+
     elements.roadmapContent.appendChild(container);
 
     // Initialize icons
