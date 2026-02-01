@@ -1,5 +1,5 @@
 /**
- * OffSec AI Mentor - Backend Server v2.0
+ * OffSec AI Mentor - Backend Server v2.5
  * 
  * FEATURES:
  * - User authentication (register/login)
@@ -1312,7 +1312,7 @@ app.get('/api/resources', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        version: '2.0',
+        version: '2.5',
         timestamp: new Date().toISOString()
     });
 });
@@ -1334,7 +1334,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log('');
     console.log('╔════════════════════════════════════════════════════════════════╗');
     console.log('║                                                                ║');
-    console.log('║   🎓 OffSec AI Mentor v2.0 - Backend Server                    ║');
+    console.log('║   🎓 OffSec AI Mentor v2.5 - Backend Server                    ║');
     console.log('║                                                                ║');
     console.log(`║   🚀 Server running on http://0.0.0.0:${PORT}                    ║`);
     console.log('║                                                                ║');

@@ -1,5 +1,5 @@
 /**
- * OffSec AI Mentor - Frontend Application v2.0
+ * OffSec AI Mentor - Frontend Application v2.5
  * 
  * FEATURES:
  * - User authentication (login/register)
