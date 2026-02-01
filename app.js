@@ -1658,14 +1658,19 @@ async function generateRoadmapForCert(certId) {
     window.assessmentResult = appState.assessment;
     
     const certNames = {
+        'thm-jr-pentester': 'THM JR - TryHackMe Junior Penetration Tester',
+        'ejpt': 'eJPT - eLearnSecurity Junior Penetration Tester',
+        'ceh': 'CEH - Certified Ethical Hacker',
+        'pnpt': 'PNPT - Practical Network Penetration Tester',
         'oscp': 'OSCP - Offensive Security Certified Professional',
+        'cpts': 'CPTS - HTB Certified Penetration Testing Specialist',
         'osep': 'OSEP - Offensive Security Experienced Penetration Tester',
         'oswe': 'OSWE - Offensive Security Web Expert',
+        'osda': 'OSDA - Offensive Security Defense Analyst',
         'oswp': 'OSWP - Offensive Security Wireless Professional',
         'osed': 'OSED - Offensive Security Exploit Developer',
-        'osda': 'OSDA - Offensive Security Defense Analyst',
-        'ejpt': 'eJPT - eLearnSecurity Junior Penetration Tester',
-        'ceh': 'CEH - Certified Ethical Hacker'
+        'osee': 'OSEE - Offensive Security Exploitation Expert',
+        'osmr': 'OSMR - Offensive Security macOS Researcher'
     };
     
     const certName = certNames[certId] || certId.toUpperCase();
@@ -1692,51 +1697,110 @@ async function generateRoadmapForCert(certId) {
     if (window.roadmapJokeInterval) {
         clearInterval(window.roadmapJokeInterval);
     }
+    if (window.roadmapStageInterval) {
+        clearInterval(window.roadmapStageInterval);
+    }
     
-    // Show loading with ETA countdown and rotating jokes
+    // Enhanced multi-stage loading with progress tracking
     const roadmapContent = document.getElementById('roadmapContent');
     
-    // Initialize loading state
-    let currentJokeIndex = 0;
-    let eta = Math.floor(Math.random() * 11) + 15; // Random 15-25 seconds
+    // Loading stages with realistic durations
+    const loadingStages = [
+        { stage: 1, text: "🔍 Analyzing your skill level and gaps...", duration: 3000 },
+        { stage: 2, text: "🎯 Identifying key weaknesses to address...", duration: 2500 },
+        { stage: 3, text: "📚 Structuring learning phases...", duration: 4000 },
+        { stage: 4, text: "🔧 Finding tools and resources...", duration: 3500 },
+        { stage: 5, text: "🗓️ Building your personalized timeline...", duration: 3000 },
+        { stage: 6, text: "✨ Finalizing your roadmap...", duration: 2000 }
+    ];
+    
+    // Calculate total duration once
+    const TOTAL_LOADING_DURATION = loadingStages.reduce((sum, stage) => sum + stage.duration, 0);
+    
+    let currentStage = 0;
+    let progress = 0;
     
     roadmapContent.innerHTML = `
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Building your personalized ${certName.split(' - ')[0]} roadmap...</p>
-            <p class="loading-subtext">Analyzing your weaknesses and creating a custom learning path</p>
-            <div class="loading-eta">
-                ⏱️ ETA: <span id="etaCountdown">${eta}</span> seconds
+        <div class="loading-state enhanced">
+            <div class="loading-header">
+                <h3>Building Your ${certName.split(' - ')[0]} Roadmap</h3>
+                <p class="loading-cert-name">${certName}</p>
             </div>
-            <div class="dev-joke" id="devJoke">
-                ${DEV_JOKES[0]}
+            
+            <div class="cyber-loader">
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-icon">🔐</div>
             </div>
+            
+            <div class="loading-stages">
+                ${loadingStages.map((s, i) => `
+                    <div class="stage-item ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
+                        <div class="stage-indicator">
+                            <span class="stage-number">${s.stage}</span>
+                            <span class="stage-check">✓</span>
+                        </div>
+                        <div class="stage-text">${s.text}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="roadmapProgressBar" style="width: 0%"></div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+            </div>
+            
+            <p class="loading-subtext">This may take 15-30 seconds as we create your custom learning path...</p>
         </div>
     `;
     
-    // Countdown timer - store globally for cleanup
-    const etaCountdownEl = document.getElementById('etaCountdown');
-    window.roadmapCountdownInterval = setInterval(() => {
-        eta--;
-        if (etaCountdownEl && eta > 0) {
-            etaCountdownEl.textContent = eta;
-        } else {
-            clearInterval(window.roadmapCountdownInterval);
-        }
-    }, 1000);
+    // Animate progress through stages
+    const progressBar = document.getElementById('roadmapProgressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    let elapsedTime = 0;
     
-    // Rotate jokes every 3 seconds - store globally for cleanup
-    window.roadmapJokeInterval = setInterval(() => {
-        currentJokeIndex = (currentJokeIndex + 1) % DEV_JOKES.length;
-        const devJokeEl = document.getElementById('devJoke');
-        if (devJokeEl) {
-            devJokeEl.style.opacity = '0';
-            setTimeout(() => {
-                devJokeEl.textContent = DEV_JOKES[currentJokeIndex];
-                devJokeEl.style.opacity = '1';
-            }, 300);
+    // Function to update stage UI
+    const updateStage = (stageIndex) => {
+        const stageItems = document.querySelectorAll('.stage-item');
+        stageItems.forEach((item, i) => {
+            if (i < stageIndex) {
+                item.classList.remove('active');
+                item.classList.add('completed');
+            } else if (i === stageIndex) {
+                item.classList.add('active');
+                item.classList.remove('completed');
+            } else {
+                item.classList.remove('active', 'completed');
+            }
+        });
+    };
+    
+    // Progress animation
+    window.roadmapStageInterval = setInterval(() => {
+        elapsedTime += 100;
+        progress = Math.min((elapsedTime / TOTAL_LOADING_DURATION) * 100, 99);
+        
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
         }
-    }, 3000);
+        if (progressPercentage) {
+            progressPercentage.textContent = `${Math.floor(progress)}%`;
+        }
+        
+        // Update stage based on elapsed time
+        let cumulativeTime = 0;
+        for (let i = 0; i < loadingStages.length; i++) {
+            cumulativeTime += loadingStages[i].duration;
+            if (elapsedTime < cumulativeTime) {
+                if (currentStage !== i) {
+                    currentStage = i;
+                    updateStage(i);
+                }
+                break;
+            }
+        }
+    }, 100);
     
     try {
         const data = await callBackendAPI('/api/generate-roadmap', {
@@ -1750,6 +1814,20 @@ async function generateRoadmapForCert(certId) {
         // Clear intervals
         if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
         if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
+        if (window.roadmapStageInterval) clearInterval(window.roadmapStageInterval);
+        
+        // Complete the progress bar animation
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressPercentage) progressPercentage.textContent = '100%';
+        
+        // Mark all stages complete
+        document.querySelectorAll('.stage-item').forEach(item => {
+            item.classList.remove('active');
+            item.classList.add('completed');
+        });
+        
+        // Small delay to show completion
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         appState.roadmap = data.roadmap;
         displayRoadmap(data.roadmap);
@@ -1771,6 +1849,7 @@ async function generateRoadmapForCert(certId) {
         // Clear intervals
         if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
         if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
+        if (window.roadmapStageInterval) clearInterval(window.roadmapStageInterval);
         
         // Show friendly error message (not technical details)
         const errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
@@ -2393,6 +2472,11 @@ function exportRoadmap() {
 }
 
 function downloadRoadmapPDF() {
+    // PDF generation constants
+    const MIN_ROADMAP_CONTENT_LENGTH = 100; // Minimum text length to consider content valid
+    const MIN_PDF_CONTAINER_HEIGHT = 100; // Minimum height in pixels for valid PDF content
+    const PDF_HEIGHT_BUFFER = 100; // Extra buffer pixels added to window height for proper rendering
+    
     if (!appState.roadmapJSON) {
         showError('No roadmap data available. Generate a roadmap first.');
         return;
@@ -2405,7 +2489,7 @@ function downloadRoadmapPDF() {
         return;
     }
     
-    showNotification('Preparing high-quality PDF...', 'info');
+    showNotification('Preparing high-quality PDF... This may take a moment.', 'info');
 
     // Create a temporary visible container off-screen to ensure full rendering
     const tempContainer = document.createElement('div');
@@ -2426,6 +2510,13 @@ function downloadRoadmapPDF() {
     
     // Clone roadmap content
     const contentClone = elements.roadmapContent.cloneNode(true);
+    
+    // Validate content has substance
+    if (!contentClone || contentClone.children.length === 0 || contentClone.textContent.trim().length < MIN_ROADMAP_CONTENT_LENGTH) {
+        showError('Roadmap content is empty or incomplete. Try regenerating the roadmap.');
+        return;
+    }
+    
     tempContainer.appendChild(contentClone);
     document.body.appendChild(tempContainer);
 
@@ -2436,8 +2527,17 @@ function downloadRoadmapPDF() {
         });
     }
 
-    // Force a reflow and wait for rendering
+    // Force a reflow and wait longer for rendering (increased to 1000ms)
     setTimeout(() => {
+        // Final validation before PDF generation
+        const tempHeight = tempContainer.offsetHeight;
+        if (tempHeight < MIN_PDF_CONTAINER_HEIGHT) {
+            console.warn('Warning: PDF container height is very small:', tempHeight);
+            document.body.removeChild(tempContainer);
+            showError('PDF content validation failed. The roadmap may not be fully rendered. Try again.');
+            return;
+        }
+        
         const opt = {
             margin: [10, 10],
             filename: filename,
@@ -2448,7 +2548,10 @@ function downloadRoadmapPDF() {
                 logging: false,
                 letterRendering: true,
                 scrollY: 0,
+                scrollX: 0,
                 windowWidth: 850,
+                windowHeight: tempHeight + PDF_HEIGHT_BUFFER, // Add buffer for proper rendering
+                backgroundColor: document.body.classList.contains('mode-oscp') ? '#121212' : '#f0f0f0',
                 onclone: (doc) => {
                     // Ensure the cloned document has the correct styles
                     const style = doc.createElement('style');
@@ -2490,11 +2593,15 @@ function downloadRoadmapPDF() {
                         .command-item { background: #f5f0e8 !important; border: 1px solid black !important; }
                         .mode-oscp .command-item { background: #21262d !important; border-color: #ffffff !important; }
                         .tool-mastery-card-v3 { background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
+                        /* Ensure all content is visible */
+                        * { visibility: visible !important; opacity: 1 !important; }
+                        .hidden { display: block !important; }
                     `;
                     doc.head.appendChild(style);
                 }
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
         html2pdf().set(opt).from(tempContainer).save().then(() => {
@@ -2505,9 +2612,9 @@ function downloadRoadmapPDF() {
             if (tempContainer.parentNode) {
                 document.body.removeChild(tempContainer);
             }
-            showError('PDF generation failed. Try exporting as JSON.');
+            showError('PDF generation failed. Try exporting as JSON instead.');
         });
-    }, 500); // 500ms delay to ensure DOM is ready
+    }, 1000); // Increased to 1000ms delay to ensure DOM is fully ready
 }
 
 // ============================================================================
