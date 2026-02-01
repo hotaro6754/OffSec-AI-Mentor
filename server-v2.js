@@ -751,10 +751,18 @@ Be appropriate to the selected mode. Output ONLY valid JSON.`,
         const isOscp = mode === 'oscp';
         
         // Find certification-specific content by matching cert name
-        const certKey = Object.keys(CERTIFICATION_CONTENT).find(key => 
-            cert.toLowerCase().includes(key.toLowerCase()) || 
-            CERTIFICATION_CONTENT[key].name.toLowerCase().includes(cert.toLowerCase())
+        // Try exact key match first, then fall back to name matching
+        let certKey = Object.keys(CERTIFICATION_CONTENT).find(key => 
+            key.toLowerCase() === cert.toLowerCase().split(' - ')[0].toLowerCase().trim()
         );
+        
+        // Fallback: try to match by certification full name
+        if (!certKey) {
+            certKey = Object.keys(CERTIFICATION_CONTENT).find(key => 
+                CERTIFICATION_CONTENT[key].name.toLowerCase() === cert.toLowerCase()
+            );
+        }
+        
         const certContent = certKey ? CERTIFICATION_CONTENT[certKey] : null;
 
         const beginnerInstructions = `

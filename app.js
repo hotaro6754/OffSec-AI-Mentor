@@ -1714,6 +1714,9 @@ async function generateRoadmapForCert(certId) {
         { stage: 6, text: "✨ Finalizing your roadmap...", duration: 2000 }
     ];
     
+    // Calculate total duration once
+    const TOTAL_LOADING_DURATION = loadingStages.reduce((sum, stage) => sum + stage.duration, 0);
+    
     let currentStage = 0;
     let progress = 0;
     
@@ -1755,7 +1758,6 @@ async function generateRoadmapForCert(certId) {
     // Animate progress through stages
     const progressBar = document.getElementById('roadmapProgressBar');
     const progressPercentage = document.getElementById('progressPercentage');
-    const totalDuration = loadingStages.reduce((sum, stage) => sum + stage.duration, 0);
     let elapsedTime = 0;
     
     // Function to update stage UI
@@ -1777,7 +1779,7 @@ async function generateRoadmapForCert(certId) {
     // Progress animation
     window.roadmapStageInterval = setInterval(() => {
         elapsedTime += 100;
-        progress = Math.min((elapsedTime / totalDuration) * 100, 99);
+        progress = Math.min((elapsedTime / TOTAL_LOADING_DURATION) * 100, 99);
         
         if (progressBar) {
             progressBar.style.width = `${progress}%`;
@@ -2470,6 +2472,11 @@ function exportRoadmap() {
 }
 
 function downloadRoadmapPDF() {
+    // PDF generation constants
+    const MIN_ROADMAP_CONTENT_LENGTH = 100; // Minimum text length to consider content valid
+    const MIN_PDF_CONTAINER_HEIGHT = 100; // Minimum height in pixels for valid PDF content
+    const PDF_HEIGHT_BUFFER = 100; // Extra buffer pixels added to window height for proper rendering
+    
     if (!appState.roadmapJSON) {
         showError('No roadmap data available. Generate a roadmap first.');
         return;
@@ -2505,7 +2512,7 @@ function downloadRoadmapPDF() {
     const contentClone = elements.roadmapContent.cloneNode(true);
     
     // Validate content has substance
-    if (!contentClone || contentClone.children.length === 0 || contentClone.textContent.trim().length < 100) {
+    if (!contentClone || contentClone.children.length === 0 || contentClone.textContent.trim().length < MIN_ROADMAP_CONTENT_LENGTH) {
         showError('Roadmap content is empty or incomplete. Try regenerating the roadmap.');
         return;
     }
@@ -2524,7 +2531,7 @@ function downloadRoadmapPDF() {
     setTimeout(() => {
         // Final validation before PDF generation
         const tempHeight = tempContainer.offsetHeight;
-        if (tempHeight < 100) {
+        if (tempHeight < MIN_PDF_CONTAINER_HEIGHT) {
             console.warn('Warning: PDF container height is very small:', tempHeight);
             document.body.removeChild(tempContainer);
             showError('PDF content validation failed. The roadmap may not be fully rendered. Try again.');
@@ -2543,7 +2550,7 @@ function downloadRoadmapPDF() {
                 scrollY: 0,
                 scrollX: 0,
                 windowWidth: 850,
-                windowHeight: tempHeight + 100,
+                windowHeight: tempHeight + PDF_HEIGHT_BUFFER, // Add buffer for proper rendering
                 backgroundColor: document.body.classList.contains('mode-oscp') ? '#121212' : '#f0f0f0',
                 onclone: (doc) => {
                     // Ensure the cloned document has the correct styles
