@@ -70,7 +70,7 @@ if (GROQ_API_KEY) {
     if (OPENAI_API_KEY) {
         FALLBACK_PROVIDER = 'openai';
         FALLBACK_API_KEY = OPENAI_API_KEY;
-        FALLBACK_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+        FALLBACK_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
         FALLBACK_API_URL = 'https://api.openai.com/v1/chat/completions';
         console.log('✅ Fallback 1: OpenAI API (' + FALLBACK_MODEL + ')');
         
@@ -92,7 +92,7 @@ if (GROQ_API_KEY) {
 } else if (OPENAI_API_KEY) {
     AI_PROVIDER = 'openai';
     AI_API_KEY = OPENAI_API_KEY;
-    AI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+    AI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
     AI_API_URL = 'https://api.openai.com/v1/chat/completions';
     console.log('✅ Using OpenAI API (' + AI_MODEL + ')');
 } else if (GEMINI_API_KEY) {
@@ -550,13 +550,13 @@ IMPORTANT INSTRUCTIONS:
 - If level is "Beginner", provide 2-3x more foundational tasks and a longer timeline (can vary from 6 months to 1 year or even 2 to 3 years depending on depth).
 - FOR OSCP: Strictly align with the official OSCP (PEN-200) syllabus topics: Information Gathering, Vulnerability Research, Web App Attacks, SQL Injection, Client-Side Attacks, Locating/Fixing Exploits, Antivirus Evasion, Privilege Escalation (Linux/Windows), Password Attacks, Pivoting/Tunneling, Active Directory Attacks, Metasploit, and Report Writing.
 - Provide REAL, CLICKABLE URLs for all resources (TryHackMe, HackTheBox, OverTheWire, YouTube).
-- Mandate at least 3-5 specific HTB/THM/OTW labs for EACH learning phase with direct URLs.
+- Mandate at least 2-3 specific HTB/THM/OTW labs for EACH learning phase with direct URLs.
 - Include specific OverTheWire (OTW) wargames like Bandit, Leviathan for Linux foundations.
 - Format data strictly as JSON so it can be rendered into professional dashboard components.
 
 MUST INCLUDE:
 1. **Executive Summary**: 2-3 sentences on their learning journey and goals.
-2. **6-10 Learning Phases** with:
+2. **4-6 Learning Phases** with:
    - Phase Name and clear Outcomes.
    - Week-by-week breakdown (Topics, Labs, Hours).
    - Essential Tools (Name, Purpose, Learning Path).
@@ -679,7 +679,7 @@ async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys
     if (customKeys.groq) {
         provider = 'groq'; apiKey = customKeys.groq; model = 'llama-3.3-70b-versatile'; apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
     } else if (customKeys.openai) {
-        provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-3.5-turbo'; apiUrl = 'https://api.openai.com/v1/chat/completions';
+        provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-4o-mini'; apiUrl = 'https://api.openai.com/v1/chat/completions';
     } else if (customKeys.gemini) {
         provider = 'gemini'; apiKey = customKeys.gemini; model = 'gemini-2.0-flash'; apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
     } else if (customKeys.deepseek) {
@@ -711,7 +711,7 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
     if (customKeys.groq) {
         currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
     } else if (customKeys.openai) {
-        currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
+        currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-4o-mini'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
     } else if (customKeys.gemini) {
         currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-2.0-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
     } else if (customKeys.deepseek) {
@@ -807,7 +807,7 @@ async function tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson = f
                     model: model,
                     messages,
                     temperature: expectJson ? 0.3 : 0.7,
-                    max_tokens: 4096
+                    max_tokens: 8192
                 };
 
                 // Only use response_format for OpenAI (Groq doesn't support it reliably)
@@ -862,15 +862,79 @@ async function tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson = f
 }
 
 function parseJsonResponse(text) {
+    // 1. Try standard parse
     try {
         return JSON.parse(text);
-    } catch {
-        const match = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*\}/);
-        if (match) {
-            const cleaned = (match[1] || match[0]).replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-            return JSON.parse(cleaned);
+    } catch (e) {
+        // 2. Try to extract JSON from markdown blocks or find first brace/bracket
+        let content = text.trim();
+
+        // Check for markdown code blocks
+        const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/);
+        if (codeBlockMatch && codeBlockMatch[1]) {
+            content = codeBlockMatch[1].trim();
+        } else {
+            // Find first occurrence of { or [
+            const firstBrace = content.indexOf('{');
+            const firstBracket = content.indexOf('[');
+            let start = -1;
+
+            if (firstBrace !== -1 && firstBracket !== -1) start = Math.min(firstBrace, firstBracket);
+            else start = Math.max(firstBrace, firstBracket);
+
+            if (start !== -1) {
+                // Try to find the last occurrence of } or ]
+                const lastBrace = content.lastIndexOf('}');
+                const lastBracket = content.lastIndexOf(']');
+                const end = Math.max(lastBrace, lastBracket);
+
+                if (end > start) {
+                    content = content.substring(start, end + 1);
+                } else {
+                    content = content.substring(start);
+                }
+            }
         }
-        throw new Error('No valid JSON found');
+
+        // 3. Clean common LLM artifacts (trailing commas)
+        content = content.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+
+        // 4. Try parsing the extracted/cleaned content
+        try {
+            return JSON.parse(content);
+        } catch (e2) {
+            // Still fails, maybe truncated. Try to close brackets/braces.
+            let fixedContent = content;
+            let stack = [];
+            let inString = false;
+            let escaped = false;
+
+            for (let i = 0; i < content.length; i++) {
+                const char = content[i];
+                if (escaped) { escaped = false; continue; }
+                if (char === '\\') { escaped = true; continue; }
+                if (char === '"') { inString = !inString; continue; }
+                if (!inString) {
+                    if (char === '{') stack.push('}');
+                    else if (char === '[') stack.push(']');
+                    else if (char === '}') { if (stack[stack.length - 1] === '}') stack.pop(); }
+                    else if (char === ']') { if (stack[stack.length - 1] === ']') stack.pop(); }
+                }
+            }
+
+            if (inString) fixedContent += '"';
+            while (stack.length > 0) {
+                fixedContent += stack.pop();
+            }
+
+            try {
+                return JSON.parse(fixedContent);
+            } catch (e3) {
+                // Return original error if robust parsing also fails
+                console.error('Robust JSON parsing failed:', e3.message);
+                throw e2;
+            }
+        }
     }
 }
 
