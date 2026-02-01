@@ -389,36 +389,61 @@ body.mode-oscp .outcomes-list-v3 li {
 
 .tools-mastery-grid-v3 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
 }
 .tool-mastery-card-v3 {
-    background: var(--black-v3);
-    color: var(--white-v3);
-    border: var(--border-v3);
-    padding: 20px;
-    box-shadow: var(--shadow-v3);
+    background: var(--white);
+    color: var(--black);
+    border: var(--border-thick);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+}
+.tool-mastery-card-v3:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: var(--shadow-lg);
+}
+.tool-mastery-card-v3 h4 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--primary);
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
 }
 .commands-v3 {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 12px;
 }
 .command-item {
     display: flex;
     flex-direction: column;
+    background: var(--cream);
+    padding: 12px;
+    border: 1px solid var(--black);
+}
+body.mode-oscp .command-item {
+    background: #21262d;
 }
 .command-item code {
-    background: #333;
-    color: var(--secondary-v3);
-    padding: 4px 8px;
-    font-size: 12px;
+    background: var(--black);
+    color: var(--secondary);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: inline-block;
+    width: fit-content;
 }
 .command-item span {
-    font-size: 11px;
-    opacity: 0.8;
-    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--gray-dark);
+}
+body.mode-oscp .command-item span {
+    color: #b0b0b0;
 }
 
 .phase-why-v3 {

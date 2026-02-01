@@ -135,6 +135,56 @@ const CERTIFICATIONS = [
         provider: 'OffSec',
         level: 'Advanced',
         duration: '~150 hours'
+    },
+    {
+        id: 'pnpt',
+        name: 'PNPT',
+        title: 'Practical Network Penetration Tester',
+        description: 'A comprehensive, practical exam covering OSINT, External/Internal attacks, and Reporting.',
+        type: 'attack',
+        provider: 'TCM Security',
+        level: 'Intermediate',
+        duration: '~100 hours'
+    },
+    {
+        id: 'cpts',
+        name: 'CPTS',
+        title: 'Certified Penetration Testing Specialist',
+        description: 'Highly technical and practical penetration testing certification from Hack The Box.',
+        type: 'attack',
+        provider: 'Hack The Box',
+        level: 'Intermediate',
+        duration: '~250 hours'
+    },
+    {
+        id: 'ejpt',
+        name: 'eJPT',
+        title: 'eLearnSecurity Junior Penetration Tester',
+        description: 'Excellent entry-level practical certification for aspiring penetration testers.',
+        type: 'attack',
+        provider: 'INE',
+        level: 'Beginner',
+        duration: '~80 hours'
+    },
+    {
+        id: 'ceh',
+        name: 'CEH',
+        title: 'Certified Ethical Hacker',
+        description: 'Industry-recognized foundational certification for ethical hacking.',
+        type: 'attack',
+        provider: 'EC-Council',
+        level: 'Beginner',
+        duration: '~120 hours'
+    },
+    {
+        id: 'thm-jr-pentester',
+        name: 'Jr Pentester',
+        title: 'Junior Penetration Tester (THM)',
+        description: 'A complete guided path from TryHackMe covering the essentials of pentesting.',
+        type: 'attack',
+        provider: 'TryHackMe',
+        level: 'Beginner',
+        duration: '~60 hours'
     }
 ];
 
@@ -1328,6 +1378,18 @@ async function proceedToEvaluation() {
 function showEvaluation() {
     const assessment = appState.assessment;
     
+    // Toggle visibility based on mode
+    const readinessCard = document.querySelector('.readiness-card');
+    const gapsCard = document.querySelector('.gaps-card');
+
+    if (appState.learningMode === 'beginner') {
+        if (readinessCard) readinessCard.classList.add('hidden');
+        if (gapsCard) gapsCard.classList.add('hidden');
+    } else {
+        if (readinessCard) readinessCard.classList.remove('hidden');
+        if (gapsCard) gapsCard.classList.remove('hidden');
+    }
+
     if (elements.readinessScore) {
         elements.readinessScore.textContent = `${assessment.readinessScore || 0}%`;
     }
@@ -2024,6 +2086,10 @@ function displayRoadmap(roadmapData) {
     // 1. Header Section
     const header = document.createElement('div');
     header.className = 'roadmap-v3-header';
+
+    // Hide Alignment in beginner mode
+    const showAlignment = appState.learningMode === 'oscp';
+
     header.innerHTML = `
         <div class="flex items-center gap-4 mb-2">
             <i data-lucide="map" class="text-primary w-10 h-10"></i>
@@ -2031,27 +2097,27 @@ function displayRoadmap(roadmapData) {
         </div>
         <div class="roadmap-meta-v3">
             <span class="meta-item">Level: <strong>${roadmapObj.currentLevel || 'Analyzing'}</strong></span>
-            <span class="meta-item">Alignment: <strong>${roadmapObj.gap_analysis?.alignment_percentage || 0}%</strong></span>
+            ${showAlignment ? `<span class="meta-item">OSCP Alignment: <strong>${roadmapObj.gap_analysis?.alignment_percentage || 0}%</strong></span>` : ''}
         </div>
     `;
     container.appendChild(header);
 
-    // 2. Gap Analysis Section
-    if (roadmapObj.gap_analysis) {
+    // 2. Gap Analysis Section (Only show if there are meaningful gaps or in OSCP mode)
+    if (roadmapObj.gap_analysis && (appState.learningMode === 'oscp' || roadmapObj.gap_analysis.missing_skills?.length > 0)) {
         const gapSection = document.createElement('div');
         gapSection.className = 'gap-analysis-v3';
         gapSection.innerHTML = `
             <div class="section-header-v3">
                 <i data-lucide="alert-circle" class="w-8 h-8"></i>
-                <h2>Gap Analysis</h2>
+                <h2>${appState.learningMode === 'oscp' ? 'Readiness Gap Analysis' : 'Your Learning Focus'}</h2>
             </div>
             <div class="gap-grid-v3">
                 <div class="gap-card">
-                    <h4>Missing Skills</h4>
+                    <h4>${appState.learningMode === 'oscp' ? 'Missing Skills' : 'New Concepts to Master'}</h4>
                     <ul>${(roadmapObj.gap_analysis.missing_skills || []).map(s => `<li>${s}</li>`).join('')}</ul>
                 </div>
                 <div class="gap-card">
-                    <h4>Weak Areas</h4>
+                    <h4>${appState.learningMode === 'oscp' ? 'Weak Areas' : 'Key Growth Areas'}</h4>
                     <ul>${(roadmapObj.gap_analysis.weak_areas || []).map(s => `<li>${s}</li>`).join('')}</ul>
                 </div>
             </div>
@@ -2194,6 +2260,10 @@ function displayRoadmap(roadmapData) {
         guideGrid.className = 'tools-mastery-grid-v3';
         guideGrid.innerHTML = roadmapObj.tools_mastery_guide.map(tool => `
             <div class="tool-mastery-card-v3">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="lab-platform-tag">${tool.category || 'Tool'}</span>
+                    <span class="phase-meta-tag">${tool.skill_level || 'General'}</span>
+                </div>
                 <h4>${tool.tool}</h4>
                 <div class="commands-v3">
                     ${(tool.commands || []).map(c => `
@@ -2330,29 +2400,43 @@ function downloadRoadmapPDF() {
         });
     }
 
-    const opt = {
-        margin: [10, 10],
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            letterRendering: true,
-            scrollY: 0,
-            windowWidth: 850
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    html2pdf().set(opt).from(tempContainer).save().then(() => {
-        document.body.removeChild(tempContainer);
-        showSuccess('Roadmap downloaded as PDF!');
-    }).catch(err => {
-        console.error('PDF generation failed:', err);
-        document.body.removeChild(tempContainer);
-        showError('PDF generation failed. Try exporting as JSON.');
-    });
+    // Force a reflow and wait for rendering
+    setTimeout(() => {
+        const opt = {
+            margin: [10, 10],
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                letterRendering: true,
+                scrollY: 0,
+                windowWidth: 850,
+                onclone: (doc) => {
+                    // Ensure the cloned document has the correct styles
+                    const style = doc.createElement('style');
+                    style.innerHTML = `
+                        .roadmap-v3-container { padding: 20px !important; width: 810px !important; }
+                        .phase-card-v3 { break-inside: avoid !important; margin-bottom: 20px !important; }
+                    `;
+                    doc.head.appendChild(style);
+                }
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(tempContainer).save().then(() => {
+            document.body.removeChild(tempContainer);
+            showSuccess('Roadmap downloaded as PDF!');
+        }).catch(err => {
+            console.error('PDF generation failed:', err);
+            if (tempContainer.parentNode) {
+                document.body.removeChild(tempContainer);
+            }
+            showError('PDF generation failed. Try exporting as JSON.');
+        });
+    }, 500); // 500ms delay to ensure DOM is ready
 }
 
 // ============================================================================
