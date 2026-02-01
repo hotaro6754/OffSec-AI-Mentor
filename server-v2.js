@@ -102,32 +102,23 @@ app.use((req, res, next) => {
 const RESOURCES = {
     youtube: {
         channels: [
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware Analysis, General Hacking' },
-            { name: 'Null Byte', url: 'https://www.youtube.com/@NullByteWHT', focus: 'Wider range of hacking tutorials, hardware hacking' },
-            { name: 'Hak5', url: 'https://www.youtube.com/@Hak5', focus: 'Hardware hacking tools, security news' },
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals, IT careers' },
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HTB walkthroughs, advanced methodology' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance, Networking, PrivEsc' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training, Kali Linux tools' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware Analysis, General Hacking, Scripting' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HackTheBox walkthroughs, advanced methodology, exploitation' },
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals, IT careers, Linux basics' },
             { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, Cisco, Python, Certifications' },
             { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, Reverse Engineering, CTFs' },
             { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug Bounty, Web Security, Mindset' },
+            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug Bounty, Web Application Security' },
             { name: 'zSecurity', url: 'https://www.youtube.com/@zSecurity', focus: 'Ethical Hacking, WiFi Security' },
-            { name: 'The PC Security Channel', url: 'https://www.youtube.com/@thepcsecuritychannel', focus: 'Malware testing, Antivirus reviews' },
-            { name: 'Security Weekly', url: 'https://www.youtube.com/@SecurityWeekly', focus: 'Security news, interviews, technical segments' },
-            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Wireless security, assembly, Pentester Academy founder' },
-            { name: 'Cyber Yodha', url: 'https://www.youtube.com/@CyberYodha', focus: 'Hacking tutorials in Hindi/English' },
-            { name: 'Bhargav Tandel', url: 'https://www.youtube.com/@bhargavtandel', focus: 'Cyber Security, Career advice' },
-            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', focus: 'Bug Bounty, Web App Security' },
-            { name: 'Bugcrowd', url: 'https://www.youtube.com/@Bugcrowd', focus: 'Bug Bounty education, researcher spotlights' },
-            { name: 'OWASP Foundation', url: 'https://www.youtube.com/@OWASPGlobal', focus: 'Web application security standards' },
-            { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Deep technical security training' },
             { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' }
         ]
     },
     platforms: {
         htb: {
             name: 'Hack The Box (HTB)',
+            url: 'https://app.hackthebox.com',
             practiceLabs: ['Starting Point', 'Machines', 'Challenges', 'Endgames', 'Fortresses', 'Pro Labs', 'Battlegrounds', 'CTF', 'Bug Bounty Labs'],
             proLabs: ['Dante', 'Offshore', 'Cybernetics', 'RastaLabs', 'APTLabs', 'Enterprise', 'Zephyr'],
             academyPaths: ['Penetration Tester', 'Bug Bounty Hunter', 'SOC Analyst', 'Incident Responder', 'Defensive Security Analyst', 'Active Directory Penetration Tester', 'Web Application Penetration Tester', 'Cloud Security Specialist', 'Security Engineer'],
@@ -136,6 +127,7 @@ const RESOURCES = {
         },
         thm: {
             name: 'TryHackMe (THM)',
+            url: 'https://tryhackme.com',
             practiceLabs: ['Rooms', 'CTF Rooms', 'Boot2Root Rooms', 'Walkthrough Rooms', 'Challenge Rooms'],
             learningPaths: ['Pre Security', 'Introduction to Cyber Security', 'Complete Beginner', 'Jr Penetration Tester', 'Web Fundamentals', 'Offensive Pentesting', 'Red Teaming', 'Blue Teaming', 'Cyber Defense', 'SOC Level 1', 'Security Engineer', 'DevSecOps', 'Cloud Security', 'Threat Intelligence', 'Incident Response', 'Digital Forensics'],
             coreSeries: ['Advent of Cyber', 'OWASP Top 10', 'Red Team Fundamentals', 'Blue Team Fundamentals', 'Cyber Defense Frameworks'],
@@ -144,51 +136,43 @@ const RESOURCES = {
         },
         otw: {
             name: 'OverTheWire (OTW)',
+            url: 'https://overthewire.org',
             practiceGames: ['Bandit', 'Leviathan', 'Natas', 'Krypton', 'Narnia', 'Behemoth', 'Utumno', 'Maze', 'Vortex', 'Manpage'],
             structure: ['Levels', 'SSH Access', 'Progressive Difficulty'],
             topics: ['Linux Command Line', 'File Permissions', 'Users & Groups', 'Environment Variables', 'Process Management', 'Networking Basics', 'Manual Enumeration', 'Password Discovery', 'Encoding & Decoding', 'Symmetric Cryptography', 'Asymmetric Cryptography', 'Binary Permissions', 'SUID Exploitation', 'Basic Buffer Overflows', 'Memory Concepts'],
             foundationFor: ['Linux+', 'Network+', 'Security+', 'eJPT']
         }
     },
-    certifications: {
-        beginner: [
-            { name: 'CompTIA Security+', provider: 'CompTIA', focus: 'Security fundamentals', duration: '2-3 months' },
-            { name: 'eJPT', provider: 'INE', focus: 'Junior pentesting', duration: '1-2 months' },
-            { name: 'BTL1', provider: 'Security Blue Team', focus: 'Blue team basics', duration: '2 months' }
-        ],
-        intermediate: [
-            { name: 'PNPT', provider: 'TCM Security', focus: 'Practical pentesting', duration: '2-3 months' },
-            { name: 'eCPPT', provider: 'INE', focus: 'Professional pentesting', duration: '3-4 months' },
-            { name: 'HTB CPTS', provider: 'HackTheBox', focus: 'Pentesting', duration: '3-4 months' },
-            { name: 'CCD', provider: 'CyberDefenders', focus: 'Blue team', duration: '2-3 months' }
-        ],
-        advanced: [
-            { name: 'OSCP', provider: 'OffSec', focus: 'Penetration testing', duration: '4-6 months' },
-            { name: 'OSWE', provider: 'OffSec', focus: 'Web exploitation', duration: '3-4 months' },
-            { name: 'OSEP', provider: 'OffSec', focus: 'Evasion', duration: '4-5 months' },
-            { name: 'CRTO', provider: 'Zero-Point Security', focus: 'Red team ops', duration: '2-3 months' }
-        ]
-    },
     tools: {
-        reconnaissance: ['Nmap', 'Masscan', 'Rustscan', 'Amass', 'Subfinder', 'httpx', 'Shodan'],
-        webTesting: ['Burp Suite', 'OWASP ZAP', 'Nikto', 'Gobuster', 'ffuf', 'SQLMap', 'wfuzz'],
-        exploitation: ['Metasploit', 'searchsploit', 'msfvenom', 'CrackMapExec', 'Impacket'],
-        passwordAttacks: ['Hashcat', 'John the Ripper', 'Hydra', 'CeWL', 'Crunch'],
-        postExploitation: ['Mimikatz', 'BloodHound', 'PowerView', 'Rubeus', 'Covenant', 'Ligolo-ng'],
+        reconnaissance: ['Nmap', 'Masscan', 'Rustscan', 'Amass', 'Subfinder', 'httpx', 'Shodan', 'theHarvester', 'Gobuster', 'ffuf'],
+        webTesting: ['Burp Suite', 'OWASP ZAP', 'Nikto', 'SQLMap', 'wfuzz', 'XSStrike', 'Commix', 'WPScan'],
+        exploitation: ['Metasploit', 'searchsploit', 'msfvenom', 'CrackMapExec', 'Impacket', 'Responder', 'Evil-WinRM'],
+        passwordAttacks: ['Hashcat', 'John the Ripper', 'Hydra', 'CeWL', 'Crunch', 'LaZagne'],
+        postExploitation: ['Mimikatz', 'BloodHound', 'PowerView', 'Rubeus', 'Covenant', 'Ligolo-ng', 'PowerUp', 'Seatbelt', 'WinPEAS', 'LinPEAS'],
+        c2Frameworks: ['Cobalt Strike', 'Sliver', 'Empire', 'Mythic', 'Havoc', 'Covenant', 'PowerShell Empire'],
+        enumeration: ['enum4linux', 'smbclient', 'ldapsearch', 'ADExplorer', 'AzureHound'],
+        cloud: ['Pacu', 'ScoutSuite', 'Prowler', 'AADInternals', 'ROADtools', 'CloudFox'],
         wireless: ['Aircrack-ng', 'Wifite', 'Bettercap'],
-        forensics: ['Volatility', 'Autopsy', 'Wireshark', 'FTK Imager'],
-        scripting: ['Python', 'Bash', 'PowerShell']
+        forensics: ['Volatility', 'Autopsy', 'Wireshark', 'FTK Imager', 'Sysmon'],
+        scripting: ['Python 3', 'Bash', 'PowerShell']
     },
     books: [
-        { title: 'The Web Application Hacker\'s Handbook', author: 'Dafydd Stuttard', level: 'Intermediate' },
-        { title: 'Penetration Testing', author: 'Georgia Weidman', level: 'Beginner' },
-        { title: 'Hacking: The Art of Exploitation', author: 'Jon Erickson', level: 'Intermediate' },
-        { title: 'Red Team Field Manual', author: 'Ben Clark', level: 'Reference' },
-        { title: 'The Hacker Playbook 3', author: 'Peter Kim', level: 'Intermediate' },
-        { title: 'Black Hat Python', author: 'Justin Seitz', level: 'Intermediate' },
-        { title: 'Bug Bounty Bootcamp', author: 'Vickie Li', level: 'Beginner-Intermediate' },
-        { title: 'Practical Malware Analysis', author: 'Sikorski & Honig', level: 'Advanced' }
-    ]
+        { title: "TCP/IP Illustrated", author: "W. Richard Stevens", focus: "Networking Fundamentals" },
+        { title: "Black Hat Python", author: "Justin Seitz", focus: "Python for Hackers" },
+        { title: "Red Team Development and Operations", author: "Joe Vest", focus: "Red Teaming Strategy" },
+        { title: "Penetration Testing Azure for Ethical Hackers", author: "David Okeyode", focus: "Cloud Security" },
+        { title: "Windows Internals", author: "Pavel Yosifovich", focus: "OS Internals" },
+        { title: "The Web Application Hacker's Handbook", author: "Dafydd Stuttard", focus: "Web Security" },
+        { title: "Practical Malware Analysis", author: "Sikorski & Honig", focus: "Malware Analysis" },
+        { title: "The Hacker Playbook 3", author: "Peter Kim", focus: "Red Team Methodology" }
+    ],
+    reporting: {
+        guides: [
+            { name: "TCM Security Report Writing Guide", url: "https://tcm-sec.com/report-writing-for-penetration-testers/" },
+            { name: "HTB Academy: Report Writing", url: "https://academy.hackthebox.com/module/details/161" }
+        ],
+        tools: ["Dradis", "PlexTrac", "PwnDoc", "Markdown", "LaTeX"]
+    }
 };
 
 // ============================================================================
@@ -486,20 +470,24 @@ Be appropriate to the selected mode. Output ONLY valid JSON.`,
 
         const beginnerInstructions = `
 IMPORTANT INSTRUCTIONS FOR BEGINNER MODE (ABSOLUTE ZERO):
+- TIMELINE: Duration of 1-2 years (or <1 year if foundations are strong).
 - ASSUME ZERO KNOWLEDGE: This user knows NOTHING.
 - SYLLABUS ANALYSIS: Analyze the ${cert} syllabus and cover all required domains.
 - START FROM SCRATCH: Begin with Computer basics, OS fundamentals, and Networking.
 - DETAILED PATH: Provide 8-12 Progressive Phases from zero to hero.
-- MANDATORY LABS: Suggest real labs from Hack The Box (Starting Point), TryHackMe (Pre-Security, Intro), and OverTheWire (Bandit). DO NOT provide URLs.
-- RESOURCES: Recommend channels like The Cyber Mentor, John Hammond, HackerSploit, or David Bombal.`;
+- MANDATORY LABS: Suggest real labs from HTB, THM, and OverTheWire. PROVIDE working URLs for these labs.
+- RESOURCES: Map specific YouTube creators (e.g., NetworkChuck for Networking, The Cyber Mentor for Pentesting basics) to relevant skills. PROVIDE working links.
+- SECTIONS: Include dedicated sections for Kali Linux Tools and Enumeration Methodology.`;
 
         const oscpInstructions = `
 IMPORTANT INSTRUCTIONS FOR OSCP MODE:
+- TIMELINE: Duration of 6 months to 1 year.
 - BRUTAL & ADVANCED: Focus strictly on PEN-200 / OSCP level.
 - ADAPTIVE DESIGN: Focus primarily on identified gaps: ${weaknesses.join(', ')}.
 - SYLLABUS ALIGNMENT: Align with current PEN-200 domains.
-- MANDATORY LABS: Suggest advanced labs from HTB (Pro Labs like Dante, Zephyr) and THM (Offensive Pentesting path). DO NOT provide URLs.
-- PRE-OSCP ALIGNMENT: Recommend PNPT or CPTS as bridges if gaps are significant.`;
+- MANDATORY LABS: Suggest advanced labs from HTB and THM. PROVIDE working URLs for these labs.
+- RESOURCES: Map advanced YouTube creators (e.g., IppSec for HTB machines, John Hammond for exploit analysis) to relevant skills. PROVIDE working links.
+- SECTIONS: Include dedicated sections for C2 Frameworks and professional Report Writing.`;
 
         return `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
 
@@ -515,8 +503,8 @@ MUST INCLUDE IN JSON:
 1. **Gap Analysis**: Checklist of missing skills and weak areas.
 2. **Dynamic Phases** (8-12 for Beginners, 4-6 for OSCP Mode):
    - Phase Name and "Why it matters for ${cert}".
-   - Outcomes, Tools, and Mandatory Labs (ONLY names, no URLs).
-   - Resources with button-style links.
+   - Outcomes, Tools, and Mandatory Labs (PROVIDE WORKING URLs).
+   - Resources with button-style links (PROVIDE WORKING URLs).
 3. **Pre-OSCP Recommendations**: Aligned certifications with mapping to user gaps.
 4. **Tools Mastery Guide**: Deep dive into critical tools with commands.
 5. **Success Metrics**: Phase-wise indicators of readiness.
@@ -524,7 +512,8 @@ MUST INCLUDE IN JSON:
 
 STRICT RULES:
 - Analyze the ${cert} syllabus and structure the roadmap accordingly.
-- DO NOT provide direct URLs for labs, only use their names.
+- Use the following RESOURCES object as the source of truth for all links: ${JSON.stringify(resources)}
+- ENSURE ALL LINKS PROVIDED ARE REAL AND WORKING.
 - Ensure each certification has a unique roadmap based on its specific syllabus.
 
 RESPOND WITH VALID JSON (pure JSON only):

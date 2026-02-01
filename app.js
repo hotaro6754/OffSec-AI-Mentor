@@ -2195,11 +2195,20 @@ function displayRoadmap(roadmapData) {
                     <div class="mt-6">
                         <div class="font-bold mb-3">Study Resources:</div>
                         <div class="resources-flex-v3">
-                            ${phase.resources.map(res => `
-                                <a href="${res.url}" target="_blank" class="btn btn-resource btn-sm">
-                                    ${res.type === 'YouTube' ? '📺' : '📖'} ${res.name}
-                                </a>
-                            `).join('')}
+                            ${phase.resources.map(res => {
+                                let icon = '📖';
+                                if (res.type === 'YouTube') icon = '📺';
+                                else if (res.type === 'Book') icon = '📘';
+                                else if (res.type === 'Guide') icon = '📝';
+                                else if (res.type === 'Tool') icon = '🛡️';
+                                else if (res.type === 'Platform') icon = '🎮';
+
+                                return `
+                                    <a href="${res.url}" target="_blank" class="btn btn-resource btn-sm">
+                                        ${icon} ${res.name}
+                                    </a>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -2404,8 +2413,11 @@ function downloadRoadmapPDF() {
     tempContainer.style.left = '-9999px';
     tempContainer.style.top = '0';
     tempContainer.style.width = '850px';
-    tempContainer.style.zIndex = '-1';
+    tempContainer.style.height = 'auto';
+    tempContainer.style.overflow = 'visible';
+    tempContainer.style.zIndex = '99999';
     tempContainer.style.visibility = 'visible';
+    tempContainer.style.backgroundColor = document.body.classList.contains('mode-oscp') ? '#121212' : '#f0f0f0';
     
     // Add theme class to temp container
     if (document.body.classList.contains('mode-oscp')) {
@@ -2441,8 +2453,43 @@ function downloadRoadmapPDF() {
                     // Ensure the cloned document has the correct styles
                     const style = doc.createElement('style');
                     style.innerHTML = `
-                        .roadmap-v3-container { padding: 20px !important; width: 810px !important; }
-                        .phase-card-v3 { break-inside: avoid !important; margin-bottom: 20px !important; }
+                        :root {
+                            --black-v3: #000000;
+                            --white-v3: #ffffff;
+                            --bg-v3: #f0f0f0;
+                            --primary-v3: #ff3e00;
+                            --secondary-v3: #00e5ff;
+                            --accent-v3: #ffff00;
+                            --success-v3: #00ff00;
+                            --error-v3: #ff0000;
+                            --gray-light-v3: #e0e0e0;
+                            --gray-dark-v3: #333333;
+                            --border-v3: 3px solid #000000;
+                            --shadow-v3: 6px 6px 0px #000000;
+                        }
+                        .mode-oscp {
+                            --bg-v3: #121212;
+                            --white-v3: #1e1e1e;
+                            --gray-light-v3: #333333;
+                            --black-v3: #ffffff;
+                            --primary-v3: #ff4d00;
+                            --secondary-v3: #00f2ff;
+                            --border-v3: 3px solid #ffffff;
+                            --shadow-v3: 6px 6px 0px #ffffff;
+                        }
+                        body { background-color: var(--bg-v3) !important; color: var(--black-v3) !important; }
+                        .roadmap-v3-container { padding: 20px !important; width: 810px !important; background-color: var(--bg-v3) !important; }
+                        .roadmap-v3-header { background: var(--primary-v3) !important; border: var(--border-v3) !important; color: white !important; box-shadow: var(--shadow-v3) !important; }
+                        .phase-card-v3 { break-inside: avoid !important; margin-bottom: 20px !important; background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
+                        .gap-card { background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
+                        .lab-mini-card { background: var(--white-v3) !important; border: 2px solid var(--black-v3) !important; box-shadow: 4px 4px 0px var(--black-v3) !important; }
+                        .btn-resource { background: var(--accent-v3) !important; color: black !important; border: 2px solid black !important; box-shadow: 3px 3px 0 black !important; }
+                        .phase-badge-v3 { background: var(--black-v3) !important; color: var(--white-v3) !important; }
+                        .phase-meta-tag { background: white !important; color: black !important; border: 2px solid black !important; }
+                        .mode-oscp .phase-meta-tag { background: #333 !important; color: #fff !important; border-color: var(--primary-v3) !important; }
+                        .command-item { background: #f5f0e8 !important; border: 1px solid black !important; }
+                        .mode-oscp .command-item { background: #21262d !important; border-color: #ffffff !important; }
+                        .tool-mastery-card-v3 { background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
                     `;
                     doc.head.appendChild(style);
                 }
