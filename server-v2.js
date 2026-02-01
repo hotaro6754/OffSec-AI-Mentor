@@ -98,9 +98,9 @@ if (GROQ_API_KEY) {
 } else if (GEMINI_API_KEY) {
     AI_PROVIDER = 'gemini';
     AI_API_KEY = GEMINI_API_KEY;
-    AI_MODEL = 'gemini-1.5-flash';
-    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-    console.log('✅ Using Google Gemini API (1.5 Flash)');
+    AI_MODEL = 'gemini-2.5-flash';
+    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    console.log('✅ Using Google Gemini API (2.5 Flash)');
 } else {
     AI_PROVIDER = 'none';
     AI_API_KEY = '';
@@ -698,7 +698,7 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
         } else if (customKeys.openai) {
             currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-3.5-turbo'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
         } else if (customKeys.gemini) {
-            currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-1.5-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+            currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-2.5-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
         } else if (customKeys.deepseek) {
             currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
         }
