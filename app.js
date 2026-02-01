@@ -195,10 +195,13 @@ const elements = {
     assessmentForm: document.getElementById('assessmentForm'),
     
     // Evaluation
-    currentLevel: document.getElementById('currentLevel'),
-    levelDescription: document.getElementById('levelDescription'),
+    readinessScore: document.getElementById('readinessScore'),
+    readinessStatus: document.getElementById('readinessStatus'),
+    oscpAlignment: document.getElementById('oscpAlignment'),
+    skillBreakdown: document.getElementById('skillBreakdown'),
     strengthsList: document.getElementById('strengthsList'),
     weaknessesList: document.getElementById('weaknessesList'),
+    confidenceGapsList: document.getElementById('confidenceGapsList'),
     focusSuggestion: document.getElementById('focusSuggestion'),
     
     // Certification
@@ -295,10 +298,7 @@ function checkApiKeyAndStart() {
         return;
     }
 
-    const hasKey = localStorage.getItem('openaiKey') ||
-                  localStorage.getItem('groqKey') ||
-                  localStorage.getItem('geminiKey') ||
-                  localStorage.getItem('deepseekKey');
+    const hasKey = localStorage.getItem('groqKey');
 
     if (!hasKey) {
         appState.isPromptingForKey = true;
@@ -1007,10 +1007,7 @@ function showSettingsModal() {
     elements.settingsModal?.classList.remove('hidden');
 
     // Load existing keys
-    document.getElementById('openaiKey').value = localStorage.getItem('openaiKey') || '';
     document.getElementById('groqKey').value = localStorage.getItem('groqKey') || '';
-    document.getElementById('geminiKey').value = localStorage.getItem('geminiKey') || '';
-    document.getElementById('deepseekKey').value = localStorage.getItem('deepseekKey') || '';
 }
 
 function hideSettingsModal() {
@@ -1018,10 +1015,7 @@ function hideSettingsModal() {
 }
 
 function saveSettings() {
-    localStorage.setItem('openaiKey', document.getElementById('openaiKey').value.trim());
     localStorage.setItem('groqKey', document.getElementById('groqKey').value.trim());
-    localStorage.setItem('geminiKey', document.getElementById('geminiKey').value.trim());
-    localStorage.setItem('deepseekKey', document.getElementById('deepseekKey').value.trim());
 
     showNotification('Settings saved successfully', 'success');
     hideSettingsModal();
@@ -1034,15 +1028,8 @@ function saveSettings() {
 }
 
 function clearSettings() {
-    localStorage.removeItem('openaiKey');
     localStorage.removeItem('groqKey');
-    localStorage.removeItem('geminiKey');
-    localStorage.removeItem('deepseekKey');
-
-    document.getElementById('openaiKey').value = '';
     document.getElementById('groqKey').value = '';
-    document.getElementById('geminiKey').value = '';
-    document.getElementById('deepseekKey').value = '';
 
     showNotification('API keys cleared', 'info');
 }
@@ -1062,15 +1049,9 @@ async function callBackendAPI(endpoint, data = {}) {
         };
         
         // Add custom API keys if present
-        const openaiKey = localStorage.getItem('openaiKey');
         const groqKey = localStorage.getItem('groqKey');
-        const geminiKey = localStorage.getItem('geminiKey');
-        const deepseekKey = localStorage.getItem('deepseekKey');
 
-        if (openaiKey) headers['X-OpenAI-API-Key'] = openaiKey;
         if (groqKey) headers['X-Groq-API-Key'] = groqKey;
-        if (geminiKey) headers['X-Gemini-API-Key'] = geminiKey;
-        if (deepseekKey) headers['X-Deepseek-API-Key'] = deepseekKey;
 
         // Add authorization header if logged in
         if (appState.sessionId) {
@@ -1326,7 +1307,8 @@ async function proceedToEvaluation() {
         // Call backend API for evaluation
         const data = await callBackendAPI('/api/evaluate-assessment', {
             answers: appState.answers,
-            questions: appState.questions
+            questions: appState.questions,
+            mode: appState.learningMode
         });
 
         appState.assessment = data;
@@ -1346,27 +1328,53 @@ async function proceedToEvaluation() {
 function showEvaluation() {
     const assessment = appState.assessment;
     
-    elements.currentLevel.textContent = assessment.level;
-    elements.levelDescription.textContent = getLevelDescription(assessment.level);
+    if (elements.readinessScore) {
+        elements.readinessScore.textContent = `${assessment.readinessScore || 0}%`;
+    }
+    if (elements.readinessStatus) {
+        elements.readinessStatus.textContent = assessment.readinessStatus || 'Analyzing...';
+        elements.readinessStatus.className = `readiness-status status-${(assessment.readinessStatus || '').toLowerCase().replace(/\s/g, '-')}`;
+    }
+    if (elements.oscpAlignment) {
+        elements.oscpAlignment.textContent = assessment.oscpAlignment || '';
+    }
     
-    elements.strengthsList.innerHTML = assessment.strengths
-        .map(s => `<li>${s}</li>`)
-        .join('');
+    if (elements.skillBreakdown && assessment.skillBreakdown) {
+        elements.skillBreakdown.innerHTML = Object.entries(assessment.skillBreakdown)
+            .map(([skill, score]) => `
+                <div class="skill-item">
+                    <div class="skill-label">
+                        <span>${skill}</span>
+                        <span>${score}%</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-bar-fill" style="width: ${score}%"></div>
+                    </div>
+                </div>
+            `).join('');
+    }
     
-    elements.weaknessesList.innerHTML = assessment.weaknesses
-        .map(w => `<li>${w}</li>`)
-        .join('');
+    if (elements.strengthsList) {
+        elements.strengthsList.innerHTML = (assessment.strengths || [])
+            .map(s => `<li>${s}</li>`)
+            .join('');
+    }
     
-    elements.focusSuggestion.textContent = assessment.focusSuggestion;
-}
+    if (elements.weaknessesList) {
+        elements.weaknessesList.innerHTML = (assessment.weaknesses || [])
+            .map(w => `<li>${w}</li>`)
+            .join('');
+    }
 
-function getLevelDescription(level) {
-    const descriptions = {
-        'Beginner': 'You\'re starting your security journey. Focus on fundamentals first.',
-        'Foundation': 'You have foundational knowledge. You\'re ready for intermediate topics.',
-        'Intermediate': 'You\'ve got solid skills. Advanced certifications are within reach.'
-    };
-    return descriptions[level] || 'Keep building your skills!';
+    if (elements.confidenceGapsList) {
+        elements.confidenceGapsList.innerHTML = (assessment.confidenceGaps || [])
+            .map(g => `<li>${g}</li>`)
+            .join('');
+    }
+
+    if (elements.focusSuggestion) {
+        elements.focusSuggestion.textContent = assessment.focusSuggestion || 'Focus on your growth areas.';
+    }
 }
 
 // ============================================================================
@@ -1672,7 +1680,8 @@ async function generateRoadmapForCert(certId) {
         const data = await callBackendAPI('/api/generate-roadmap', {
             level: level,
             weaknesses: weaknesses,
-            cert: certName
+            cert: certName,
+            assessmentResult: appState.assessment
         });
         
         // Clear intervals
@@ -2019,46 +2028,44 @@ function displayRoadmap(roadmapData) {
             <i data-lucide="map" class="text-primary w-10 h-10"></i>
             <h1 class="m-0">${roadmapObj.targetCertification || 'Certification Roadmap'}</h1>
         </div>
-        <p>${roadmapObj.executive_summary || 'Your personalized learning path.'}</p>
+        <div class="roadmap-meta-v3">
+            <span class="meta-item">Level: <strong>${roadmapObj.currentLevel || 'Analyzing'}</strong></span>
+            <span class="meta-item">Alignment: <strong>${roadmapObj.gap_analysis?.alignment_percentage || 0}%</strong></span>
+        </div>
     `;
     container.appendChild(header);
 
-    // 2. Quick Stats Section
-    const statsGrid = document.createElement('div');
-    statsGrid.className = 'quick-stats-grid';
-    statsGrid.innerHTML = `
-        <div class="stat-card">
-            <div class="flex items-center gap-2 mb-2">
-                <i data-lucide="award" class="w-5 h-5"></i>
-                <h4 class="m-0">Current Level</h4>
+    // 2. Gap Analysis Section
+    if (roadmapObj.gap_analysis) {
+        const gapSection = document.createElement('div');
+        gapSection.className = 'gap-analysis-v3';
+        gapSection.innerHTML = `
+            <div class="section-header-v3">
+                <i data-lucide="alert-circle" class="w-8 h-8"></i>
+                <h2>Gap Analysis</h2>
             </div>
-            <div class="value">${roadmapObj.currentLevel || 'Analyzing'}</div>
-        </div>
-        <div class="stat-card">
-            <div class="flex items-center gap-2 mb-2">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
-                <h4 class="m-0">Duration</h4>
+            <div class="gap-grid-v3">
+                <div class="gap-card">
+                    <h4>Missing Skills</h4>
+                    <ul>${(roadmapObj.gap_analysis.missing_skills || []).map(s => `<li>${s}</li>`).join('')}</ul>
+                </div>
+                <div class="gap-card">
+                    <h4>Weak Areas</h4>
+                    <ul>${(roadmapObj.gap_analysis.weak_areas || []).map(s => `<li>${s}</li>`).join('')}</ul>
+                </div>
             </div>
-            <div class="value">${roadmapObj.totalDuration || '24 Weeks'}</div>
-        </div>
-        <div class="stat-card">
-            <div class="flex items-center gap-2 mb-2">
-                <i data-lucide="trending-up" class="w-5 h-5"></i>
-                <h4 class="m-0">Progression</h4>
-            </div>
-            <div class="value">${roadmapObj.difficulty_progression || 'Growth'}</div>
-        </div>
-    `;
-    container.appendChild(statsGrid);
+        `;
+        container.appendChild(gapSection);
+    }
     
     // 3. Phases Timeline
-    const phases = roadmapObj.roadmap || roadmapObj.phases;
-    if (phases && Array.isArray(phases)) {
+    const phases = roadmapObj.roadmap || [];
+    if (phases.length > 0) {
         const phaseSectionHeader = document.createElement('div');
         phaseSectionHeader.className = 'section-header-v3';
         phaseSectionHeader.innerHTML = `
             <i data-lucide="layers" class="w-8 h-8"></i>
-            <h2>Learning Phases</h2>
+            <h2>Dynamic Learning Phases</h2>
         `;
         container.appendChild(phaseSectionHeader);
 
@@ -2069,20 +2076,16 @@ function displayRoadmap(roadmapData) {
             const card = document.createElement('div');
             card.className = 'phase-card-v3';
             
-            const phaseName = phase.phase_name || phase.name || `Phase ${idx + 1}`;
-            const duration = phase.duration_weeks || phase.weeks || phase.duration || '?';
-            const hours = phase.total_hours || phase.hours || '?';
+            const phaseName = phase.phase_name || `Phase ${idx + 1}`;
+            const duration = phase.duration_weeks || '?';
 
             let html = `
                 <div class="flex justify-between items-start flex-wrap gap-2 mb-4">
                     <div class="phase-badge-v3">PHASE ${idx + 1}: ${phaseName.toUpperCase()}</div>
-                    <div class="flex gap-3">
-                        <div class="phase-meta-tag">⏱️ ${duration} Weeks</div>
-                        <div class="phase-meta-tag">🔥 ${hours} Hours</div>
-                    </div>
+                    <div class="phase-meta-tag">⏱️ ${duration} Weeks</div>
                 </div>
-                <div class="mb-4">
-                    <p><strong>Goal:</strong> ${phase.outcome || 'Master phase objectives.'}</p>
+                <div class="phase-why-v3 mb-4">
+                    <strong>Why it matters for OSCP:</strong> ${phase.why_it_matters || ''}
                 </div>
             `;
             
@@ -2090,10 +2093,7 @@ function displayRoadmap(roadmapData) {
             if (phase.learning_outcomes && Array.isArray(phase.learning_outcomes)) {
                 html += `
                     <div class="mb-4">
-                        <div class="flex items-center gap-2 mb-2 font-bold">
-                            <i data-lucide="check-circle-2" class="w-4 h-4 text-primary"></i>
-                            Key Outcomes
-                        </div>
+                        <div class="font-bold mb-2">Outcomes:</div>
                         <ul class="outcomes-list-v3">
                             ${phase.learning_outcomes.map(o => `<li>${o}</li>`).join('')}
                         </ul>
@@ -2101,55 +2101,20 @@ function displayRoadmap(roadmapData) {
                 `;
             }
 
-            // Weekly breakdown table
-            const weeks = phase.weekly_breakdown || phase.weeks;
-            if (weeks) {
+            // Mandatory Labs
+            if (phase.mandatory_labs && Array.isArray(phase.mandatory_labs)) {
                 html += `
                     <div class="mb-6">
-                        <table class="weekly-table-v3">
-                            <thead>
-                                <tr>
-                                    <th>Week</th>
-                                    <th>Topics & Labs</th>
-                                    <th>Hours</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${weeks.map(w => `
-                                    <tr>
-                                        <td><strong>W${w.week}</strong></td>
-                                        <td>
-                                            <div><strong>Topics:</strong> ${(w.topics || []).join(', ')}</div>
-                                            <div class="mt-1"><strong>Labs:</strong> ${(w.labs || []).join(', ')}</div>
-                                            <div class="checkpoint-v3">Checkpoint: ${w.checkpoint || 'Ready'}</div>
-                                        </td>
-                                        <td>${w.hours || w.hours_per_week || '-'}h</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            // Recommended Labs
-            if (phase.recommended_labs && Array.isArray(phase.recommended_labs)) {
-                html += `
-                    <div class="mb-6">
-                        <div class="flex items-center gap-2 mb-3 font-bold">
-                            <i data-lucide="flask-conical" class="w-5 h-5 text-primary"></i>
-                            Recommended Hands-on Labs
-                        </div>
+                        <div class="font-bold mb-3">Mandatory Hands-on Labs:</div>
                         <div class="labs-grid-v3">
-                            ${phase.recommended_labs.map(lab => `
+                            ${phase.mandatory_labs.map(lab => `
                                 <div class="lab-mini-card">
                                     <div class="flex justify-between items-start mb-2">
                                         <span class="lab-platform-tag">${lab.platform}</span>
-                                        <span class="lab-diff-tag ${lab.difficulty?.toLowerCase()}">${lab.difficulty}</span>
                                     </div>
                                     <div class="font-bold text-sm">${lab.name}</div>
-                                    <div class="text-xs opacity-80 mt-1">${lab.skills_gained?.slice(0, 2).join(', ') || ''}</div>
-                                    ${lab.url ? `<a href="${lab.url}" target="_blank" class="lab-link-v3 mt-2">Start Lab <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
+                                    <div class="text-xs opacity-80 mt-1">${(lab.skills || []).join(', ')}</div>
+                                    ${lab.url ? `<a href="${lab.url}" target="_blank" class="btn btn-resource btn-sm mt-3">Start Lab</a>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -2157,49 +2122,30 @@ function displayRoadmap(roadmapData) {
                 `;
             }
 
-            // Tools grid
-            const tools = phase.essential_tools || phase.tools;
-            if (tools) {
-                html += `
-                    <div class="flex items-center gap-2 mb-3 font-bold">
-                        <i data-lucide="terminal" class="w-5 h-5 text-primary"></i>
-                        Core Tools
-                    </div>
-                    <div class="tools-grid-v3">
-                `;
-                tools.forEach(t => {
-                    const name = t.name || t.tool_name || t;
-                    html += `
-                        <div class="tool-card-v3">
-                            <strong>${name}</strong>
-                            <div style="font-size: 11px; opacity: 0.9;">${t.purpose || 'Phase tool'}</div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-
-            // Phase Resources (YouTube, Blogs, etc)
-            const phaseResources = phase.resources_for_phase || phase.resources;
-            if (phaseResources && Array.isArray(phaseResources)) {
+            // Phase Resources
+            if (phase.resources && Array.isArray(phase.resources)) {
                 html += `
                     <div class="mt-6">
-                        <div class="flex items-center gap-2 mb-3 font-bold">
-                            <i data-lucide="library" class="w-5 h-5 text-primary"></i>
-                            Phase Study Resources
-                        </div>
-                        <div class="labs-grid-v3">
-                            ${phaseResources.map(res => `
-                                <div class="lab-mini-card">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="lab-platform-tag">${res.type || 'Resource'}</span>
-                                    </div>
-                                    <div class="font-bold text-sm">${res.name || res.topic}</div>
-                                    <div class="text-xs opacity-80 mt-1">${res.topic || ''}</div>
-                                    ${res.link ? `<a href="${res.link}" target="_blank" class="lab-link-v3 mt-2">View <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
-                                </div>
+                        <div class="font-bold mb-3">Study Resources:</div>
+                        <div class="resources-flex-v3">
+                            ${phase.resources.map(res => `
+                                <a href="${res.url}" target="_blank" class="btn btn-resource btn-sm">
+                                    ${res.type === 'YouTube' ? '📺' : '📖'} ${res.name}
+                                </a>
                             `).join('')}
                         </div>
+                    </div>
+                `;
+            }
+
+            // Checklist
+            if (phase.completion_checklist && Array.isArray(phase.completion_checklist)) {
+                html += `
+                    <div class="mt-6">
+                        <div class="font-bold mb-2">Phase Completion Checklist:</div>
+                        <ul class="checklist-v3">
+                            ${phase.completion_checklist.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
                     </div>
                 `;
             }
@@ -2209,33 +2155,32 @@ function displayRoadmap(roadmapData) {
         });
         container.appendChild(timeline);
     }
-    
-    // 4. Daily Study Schedule
-    const schedule = roadmapObj.daily_study_schedule;
-    if (schedule && Array.isArray(schedule)) {
-        const schedHeader = document.createElement('div');
-        schedHeader.className = 'section-header-v3';
-        schedHeader.innerHTML = `
-            <i data-lucide="clock" class="w-8 h-8"></i>
-            <h2>Daily Study Routine</h2>
+
+    // 4. Pre-OSCP Alignment
+    if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
+        const alignHeader = document.createElement('div');
+        alignHeader.className = 'section-header-v3';
+        alignHeader.innerHTML = `
+            <i data-lucide="award" class="w-8 h-8"></i>
+            <h2>Pre-OSCP Alignment</h2>
         `;
-        container.appendChild(schedHeader);
-        
-        const schedGrid = document.createElement('div');
-        schedGrid.className = 'schedule-grid-v3';
-        schedGrid.innerHTML = schedule.map(s => `
-            <div class="schedule-card-v3">
-                <div class="sched-time">${s.time || s.time_slot}</div>
-                <div class="sched-activity">${s.activity}</div>
-                ${s.focus ? `<div class="sched-focus">Focus: ${s.focus}</div>` : ''}
+        container.appendChild(alignHeader);
+
+        const alignGrid = document.createElement('div');
+        alignGrid.className = 'align-grid-v3';
+        alignGrid.innerHTML = roadmapObj.pre_oscp_alignment.map(a => `
+            <div class="align-card-v3">
+                <h4>${a.cert}</h4>
+                <p><strong>Reason:</strong> ${a.reason}</p>
+                <p><strong>Bridges Gap:</strong> ${a.gap_it_bridges}</p>
+                <div class="overlap-v3">Overlap with OSCP: ${a.overlap_with_oscp}</div>
             </div>
         `).join('');
-        container.appendChild(schedGrid);
+        container.appendChild(alignGrid);
     }
 
-    // 4.5 Tools Mastery Guide
-    const masteryGuide = roadmapObj.tools_mastery_guide;
-    if (masteryGuide && Array.isArray(masteryGuide)) {
+    // 5. Tools Mastery Guide
+    if (roadmapObj.tools_mastery_guide && Array.isArray(roadmapObj.tools_mastery_guide)) {
         const guideHeader = document.createElement('div');
         guideHeader.className = 'section-header-v3';
         guideHeader.innerHTML = `
@@ -2245,138 +2190,21 @@ function displayRoadmap(roadmapData) {
         container.appendChild(guideHeader);
 
         const guideGrid = document.createElement('div');
-        guideGrid.className = 'resources-grid-v3';
-        guideGrid.innerHTML = masteryGuide.map(tool => `
-            <div class="resource-card-v3">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="res-icon-wrapper">
-                            <i data-lucide="terminal" class="w-5 h-5"></i>
+        guideGrid.className = 'tools-mastery-grid-v3';
+        guideGrid.innerHTML = roadmapObj.tools_mastery_guide.map(tool => `
+            <div class="tool-mastery-card-v3">
+                <h4>${tool.tool}</h4>
+                <div class="commands-v3">
+                    ${(tool.commands || []).map(c => `
+                        <div class="command-item">
+                            <code>${c.cmd}</code>
+                            <span>${c.purpose}</span>
                         </div>
-                        <h4 class="m-0">${tool.tool_name}</h4>
-                    </div>
-                    <span class="lab-diff-tag ${tool.importance?.toLowerCase() === 'high' ? 'hard' : 'medium'}">${tool.importance || 'Essential'}</span>
-                </div>
-                <div class="text-xs font-bold uppercase opacity-60 mb-1">When to use:</div>
-                <p class="res-focus mb-3">${tool.when_to_use}</p>
-
-                <div class="text-xs font-bold uppercase opacity-60 mb-2">Critical Commands:</div>
-                <div class="flex flex-col gap-2">
-                    ${(tool.critical_commands || []).slice(0, 4).map(cmd => {
-                        const cmdText = typeof cmd === 'string' ? cmd : (cmd.command || '');
-                        const cmdPurpose = typeof cmd === 'string' ? '' : (cmd.purpose || '');
-                        return `
-                            <div class="p-2 bg-gray-light-v3 border-2 border-black text-xs font-mono">
-                                <div class="text-primary">${cmdText}</div>
-                                ${cmdPurpose ? `<div class="opacity-70 mt-1" style="font-family: sans-serif;">${cmdPurpose}</div>` : ''}
-                            </div>
-                        `;
-                    }).join('')}
+                    `).join('')}
                 </div>
             </div>
         `).join('');
         container.appendChild(guideGrid);
-    }
-
-    // 5. Curated Resources (New Grid Cards)
-    const resources = roadmapObj.curated_resources;
-    if (resources && (Array.isArray(resources) || typeof resources === 'object')) {
-        const resHeader = document.createElement('div');
-        resHeader.className = 'section-header-v3';
-        resHeader.innerHTML = `
-            <i data-lucide="book-open" class="w-8 h-8"></i>
-            <h2>Curated Learning Resources</h2>
-        `;
-        container.appendChild(resHeader);
-
-        const resGrid = document.createElement('div');
-        resGrid.className = 'resources-grid-v3';
-
-        // Handle both array and object formats for robustness
-        const resourceList = Array.isArray(resources) ? resources :
-                            Object.entries(resources).flatMap(([type, list]) =>
-                                Array.isArray(list) ? list.map(item => ({...item, type})) : []
-                            );
-
-        resGrid.innerHTML = resourceList.map(res => {
-            let icon = 'link';
-            if (res.type?.toLowerCase().includes('youtube')) icon = 'youtube';
-            if (res.type?.toLowerCase().includes('book')) icon = 'book';
-            if (res.type?.toLowerCase().includes('platform')) icon = 'globe';
-
-            return `
-                <div class="resource-card-v3">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="res-icon-wrapper">
-                            <i data-lucide="${icon}" class="w-5 h-5"></i>
-                        </div>
-                        <span class="res-type-tag">${res.type || 'Resource'}</span>
-                    </div>
-                    <h4 class="m-0 mb-1">${res.name || res.title}</h4>
-                    <p class="res-focus">${res.focus || res.topic || ''}</p>
-                    ${res.url && res.url !== 'N/A' ? `
-                        <a href="${res.url}" target="_blank" class="res-link-btn-v3">
-                            View Resource <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-        container.appendChild(resGrid);
-    }
-    
-    // 6. Success Benchmarks
-    const metrics = roadmapObj.success_metrics;
-    if (metrics && Array.isArray(metrics)) {
-        const metricsHeader = document.createElement('div');
-        metricsHeader.className = 'section-header-v3';
-        metricsHeader.innerHTML = `
-            <i data-lucide="target" class="w-8 h-8"></i>
-            <h2>Success Benchmarks</h2>
-        `;
-        container.appendChild(metricsHeader);
-
-        const metricsTable = document.createElement('div');
-        metricsTable.className = 'table-responsive-v3';
-        metricsTable.innerHTML = `
-            <table class="metrics-table-v3">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Target Goal</th>
-                        <th>Indicator</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${metrics.map(m => `
-                        <tr>
-                            <td><strong>${m.metric || m.phase}</strong></td>
-                            <td>${m.target || m.completed_when}</td>
-                            <td>${m.indicator || m.checkpoint_assessment}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        container.appendChild(metricsTable);
-    }
-    
-    // 7. Success Mindset
-    const mindset = roadmapObj.motivation_and_mindset;
-    if (mindset) {
-        const mindsetCard = document.createElement('div');
-        mindsetCard.className = 'success-mindset-card-v3';
-        mindsetCard.innerHTML = `
-            <div class="mindset-quote">
-                <i data-lucide="quote" class="w-8 h-8 opacity-20 absolute top-4 left-4"></i>
-                <p>"${mindset.why_people_succeed || 'Persistence is the key to mastering offensive security. Embrace the challenge.'}"</p>
-            </div>
-            <div class="mindset-footer">
-                <i data-lucide="rocket" class="w-5 h-5 text-primary"></i>
-                <span><strong>Real-World Impact:</strong> ${mindset.real_world_applications || 'Career growth and elite problem-solving skills.'}</span>
-            </div>
-        `;
-        container.appendChild(mindsetCard);
     }
 
     elements.roadmapContent.appendChild(container);
@@ -2475,36 +2303,54 @@ function downloadRoadmapPDF() {
     
     showNotification('Preparing high-quality PDF...', 'info');
 
-    // Clone the element to avoid visual glitches on the page during capture
-    const element = elements.roadmapContent.cloneNode(true);
+    // Create a temporary visible container off-screen to ensure full rendering
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
+    tempContainer.style.width = '850px';
+    tempContainer.style.zIndex = '-1';
+    tempContainer.style.visibility = 'visible';
     
-    // Create a wrapper to preserve theme context
-    const wrapper = document.createElement('div');
+    // Add theme class to temp container
     if (document.body.classList.contains('mode-oscp')) {
-        wrapper.className = 'mode-oscp';
+        tempContainer.className = 'mode-oscp';
     }
     
-    // PDF-specific styling
-    wrapper.style.padding = '40px';
-    wrapper.style.background = document.body.classList.contains('mode-oscp') ? '#0d1117' : '#faf8f5';
-    wrapper.style.width = '850px';
-    wrapper.appendChild(element);
+    // Clone roadmap content
+    const contentClone = elements.roadmapContent.cloneNode(true);
+    tempContainer.appendChild(contentClone);
+    document.body.appendChild(tempContainer);
+
+    // Re-initialize Lucide icons in the clone
+    if (window.lucide) {
+        lucide.createIcons({
+            root: contentClone
+        });
+    }
 
     const opt = {
-        margin: 10,
+        margin: [10, 10],
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
             scale: 2,
             useCORS: true,
             logging: false,
-            backgroundColor: document.body.classList.contains('mode-oscp') ? '#0d1117' : '#faf8f5'
+            letterRendering: true,
+            scrollY: 0,
+            windowWidth: 850
         },
-        jsPDF: { orientation: 'portrait', unit: 'px', format: 'a4', hotfixes: ['px_scaling'] }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    html2pdf().set(opt).from(wrapper).save().then(() => {
+    html2pdf().set(opt).from(tempContainer).save().then(() => {
+        document.body.removeChild(tempContainer);
         showSuccess('Roadmap downloaded as PDF!');
+    }).catch(err => {
+        console.error('PDF generation failed:', err);
+        document.body.removeChild(tempContainer);
+        showError('PDF generation failed. Try exporting as JSON.');
     });
 }
 

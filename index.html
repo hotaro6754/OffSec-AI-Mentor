@@ -80,20 +80,8 @@
             <p class="settings-desc">Provide your own API keys to bypass global rate limits. Keys are stored locally in your browser.</p>
 
             <div class="form-group">
-                <label for="openaiKey">OpenAI API Key</label>
-                <input type="password" id="openaiKey" placeholder="sk-...">
-            </div>
-            <div class="form-group">
                 <label for="groqKey">Groq API Key</label>
                 <input type="password" id="groqKey" placeholder="gsk_...">
-            </div>
-            <div class="form-group">
-                <label for="geminiKey">Gemini API Key</label>
-                <input type="password" id="geminiKey" placeholder="AIza...">
-            </div>
-            <div class="form-group">
-                <label for="deepseekKey">Deepseek API Key</label>
-                <input type="password" id="deepseekKey" placeholder="sk-...">
             </div>
 
             <div class="settings-actions">
@@ -280,15 +268,26 @@
             </div>
 
             <div class="evaluation-container">
-                <!-- Current Level -->
-                <div class="evaluation-card level-card" data-aos="fade-up" data-aos-delay="100">
-                    <h3 class="card-title">Current Level</h3>
-                    <div id="currentLevel" class="level-badge">Analyzing...</div>
-                    <p id="levelDescription" class="level-description"></p>
+                <!-- Readiness Score & Status -->
+                <div class="evaluation-card readiness-card" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="card-title">OSCP Readiness</h3>
+                    <div class="readiness-display">
+                        <div id="readinessScore" class="readiness-score">0%</div>
+                        <div id="readinessStatus" class="readiness-status">Analyzing...</div>
+                    </div>
+                    <div id="oscpAlignment" class="oscp-alignment"></div>
+                </div>
+
+                <!-- Skill Breakdown -->
+                <div class="evaluation-card breakdown-card" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="card-title">Skill Breakdown</h3>
+                    <div id="skillBreakdown" class="skill-breakdown-grid">
+                        <!-- Skills will be populated here -->
+                    </div>
                 </div>
 
                 <!-- Strength Areas -->
-                <div class="evaluation-card strengths-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="evaluation-card strengths-card" data-aos="fade-up" data-aos-delay="300">
                     <h3 class="card-title">Your Strengths</h3>
                     <ul id="strengthsList" class="list-items">
                         <li>Loading...</li>
@@ -296,17 +295,26 @@
                 </div>
 
                 <!-- Weak Areas -->
-                <div class="evaluation-card weaknesses-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="evaluation-card weaknesses-card" data-aos="fade-up" data-aos-delay="400">
                     <h3 class="card-title">Areas to Develop</h3>
                     <ul id="weaknessesList" class="list-items">
                         <li>Loading...</li>
                     </ul>
                 </div>
 
+                <!-- Confidence Gaps -->
+                <div class="evaluation-card gaps-card" data-aos="fade-up" data-aos-delay="500">
+                    <h3 class="card-title">Confidence Gaps</h3>
+                    <ul id="confidenceGapsList" class="list-items">
+                        <!-- Gaps will be populated here -->
+                    </ul>
+                </div>
+
                 <!-- Learning Focus -->
-                <div class="evaluation-card focus-card" data-aos="fade-up" data-aos-delay="400">
-                    <h3 class="card-title">Your Focus</h3>
+                <div class="evaluation-card focus-card" data-aos="fade-up" data-aos-delay="600">
+                    <h3 class="card-title">Mentor's Focus</h3>
                     <p id="focusSuggestion" class="focus-text">Loading...</p>
+                    <div id="currentLevel" class="level-badge-sm hidden"></div>
                 </div>
             </div>
 
@@ -581,11 +589,12 @@
                         <strong>No certification guarantees:</strong> This roadmap increases your readiness for OffSec certifications, 
                         but success depends on your commitment and practice.
                     </p>
+                    <p>AI processing powered exclusively by <strong>Groq</strong>.</p>
                 </div>
 
                 <div class="footer-meta">
                     <p>&copy; 2026 OffSec AI Mentor. Built with educational integrity.</p>
-                    <p>Powered by <strong>Google Gemini 2.0 Flash</strong> | Designed for the <strong>OffSec Community</strong></p>
+                    <p>Designed for the <strong>OffSec Community</strong></p>
                 </div>
             </div>
         </footer>
