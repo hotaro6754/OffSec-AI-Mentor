@@ -544,51 +544,55 @@ Be encouraging but honest. Output ONLY valid JSON.`,
     /**
      * Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
      */
-    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, visually stunning, and BEGINNER-FRIENDLY ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
+    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, visually stunning, and HIGHLY DETAILED ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
 
-IMPORTANT:
-- Use simple, encouraging language suitable for beginners.
-- Provide actual, clickable URLs for all resources (TryHackMe, HackTheBox, YouTube, etc.).
-- Ensure all resources are high-quality and relevant to the target certification.
+IMPORTANT INSTRUCTIONS:
+- If level is "Beginner", provide 2-3x more foundational tasks and a longer timeline (can vary from 6 months to 1 year or even 2 to 3 years depending on depth).
+- FOR OSCP: Strictly align with the official OSCP (PEN-200) syllabus topics: Information Gathering, Vulnerability Research, Web App Attacks, SQL Injection, Client-Side Attacks, Locating/Fixing Exploits, Antivirus Evasion, Privilege Escalation (Linux/Windows), Password Attacks, Pivoting/Tunneling, Active Directory Attacks, Metasploit, and Report Writing.
+- Provide REAL, CLICKABLE URLs for all resources (TryHackMe, HackTheBox, OverTheWire, YouTube).
+- Mandate at least 3-5 specific HTB/THM/OTW labs for EACH learning phase with direct URLs.
+- Include specific OverTheWire (OTW) wargames like Bandit, Leviathan for Linux foundations.
 - Format data strictly as JSON so it can be rendered into professional dashboard components.
 
 MUST INCLUDE:
 1. **Executive Summary**: 2-3 sentences on their learning journey and goals.
-2. **6-8 Learning Phases** with:
+2. **6-10 Learning Phases** with:
    - Phase Name and clear Outcomes.
    - Week-by-week breakdown (Topics, Labs, Hours).
    - Essential Tools (Name, Purpose, Learning Path).
-   - Recommended Labs with Platform, Difficulty (Easy/Medium/Hard), and Skills Gained.
-   - Resource Links for each phase with Category (YouTube, Blog, Course).
+   - Recommended Labs with Platform (HTB/THM/OTW), Difficulty (Easy/Medium/Hard), Skills Gained, and direct URL.
+   - Resource Links for each phase with Category (YouTube, Blog, Course) and direct URL.
 
-3. **Tools Mastery Guide**: Deep dive into critical tools (Nmap, Burp, etc) with commands.
+3. **Tools Mastery Guide**: Deep dive into critical tools (Nmap, Burp, Metasploit, etc) with commands.
 
 4. **Curated Resources**: Top-tier links for YouTube, Books, and Platforms.
 
-5. **Daily Study Schedule**: A structured routine.
+5. **Daily Study Schedule**: A structured routine tailored to their level.
 
-6. **Success Metrics**: How to measure progress.
+6. **Similar Certifications**: Suggest 3-4 other certifications that complement this path (e.g., PNPT, CPTS, eJPT).
 
-7. **Motivation**: Encouragement and real-world context.
+7. **Success Metrics**: How to measure progress.
+
+8. **Motivation**: Encouragement and real-world context.
 
 RESPOND WITH VALID JSON (pure JSON only):
 {
   "targetCertification": "${cert}",
   "currentLevel": "${level}",
-  "totalDuration": "20-24 weeks",
-  "difficulty_progression": "Beginner to Intermediate",
+  "totalDuration": "6 months to 3 years based on level",
+  "difficulty_progression": "Level-appropriate progression",
   "executive_summary": "[Summary]",
   "roadmap": [
     {
       "phase": 1,
       "phase_name": "[Name]",
-      "duration_weeks": 3,
-      "total_hours": 60,
+      "duration_weeks": 4,
+      "total_hours": 80,
       "learning_outcomes": ["[Skill 1]", "[Skill 2]"],
       "weekly_breakdown": [{"week": 1, "topics": ["[T1]"], "labs": ["[L1]"], "hours": 20, "checkpoint": "[Goal]"}],
       "essential_tools": [{"name": "[Tool]", "purpose": "[Why]", "learning_path": {"beginner": "[B]", "intermediate": "[I]", "advanced": "[A]"}, "key_features": ["[F]"], "practice_exercise": "[Ex]"}],
-      "recommended_labs": [{"name": "[Lab]", "platform": "[THM/HTB]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[S]"], "url": "[URL]"}],
-      "resources_for_phase": [{"type": "YouTube", "name": "[Name]", "topic": "[Topic]", "link": "[URL]"}],
+      "recommended_labs": [{"name": "[Lab]", "platform": "[THM/HTB/OTW]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[S]"], "url": "[Direct URL]"}],
+      "resources_for_phase": [{"type": "YouTube", "name": "[Name]", "topic": "[Topic]", "url": "[Direct URL]"}],
       "outcome": "[Achievement summary]"
     }
   ],
@@ -602,7 +606,7 @@ RESPOND WITH VALID JSON (pure JSON only):
   },
   "daily_study_schedule": [
     {"time": "Morning (08:00 - 10:00)", "activity": "Theory & Concepts", "focus": "Reading documentation & watching tutorials"},
-    {"time": "Midday (12:00 - 14:00)", "activity": "Labs & Practice", "focus": "Hands-on exercises on THM/HTB"},
+    {"time": "Midday (12:00 - 14:00)", "activity": "Labs & Practice", "focus": "Hands-on exercises on THM/HTB/OTW"},
     {"time": "Evening (18:00 - 20:00)", "activity": "Review & Documentation", "focus": "Writing notes and reviewing daily learnings"},
     {"time": "Weekend", "activity": "Deep Dive", "focus": "Full machines and complex scenarios"}
   ],
