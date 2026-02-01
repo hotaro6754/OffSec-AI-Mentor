@@ -36,20 +36,15 @@ require('dotenv').config();
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // Determine which AI provider to use
-let AI_PROVIDER = 'none';
-let AI_API_KEY = '';
-let AI_MODEL = '';
-let AI_API_URL = '';
+let AI_PROVIDER = 'groq'; // Always Groq
+let AI_MODEL = 'llama-3.3-70b-versatile';
+let AI_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+let AI_API_KEY = GROQ_API_KEY || '';
 
 if (GROQ_API_KEY) {
-    AI_PROVIDER = 'groq';
-    AI_API_KEY = GROQ_API_KEY;
-    AI_MODEL = 'llama-3.3-70b-versatile';
-    AI_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
     console.log('✅ AI Provider: Groq API (LLaMA 3.3 70B)');
 } else {
-    AI_PROVIDER = 'none';
-    AI_API_KEY = '';
+    AI_PROVIDER = 'none'; // Set to none if no system key, but defaults are still set for BYOK
     console.warn('⚠️  WARNING: No Groq API key found!');
     console.warn('   Assessment will use fallback questions only.');
     console.warn('   Roadmap generation will NOT be available.');
@@ -662,20 +657,20 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                     // Exponential backoff: 5s, 15s, 30s for rate limits
                     const waitTimes = [5, 15, 30];
                     const waitTime = waitTimes[Math.min(attempt, waitTimes.length - 1)];
-                    console.log(`⏳ ${provider.toUpperCase()} rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
+                    console.log(`⏳ GROQ rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
                 }
                 // Return rate limit error so caller can use fallback
-                return { success: false, rateLimit: true, error: `${provider.toUpperCase()} rate limit exceeded` };
+                return { success: false, rateLimit: true, error: `GROQ rate limit exceeded` };
             }
             throw new Error(errorData.error?.message || `API Error: ${response.status}`);
         } catch (error) {
             if (attempt === retries) {
-                console.error(`❌ ${provider.toUpperCase()} API error:`, error.message);
+                console.error(`❌ GROQ API error:`, error.message);
                 return { success: false, rateLimit: false, error: error.message };
             }
-            console.log(`⚠️ ${provider.toUpperCase()} Attempt ${attempt} failed, retrying...`);
+            console.log(`⚠️ GROQ Attempt ${attempt} failed, retrying...`);
             await new Promise(r => setTimeout(r, 1000));
         }
     }
