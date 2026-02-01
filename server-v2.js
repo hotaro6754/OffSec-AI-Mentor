@@ -32,79 +32,25 @@ const PORT = process.env.PORT || 3000;
 // Load environment variables from .env file
 require('dotenv').config();
 
-// AI Provider Configuration - supports OpenAI, Groq, Deepseek, or Gemini
-// Priority: GROQ (free) > OPENAI > DEEPSEEK > GEMINI
-// If GROQ rate limits, automatically fallback to OPENAI
-// If OPENAI rate limits, automatically fallback to DEEPSEEK
+// AI Provider Configuration - Groq ONLY
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Determine which AI provider to use (primary)
+// Determine which AI provider to use
 let AI_PROVIDER = 'none';
 let AI_API_KEY = '';
 let AI_MODEL = '';
 let AI_API_URL = '';
-
-// Fallback provider configuration (1st fallback)
-let FALLBACK_PROVIDER = 'none';
-let FALLBACK_API_KEY = '';
-let FALLBACK_MODEL = '';
-let FALLBACK_API_URL = '';
-
-// Secondary fallback provider configuration (2nd fallback)
-let FALLBACK2_PROVIDER = 'none';
-let FALLBACK2_API_KEY = '';
-let FALLBACK2_MODEL = '';
-let FALLBACK2_API_URL = '';
 
 if (GROQ_API_KEY) {
     AI_PROVIDER = 'groq';
     AI_API_KEY = GROQ_API_KEY;
     AI_MODEL = 'llama-3.3-70b-versatile';
     AI_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-    console.log('✅ Primary: Groq API (LLaMA 3.3 70B)');
-    
-    // Set up fallback chain: OpenAI -> Deepseek
-    if (OPENAI_API_KEY) {
-        FALLBACK_PROVIDER = 'openai';
-        FALLBACK_API_KEY = OPENAI_API_KEY;
-        FALLBACK_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-        FALLBACK_API_URL = 'https://api.openai.com/v1/chat/completions';
-        console.log('✅ Fallback 1: OpenAI API (' + FALLBACK_MODEL + ')');
-        
-        // Third fallback: Deepseek
-        if (DEEPSEEK_API_KEY) {
-            FALLBACK2_PROVIDER = 'deepseek';
-            FALLBACK2_API_KEY = DEEPSEEK_API_KEY;
-            FALLBACK2_MODEL = 'deepseek-chat';
-            FALLBACK2_API_URL = 'https://api.deepseek.com/chat/completions';
-            console.log('✅ Fallback 2: Deepseek API (deepseek-chat)');
-        }
-    } else if (DEEPSEEK_API_KEY) {
-        FALLBACK_PROVIDER = 'deepseek';
-        FALLBACK_API_KEY = DEEPSEEK_API_KEY;
-        FALLBACK_MODEL = 'deepseek-chat';
-        FALLBACK_API_URL = 'https://api.deepseek.com/chat/completions';
-        console.log('✅ Fallback: Deepseek API (deepseek-chat)');
-    }
-} else if (OPENAI_API_KEY) {
-    AI_PROVIDER = 'openai';
-    AI_API_KEY = OPENAI_API_KEY;
-    AI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-    AI_API_URL = 'https://api.openai.com/v1/chat/completions';
-    console.log('✅ Using OpenAI API (' + AI_MODEL + ')');
-} else if (GEMINI_API_KEY) {
-    AI_PROVIDER = 'gemini';
-    AI_API_KEY = GEMINI_API_KEY;
-    AI_MODEL = 'gemini-2.0-flash';
-    AI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-    console.log('✅ Using Google Gemini API (2.0 Flash)');
+    console.log('✅ AI Provider: Groq API (LLaMA 3.3 70B)');
 } else {
     AI_PROVIDER = 'none';
     AI_API_KEY = '';
-    console.warn('⚠️  WARNING: No AI API key found!');
+    console.warn('⚠️  WARNING: No Groq API key found!');
     console.warn('   Assessment will use fallback questions only.');
     console.warn('   Roadmap generation will NOT be available.');
     console.warn('');
@@ -128,7 +74,7 @@ if (AI_PROVIDER !== 'none') {
 app.use(cors({
     origin: true, // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-OpenAI-API-Key', 'X-Groq-API-Key', 'X-Gemini-API-Key', 'X-Deepseek-API-Key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Groq-API-Key'],
     credentials: true
 }));
 
@@ -149,10 +95,7 @@ app.use((req, res, next) => {
     
     // Extract custom API keys from request headers
     req.customKeys = {
-        openai: req.headers['x-openai-api-key'],
-        groq: req.headers['x-groq-api-key'],
-        gemini: req.headers['x-gemini-api-key'],
-        deepseek: req.headers['x-deepseek-api-key']
+        groq: req.headers['x-groq-api-key']
     };
     next();
 });
@@ -454,164 +397,150 @@ const PROMPTS = {
         
         const oscpTopics = `
 OSCP-LEVEL TOPICS (scenario-based, practical):
-1. Active Directory: Kerberoasting concepts, AS-REP roasting theory, trust relationships
-2. Privilege Escalation: SUID/capabilities concepts, service misconfigurations, kernel exploit methodology
-3. Network Pivoting: Port forwarding concepts, tunneling theory, lateral movement planning
-4. Web Exploitation: SQLi methodology, file upload bypasses, LFI/RFI theory
-5. Password Attacks: Hash types, cracking methodology, spray attack concepts
-6. Buffer Overflow: Stack concepts, DEP/ASLR theory (no actual shellcode)
+1. Enumeration Depth: Service identification, versioning, script-based enumeration, finding low-hanging fruit.
+2. Active Directory: Kerberoasting, AS-REP Roasting, BloodHound analysis, pivoting between domains, GPO abuse.
+3. Privilege Escalation: Linux (SUID, Cron, Kernel, Capabilities) and Windows (Token Impersonation, Unquoted Service Paths, Registry abuse).
+4. Web Exploitation: SQLi (Union/Error/Time-based), File Upload bypasses, LFI/RFI to RCE, Directory Traversal.
+5. Buffer Overflow Concepts: Stack anatomy, EIP control, JMP ESP, Bad chars, Shellcode prep (Theory only).
+6. Exam Mindset: Time management, report-writing essentials, note-taking, handling rabbit holes.
 
 QUESTION STYLE FOR OSCP MODE:
-- HTB/Pro Labs scenario style
-- "During an engagement, you discover..." type questions  
-- Methodology-focused, not exploit code
-- Decision-making scenarios
-- Similar to Dante/Offshore lab scenarios`;
+- BRUTAL and HONEST. No beginner-level fluff.
+- Scenario-based: "During an exam, you find X..." or "You have a shell as Y, now what?"
+- Multi-step: Question should imply a sequence of actions.
+- Open-ended: Use short-answer types to test depth.
+- Methodology-focused, not exploit code.`;
 
         const beginnerTopics = `
 BEGINNER-LEVEL TOPICS (foundational):
-1. Networking: TCP/IP, OSI model, common ports/protocols, subnetting basics
-2. Linux: File permissions, common commands, directory structure
-3. Web Security: HTTP methods, OWASP Top 10 concepts, cookies/sessions
-4. Security Fundamentals: CIA triad, authentication, encryption basics
-5. Reconnaissance: Passive vs active, OSINT concepts, enumeration theory`;
+1. Networking: TCP/IP, OSI, Ports, Subnetting.
+2. Linux: Permissions, CLI basics, directory structure.
+3. Web Security: HTTP, OWASP Top 10 concepts.
+4. Security Fundamentals: CIA triad, Auth types, Encryption.
+5. Reconnaissance: Active/Passive basics.`;
 
-        return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (advanced)' : 'beginner cybersecurity learners'}.
+        return `You are creating a FRESH, BRUTAL assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'beginner cybersecurity learners'}.
 
 CRITICAL: Generate COMPLETELY NEW questions. This is retake #${retakeCount + 1}.
-${usedHashes.length > 0 ? `\nAVOID these previously used question patterns - create entirely different scenarios and angles.` : ''}
+${usedHashes.length > 0 ? `\nAVOID these previously used question patterns - create entirely different scenarios.` : ''}
 
 ${isOscp ? oscpTopics : beginnerTopics}
 
 REQUIREMENTS:
-- 10 questions total: 6-7 multiple choice, 3-4 short answer
-- Each question must be UNIQUE - different scenario, different angle
-- Include realistic scenarios ${isOscp ? 'like HTB/Dante style' : 'for learning'}
-- Test understanding and methodology, not memorization
-- Add random elements: different IPs, ports, usernames, scenarios each time
+- 10 questions total: 5 multiple choice (HARD), 5 short answer (DEEP).
+- Each question must be UNIQUE and SCENARIO-BASED.
+- OSCP MODE must be exam-level, unforgiving, and multi-step.
+- Test understanding and methodology, not memorization.
 
 JSON OUTPUT FORMAT:
 {
   "questions": [
     {
-      "type": "multiple-choice",
-      "question": "Unique scenario-based question",
-      "options": ["A", "B", "C", "D"],
-      "correctAnswer": "Exact text of correct option",
-      "explanation": "Why this is correct + learning insight",
-      "hint": "Guiding hint without giving away answer",
-      "topic": "networking|linux|web|security|recon|${isOscp ? 'ad|privesc|pivoting' : ''}"
+      "type": "multiple-choice" | "short-answer",
+      "question": "Realistic scenario-based question",
+      "options": ["A", "B", "C", "D"], // only for multiple-choice
+      "correctAnswer": "Exact correct answer",
+      "explanation": "Why this is correct + OSCP exam insight",
+      "hint": "Strategic hint",
+      "topic": "networking|linux|web|security|ad|privesc|pivoting|bof|mindset"
     }
   ]
 }
 
 STRICT RULES:
-✗ NO actual exploit code
-✗ NO real CVE details
-✗ NO step-by-step hacking commands
-✓ Focus on methodology and concepts
-✓ Make each question feel fresh and different`;
+✗ NO actual exploit code or payloads
+✗ NO beginner-level definitions in OSCP mode
+✓ Focus on decision making under pressure`;
     },
 
     /**
-     * Evaluation prompt - enhanced
+     * Evaluation prompt - enhanced with Readiness Analysis
      */
-    evaluation: `You are evaluating a cybersecurity assessment. Analyze carefully and provide a detailed JSON response.
+    evaluation: `You are evaluating a cybersecurity assessment with BRUTAL honesty. Analyze carefully and provide a detailed JSON response.
 
 OUTPUT FORMAT:
 {
+  "readinessScore": <number 0-100>,
+  "readinessStatus": "Ready" | "Almost Ready" | "Not Ready",
   "level": "Beginner" | "Foundation" | "Intermediate" | "Advanced",
   "score": <number 0-100>,
-  "strengths": ["Specific strength 1", "Strength 2", "Strength 3"],
-  "weaknesses": ["Growth area 1", "Growth area 2", "Growth area 3"],
-  "focusSuggestion": "Personalized 2-3 sentence recommendation with specific next steps.",
-  "topicScores": {
-    "networking": <0-100>,
-    "linux": <0-100>,
-    "web": <0-100>,
-    "security": <0-100>
-  }
+  "strengths": ["Specific skill 1", "Skill 2"],
+  "weaknesses": ["Growth area 1", "Growth area 2"],
+  "confidenceGaps": ["Area where user shows hesitation or partial knowledge"],
+  "skillBreakdown": {
+    "Enumeration": <0-100>,
+    "Privilege Escalation": <0-100>,
+    "Active Directory": <0-100>,
+    "Web Exploitation": <0-100>,
+    "Methodology/Mindset": <0-100>
+  },
+  "focusSuggestion": "Direct, actionable advice on what to fix first.",
+  "oscpAlignment": "How well the user aligns with PEN-200 syllabus."
 }
 
-LEVEL CRITERIA:
-- "Beginner": < 40% - needs fundamentals
-- "Foundation": 40-60% - ready for guided hands-on
-- "Intermediate": 60-80% - ready for CTFs and labs
-- "Advanced": > 80% - ready for advanced challenges
+CRITERIA FOR READY:
+- Score > 85% in OSCP Mode
+- Strong performance in AD and PrivEsc
+- Solid methodology identified
 
-Be encouraging but honest. Output ONLY valid JSON.`,
+Be brutally honest. If they are not ready, say so clearly. Output ONLY valid JSON.`,
 
     /**
-     * Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
+     * Adaptive Roadmap prompt - generates HIGHLY DETAILED structured JSON roadmap
      */
-    roadmap: (level, weaknesses, cert, resources) => `Create a comprehensive, visually stunning, and HIGHLY DETAILED ${cert} learning roadmap for a ${level}-level learner with these focus areas: ${weaknesses.join(', ')}.
+    roadmap: (level, weaknesses, cert, resources, assessmentResult = {}) => `Create a comprehensive, visually stunning, and HIGHLY ADAPTIVE ${cert} learning roadmap.
+
+USER DATA:
+- Level: ${level}
+- Identified Gaps: ${weaknesses.join(', ')}
+- Readiness Score: ${assessmentResult.readinessScore || 'N/A'}%
 
 IMPORTANT INSTRUCTIONS:
-- If level is "Beginner", provide 2-3x more foundational tasks and a longer timeline (can vary from 6 months to 1 year or even 2 to 3 years depending on depth).
-- FOR OSCP: Strictly align with the official OSCP (PEN-200) syllabus topics: Information Gathering, Vulnerability Research, Web App Attacks, SQL Injection, Client-Side Attacks, Locating/Fixing Exploits, Antivirus Evasion, Privilege Escalation (Linux/Windows), Password Attacks, Pivoting/Tunneling, Active Directory Attacks, Metasploit, and Report Writing.
-- Provide REAL, CLICKABLE URLs for all resources (TryHackMe, HackTheBox, OverTheWire, YouTube).
-- Mandate at least 2-3 specific HTB/THM/OTW labs for EACH learning phase with direct URLs.
-- Include specific OverTheWire (OTW) wargames like Bandit, Leviathan for Linux foundations.
-- Format data strictly as JSON so it can be rendered into professional dashboard components.
+- ADAPTIVE DESIGN: Focus ONLY on the identified gaps. Remove topics the user has already mastered.
+- OSCP SYLLABUS ALIGNMENT: Strictly align with PEN-200: Info Gathering, Vulnerability Research, Web App Attacks, SQLi, Client-Side, AV Evasion, PrivEsc (Win/Lin), Password Attacks, Pivoting, Active Directory, Metasploit, Report Writing.
+- MANDATORY LABS: Include specific, clickable HTB (e.g., Dante, Pro Labs) and THM links for every phase.
+- PRE-OSCP ALIGNMENT: If readiness score < 70%, recommend PNPT, CRTP, or eJPT. Explain the overlap and how they bridge the user's specific skill gaps.
 
-MUST INCLUDE:
-1. **Executive Summary**: 2-3 sentences on their learning journey and goals.
-2. **4-6 Learning Phases** with:
-   - Phase Name and clear Outcomes.
-   - Week-by-week breakdown (Topics, Labs, Hours).
-   - Essential Tools (Name, Purpose, Learning Path).
-   - Recommended Labs with Platform (HTB/THM/OTW), Difficulty (Easy/Medium/Hard), Skills Gained, and direct URL.
-   - Resource Links for each phase with Category (YouTube, Blog, Course) and direct URL.
-
-3. **Tools Mastery Guide**: Deep dive into critical tools (Nmap, Burp, Metasploit, etc) with commands.
-
-4. **Curated Resources**: Top-tier links for YouTube, Books, and Platforms.
-
-5. **Daily Study Schedule**: A structured routine tailored to their level.
-
-6. **Similar Certifications**: Suggest 3-4 other certifications that complement this path (e.g., PNPT, CPTS, eJPT).
-
-7. **Success Metrics**: How to measure progress.
-
-8. **Motivation**: Encouragement and real-world context.
+MUST INCLUDE IN JSON:
+1. **Gap Analysis**: Checklist of missing skills and weak areas.
+2. **4-6 Dynamic Phases**:
+   - Phase Name and "Why it matters for OSCP".
+   - Outcomes, Tools, and Mandatory Labs (with URLs).
+   - Resources with button-style links.
+3. **Pre-OSCP Recommendations**: Aligned certifications with mapping to user gaps.
+4. **Tools Mastery Guide**: Deep dive into critical tools with commands.
+5. **Success Metrics**: Phase-wise indicators of readiness.
 
 RESPOND WITH VALID JSON (pure JSON only):
 {
   "targetCertification": "${cert}",
   "currentLevel": "${level}",
-  "totalDuration": "6 months to 3 years based on level",
-  "difficulty_progression": "Level-appropriate progression",
-  "executive_summary": "[Summary]",
+  "gap_analysis": {
+    "missing_skills": [],
+    "weak_areas": [],
+    "alignment_percentage": 0
+  },
   "roadmap": [
     {
       "phase": 1,
       "phase_name": "[Name]",
+      "why_it_matters": "[Significance for OSCP]",
       "duration_weeks": 4,
-      "total_hours": 80,
-      "learning_outcomes": ["[Skill 1]", "[Skill 2]"],
-      "weekly_breakdown": [{"week": 1, "topics": ["[T1]"], "labs": ["[L1]"], "hours": 20, "checkpoint": "[Goal]"}],
-      "essential_tools": [{"name": "[Tool]", "purpose": "[Why]", "learning_path": {"beginner": "[B]", "intermediate": "[I]", "advanced": "[A]"}, "key_features": ["[F]"], "practice_exercise": "[Ex]"}],
-      "recommended_labs": [{"name": "[Lab]", "platform": "[THM/HTB/OTW]", "difficulty": "Easy", "hours": 3, "skills_gained": ["[S]"], "url": "[Direct URL]"}],
-      "resources_for_phase": [{"type": "YouTube", "name": "[Name]", "topic": "[Topic]", "url": "[Direct URL]"}],
-      "outcome": "[Achievement summary]"
+      "learning_outcomes": [],
+      "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
+      "mandatory_labs": [{"name": "", "platform": "HTB|THM", "url": "", "skills": []}],
+      "resources": [{"type": "YouTube|Blog", "name": "", "url": ""}],
+      "completion_checklist": []
     }
   ],
+  "pre_oscp_alignment": [
+    {"cert": "PNPT|CRTP|eJPT", "reason": "", "overlap_with_oscp": "", "gap_it_bridges": ""}
+  ],
   "tools_mastery_guide": [
-    {"tool_name": "[Tool]", "category": "[Cat]", "importance": "High", "when_to_use": "[When]", "learning_progression": {"phase_1": "[P1]", "phase_2": "[P2]", "phase_3": "[P3]"}, "critical_commands": [{"command": "[cmd]", "purpose": "[Why]", "example": "[ex]"}]}
+    {"tool": "", "commands": [{"cmd": "", "purpose": ""}]}
   ],
-  "curated_resources": {
-    "youtube_channels": [{"name": "[Name]", "focus": "[Focus]", "link": "[URL]"}],
-    "essential_books": [{"title": "[Title]", "author": "[Author]", "topic": "[Topic]"}],
-    "learning_platforms": [{"name": "[Platform]", "type": "Lab", "best_for": "[Purpose]", "link": "[URL]"}]
-  },
-  "daily_study_schedule": [
-    {"time": "Morning (08:00 - 10:00)", "activity": "Theory & Concepts", "focus": "Reading documentation & watching tutorials"},
-    {"time": "Midday (12:00 - 14:00)", "activity": "Labs & Practice", "focus": "Hands-on exercises on THM/HTB/OTW"},
-    {"time": "Evening (18:00 - 20:00)", "activity": "Review & Documentation", "focus": "Writing notes and reviewing daily learnings"},
-    {"time": "Weekend", "activity": "Deep Dive", "focus": "Full machines and complex scenarios"}
-  ],
-  "success_metrics": [{"phase": "Phase 1", "completed_when": "[Crit]", "checkpoint_assessment": "[Test]"}],
-  "motivation_and_mindset": {"why_people_succeed": "[Why]", "real_world_applications": "[Context]"}
+  "daily_study_schedule": [],
+  "success_metrics": []
 }`,
 
     /**
@@ -667,89 +596,17 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
     }
 }
 
-// Call only primary AI provider (no fallback) - for roadmap generation
-async function callAIPrimary(prompt, expectJson = false, retries = 3, customKeys = {}) {
-    // Determine which AI provider to use, prioritizing custom keys (BYOK)
-    let provider = AI_PROVIDER;
-    let apiKey = AI_API_KEY;
-    let model = AI_MODEL;
-    let apiUrl = AI_API_URL;
-
-    // Check for custom keys first - this allows users to override the system provider
-    if (customKeys.groq) {
-        provider = 'groq'; apiKey = customKeys.groq; model = 'llama-3.3-70b-versatile'; apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    } else if (customKeys.openai) {
-        provider = 'openai'; apiKey = customKeys.openai; model = 'gpt-4o-mini'; apiUrl = 'https://api.openai.com/v1/chat/completions';
-    } else if (customKeys.gemini) {
-        provider = 'gemini'; apiKey = customKeys.gemini; model = 'gemini-2.0-flash'; apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-    } else if (customKeys.deepseek) {
-        provider = 'deepseek'; apiKey = customKeys.deepseek; model = 'deepseek-chat'; apiUrl = 'https://api.deepseek.com/chat/completions';
-    } else if (provider !== 'none') {
-        // If no custom key found for other providers, check if there's a custom key for the system provider
-        apiKey = customKeys[provider] || AI_API_KEY;
-    }
-
-    console.log(`📤 Calling ${provider.toUpperCase()} API (Primary Only - No Fallback)...`);
-    
-    const result = await tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson, retries);
-    
-    if (result.success) {
-        return result.data;
-    }
-    
-    throw new Error(result.error);
-}
-
 async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
-    // Determine which AI provider to use, prioritizing custom keys (BYOK)
-    let currentProvider = AI_PROVIDER;
-    let currentApiKey = AI_API_KEY;
-    let currentModel = AI_MODEL;
-    let currentApiUrl = AI_API_URL;
+    // Groq ONLY
+    let currentApiKey = customKeys.groq || AI_API_KEY;
 
-    // Check for custom keys first - this allows users to override the system provider
-    if (customKeys.groq) {
-        currentProvider = 'groq'; currentApiKey = customKeys.groq; currentModel = 'llama-3.3-70b-versatile'; currentApiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    } else if (customKeys.openai) {
-        currentProvider = 'openai'; currentApiKey = customKeys.openai; currentModel = 'gpt-4o-mini'; currentApiUrl = 'https://api.openai.com/v1/chat/completions';
-    } else if (customKeys.gemini) {
-        currentProvider = 'gemini'; currentApiKey = customKeys.gemini; currentModel = 'gemini-2.0-flash'; currentApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-    } else if (customKeys.deepseek) {
-        currentProvider = 'deepseek'; currentApiKey = customKeys.deepseek; currentModel = 'deepseek-chat'; currentApiUrl = 'https://api.deepseek.com/chat/completions';
-    } else if (currentProvider !== 'none') {
-        // If no custom key found for other providers, check if there's a custom key for the system provider
-        currentApiKey = customKeys[currentProvider] || AI_API_KEY;
+    if (!currentApiKey) {
+        throw new Error("Groq API key is missing");
     }
 
-    console.log(`📤 Calling ${currentProvider.toUpperCase()} API...`);
+    console.log(`📤 Calling GROQ API...`);
     
-    // Try with chosen provider first
-    const result = await tryCallAI(currentProvider, currentApiKey, currentModel, currentApiUrl, prompt, expectJson, retries);
-    
-    // Fallback logic
-    if (!result.success && result.rateLimit) {
-        // Try fallback 1
-        if (FALLBACK_PROVIDER !== 'none') {
-            console.log(`🔄 Switching to fallback ${FALLBACK_PROVIDER.toUpperCase()} API...`);
-            const fbApiKey = customKeys[FALLBACK_PROVIDER] || FALLBACK_API_KEY;
-            const fallbackResult = await tryCallAI(FALLBACK_PROVIDER, fbApiKey, FALLBACK_MODEL, FALLBACK_API_URL, prompt, expectJson, retries);
-            if (fallbackResult.success) {
-                console.log(`✅ ${FALLBACK_PROVIDER.toUpperCase()} API succeeded!`);
-                return fallbackResult.data;
-            }
-
-            // Try fallback 2
-            if (!fallbackResult.success && fallbackResult.rateLimit && FALLBACK2_PROVIDER !== 'none') {
-                console.log(`🔄 Switching to secondary fallback ${FALLBACK2_PROVIDER.toUpperCase()} API...`);
-                const fb2ApiKey = customKeys[FALLBACK2_PROVIDER] || FALLBACK2_API_KEY;
-                const fallback2Result = await tryCallAI(FALLBACK2_PROVIDER, fb2ApiKey, FALLBACK2_MODEL, FALLBACK2_API_URL, prompt, expectJson, retries);
-                if (fallback2Result.success) {
-                    console.log(`✅ ${FALLBACK2_PROVIDER.toUpperCase()} API succeeded!`);
-                    return fallback2Result.data;
-                }
-            }
-        }
-    }
+    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries);
     
     if (result.success) {
         return result.data;
@@ -758,80 +615,44 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
     throw new Error(result.error || "AI call failed");
 }
 
-async function tryCallAI(provider, apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
+async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             let response, data;
             
-            if (provider === 'gemini') {
-                // Gemini API has different format
-                const requestBody = {
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: expectJson ? 0.3 : 0.7,
-                        topK: 40,
-                        topP: 0.95,
-                        maxOutputTokens: 8192
-                    }
-                };
-                if (expectJson) {
-                    requestBody.generationConfig.responseMimeType = 'application/json';
+            // Groq uses OpenAI-compatible format
+            const messages = [{ role: 'user', content: prompt }];
+
+            if (expectJson) {
+                messages.unshift({
+                    role: 'system',
+                    content: 'You are a helpful assistant. Always respond with valid JSON only, no markdown code blocks or explanations. Just pure JSON.'
+                });
+            }
+
+            const requestBody = {
+                model: model,
+                messages,
+                temperature: expectJson ? 0.1 : 0.7,
+                max_tokens: 8192
+            };
+
+            response = await fetchWithTimeout(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(requestBody)
+            }, 60000);
+
+            if (response.ok) {
+                data = await response.json();
+                if (data.choices?.[0]?.message?.content) {
+                    console.log(`✅ GROQ API call successful`);
+                    return { success: true, data: data.choices[0].message.content };
                 }
-
-                response = await fetchWithTimeout(`${apiUrl}?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                }, 45000);
-
-                if (response.ok) {
-                    data = await response.json();
-                    if (data.candidates?.[0]?.content?.parts) {
-                        console.log(`✅ ${provider.toUpperCase()} API call successful`);
-                        return { success: true, data: data.candidates[0].content.parts.map(p => p.text).join('') };
-                    }
-                    throw new Error('Invalid API response from Gemini');
-                }
-            } else {
-                // OpenAI and Groq use the same API format
-                const messages = [{ role: 'user', content: prompt }];
-                
-                if (expectJson) {
-                    messages.unshift({
-                        role: 'system',
-                        content: 'You are a helpful assistant. Always respond with valid JSON only, no markdown code blocks or explanations. Just pure JSON.'
-                    });
-                }
-
-                const requestBody = {
-                    model: model,
-                    messages,
-                    temperature: expectJson ? 0.3 : 0.7,
-                    max_tokens: 8192
-                };
-
-                // Only use response_format for OpenAI (Groq doesn't support it reliably)
-                if (expectJson && provider === 'openai') {
-                    requestBody.response_format = { type: 'json_object' };
-                }
-
-                response = await fetchWithTimeout(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify(requestBody)
-                }, 45000);
-
-                if (response.ok) {
-                    data = await response.json();
-                    if (data.choices?.[0]?.message?.content) {
-                        console.log(`✅ ${provider.toUpperCase()} API call successful`);
-                        return { success: true, data: data.choices[0].message.content };
-                    }
-                    throw new Error('Invalid API response');
-                }
+                throw new Error('Invalid API response');
             }
 
             // Handle errors
@@ -1169,13 +990,13 @@ app.post('/api/generate-roadmap', async (req, res) => {
     }
     
     try {
-        const { level, weaknesses, cert } = req.body;
+        const { level, weaknesses, cert, assessmentResult } = req.body;
         
         if (!level || !weaknesses || !cert) {
             return res.status(400).json({ error: 'Level, weaknesses, and cert required' });
         }
 
-        const prompt = PROMPTS.roadmap(level, weaknesses, cert, RESOURCES);
+        const prompt = PROMPTS.roadmap(level, weaknesses, cert, RESOURCES, assessmentResult);
         
         let response;
         let retryCount = 0;
@@ -1324,8 +1145,7 @@ app.post('/api/mentor-chat', async (req, res) => {
         // Check if it's a rate limit error (case-insensitive)
         const isRateLimit = error.message.toLowerCase().includes('rate limit');
         if (isRateLimit) {
-            console.log('💬 Both APIs rate-limited, returning helpful guidance...');
-            // Return helpful guidance when both APIs are rate-limited
+            console.log('💬 GROQ API rate-limited, returning helpful guidance...');
             const demoReply = "I'm currently helping many learners and the AI service is temporarily overloaded. Here's what I'd recommend in the meantime:\n\n" +
                 "1. **Practice with TryHackMe** - Complete beginner-friendly rooms\n" +
                 "2. **Study Linux Basics** - Focus on file system navigation and permissions\n" +

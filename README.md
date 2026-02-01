@@ -101,13 +101,9 @@ This is an **educational guidance tool only**—not a hacking tutorial, not a vu
 - **dotenv** — Environment variable management
 
 ### **AI/LLM**
-- **Multiple AI Providers Supported:**
-  - **Groq** (LLaMA 3.3 70B) — Free tier, recommended
-  - **OpenAI** (GPT-3.5/4) — Paid
-  - **Deepseek** — Paid alternative
-  - **Google Gemini** (2.5 Flash) — Free/Paid
-- **Automatic Fallback Chain** — Seamless provider switching on rate limits
-- **Authentication:** API Key via environment variables (secure)
+- **AI Provider:**
+  - **Groq** (LLaMA 3.3 70B) — Fast inference, recommended.
+- **Authentication:** API Key via environment variables or BYOK (Bring Your Own Key) in Settings.
 
 ### **Animations & Polish**
 - **AOS.js** — Scroll-reveal animations
@@ -128,11 +124,7 @@ This is an **educational guidance tool only**—not a hacking tutorial, not a vu
 ### **Prerequisites**
 - **Node.js** v18 or higher
 - **npm** or **yarn**
-- **API Key** from one of the supported providers:
-  - [Groq](https://console.groq.com) (Recommended - Free tier)
-  - [OpenAI](https://platform.openai.com/api-keys)
-  - [Deepseek](https://platform.deepseek.com)
-  - [Google Gemini](https://aistudio.google.com/app/apikey)
+- **Groq API Key** from [https://console.groq.com](https://console.groq.com).
 
 ### **Installation**
 
@@ -154,26 +146,14 @@ This is an **educational guidance tool only**—not a hacking tutorial, not a vu
    cp .env.example .env
    ```
    
-   Edit `.env` and add your API key (choose one):
+   Edit `.env` and add your Groq API key:
    ```bash
-   # Option 1: Groq (Recommended - Free)
    GROQ_API_KEY=your_groq_api_key_here
-   
-   # Option 2: OpenAI
-   OPENAI_API_KEY=your_openai_api_key_here
-   OPENAI_MODEL=gpt-3.5-turbo
-   
-   # Option 3: Deepseek
-   DEEPSEEK_API_KEY=your_deepseek_api_key_here
-   
-   # Option 4: Google Gemini
-   GEMINI_API_KEY=your_gemini_api_key_here
    ```
    
    **⚠️ IMPORTANT:** 
    - Never commit your `.env` file to git
    - The `.env` file is already in `.gitignore`
-   - Multiple API keys enable automatic fallback
 
 4. **Start the server:**
    ```bash
@@ -484,7 +464,7 @@ This project is provided as-is for educational purposes within the OffSec commun
 ### Quick Links
 - [OffSec Official](https://www.offensive-security.com)
 - [OffSec Community](https://www.offensive-security.com/community)
-- [Google Gemini API](https://ai.google.dev)
+- [Groq API](https://console.groq.com)
 
 ---
 
