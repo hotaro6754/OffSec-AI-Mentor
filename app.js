@@ -1681,6 +1681,7 @@ async function generateRoadmapForCert(certId) {
             level: level,
             weaknesses: weaknesses,
             cert: certName,
+            mode: appState.learningMode,
             assessmentResult: appState.assessment
         });
         
