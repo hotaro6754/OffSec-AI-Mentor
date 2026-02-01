@@ -2888,16 +2888,15 @@ function revealSecret(containerId) {
     secretDiv.classList.remove('hidden');
     secretDiv.classList.add('revealed');
     
-    // Generate QR code
-    const qrContainer = document.createElement('div');
-    qrContainer.id = 'qr-code-' + Date.now();
+    // Generate unique QR container ID
+    const qrContainerId = 'qr-code-' + Date.now();
     
     // Create rickroll reveal content
     secretDiv.innerHTML = `
         <div class="rickroll-reveal">
             <p class="reveal-text">🎉 Your Cyber Wisdom Awaits! 🎉</p>
-            <div class="qr-wrapper" id="qr-wrapper-${Date.now()}">
-                <div id="${qrContainer.id}"></div>
+            <div class="qr-wrapper">
+                <div id="${qrContainerId}"></div>
                 <p style="margin-top: 12px; color: #333; font-weight: 600;">Scan the QR code</p>
             </div>
             <p class="or-text">OR</p>
@@ -2913,20 +2912,38 @@ function revealSecret(containerId) {
     setTimeout(() => {
         if (typeof QRCode !== 'undefined') {
             try {
-                new QRCode(qrContainer.id, {
+                const qrElement = document.getElementById(qrContainerId);
+                if (!qrElement) {
+                    console.error('QR container element not found');
+                    return;
+                }
+                
+                const qrOptions = {
                     text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                     width: 200,
                     height: 200,
                     colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                    colorLight: "#ffffff"
+                };
+                
+                // Add correctLevel if available
+                if (QRCode.CorrectLevel && QRCode.CorrectLevel.H) {
+                    qrOptions.correctLevel = QRCode.CorrectLevel.H;
+                }
+                
+                new QRCode(qrElement, qrOptions);
             } catch (e) {
                 console.error('QR Code generation failed:', e);
-                qrContainer.innerHTML = '<p style="padding: 20px;">QR Code unavailable</p>';
+                const qrContainer = document.getElementById(qrContainerId);
+                if (qrContainer) {
+                    qrContainer.innerHTML = '<p style="padding: 20px;">QR Code unavailable</p>';
+                }
             }
         } else {
-            qrContainer.innerHTML = '<p style="padding: 20px;">QR Code library not loaded</p>';
+            const qrContainer = document.getElementById(qrContainerId);
+            if (qrContainer) {
+                qrContainer.innerHTML = '<p style="padding: 20px;">QR Code library not loaded</p>';
+            }
         }
     }, 100);
     

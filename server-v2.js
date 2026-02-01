@@ -1114,20 +1114,25 @@ function parseJsonResponse(text) {
 function validateAndCleanResources(resources) {
     if (!Array.isArray(resources)) return [];
     
-    return resources.map(res => {
-        // Ensure resource has a name
-        const name = res.name || res.channel || res.title || 'Resource';
-        const type = res.type || 'Resource';
-        const url = res.url || '#';
-        const description = res.why || res.description || res.recommended || '';
-        
-        return {
-            type,
-            name,
-            url,
-            description
-        };
-    }).filter(res => res.name !== 'Resource' && res.url !== '#');
+    return resources
+        .filter(res => {
+            // Keep resource if it has at least one valid field
+            return res && (res.name || res.channel || res.title || res.url);
+        })
+        .map(res => {
+            // Ensure resource has a name
+            const name = res.name || res.channel || res.title || 'Resource';
+            const type = res.type || 'Resource';
+            const url = res.url || '#';
+            const description = res.why || res.description || res.recommended || '';
+            
+            return {
+                type,
+                name,
+                url,
+                description
+            };
+        });
 }
 
 // Validate and clean roadmap data structure
