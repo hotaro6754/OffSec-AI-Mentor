@@ -288,8 +288,29 @@ function init() {
     console.log('✅ Initialization complete');
 }
 
+function checkApiKeyAndStart() {
+    // Check if user is logged in - if not, show auth modal
+    if (!appState.user) {
+        showAuthModal('login');
+        return;
+    }
+
+    const hasKey = localStorage.getItem('openaiKey') ||
+                  localStorage.getItem('groqKey') ||
+                  localStorage.getItem('geminiKey') ||
+                  localStorage.getItem('deepseekKey');
+
+    if (!hasKey) {
+        appState.isPromptingForKey = true;
+        showNotification('Please provide an API key to start assessment!', 'info');
+        showSettingsModal();
+    } else {
+        startAssessment();
+    }
+}
+
 function setupEventListeners() {
-    elements.startBtn?.addEventListener('click', startAssessment);
+    elements.startBtn?.addEventListener('click', checkApiKeyAndStart);
 
     // Settings
     elements.settingsBtn?.addEventListener('click', showSettingsModal);
@@ -421,8 +442,8 @@ function setupAuthListeners() {
             updateAuthUI();
             showNotification('Welcome back! 🎉', 'success');
             
-            // Start assessment after login
-            startAssessment();
+            // Start assessment flow (will prompt for key if missing)
+            checkApiKeyAndStart();
             
         } catch (error) {
             showAuthError('login', error.message);
@@ -462,8 +483,8 @@ function setupAuthListeners() {
             updateAuthUI();
             showNotification('Account created! Welcome aboard! 🚀', 'success');
             
-            // Start assessment after registration
-            startAssessment();
+            // Start assessment flow (will prompt for key if missing)
+            checkApiKeyAndStart();
             
         } catch (error) {
             showAuthError('register', error.message);
@@ -1004,6 +1025,12 @@ function saveSettings() {
 
     showNotification('Settings saved successfully', 'success');
     hideSettingsModal();
+
+    // If we were prompting for a key to start assessment, start it now
+    if (appState.isPromptingForKey) {
+        appState.isPromptingForKey = false;
+        startAssessment();
+    }
 }
 
 function clearSettings() {
@@ -1078,12 +1105,6 @@ async function callBackendAPI(endpoint, data = {}) {
 // ============================================================================
 
 async function startAssessment() {
-    // Check if user is logged in - if not, show auth modal
-    if (!appState.user) {
-        showAuthModal('login');
-        return;
-    }
-    
     console.log('🎯 Starting assessment...');
     showSection('assessmentSection');
     
