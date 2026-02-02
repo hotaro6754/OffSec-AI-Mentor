@@ -2303,9 +2303,12 @@ function displayRoadmap(roadmapData) {
                                 else if (res.type === 'Tool') icon = '🛡️';
                                 else if (res.type === 'Platform') icon = '🎮';
 
+                                // Robust name handling to avoid 'undefined'
+                                const name = res.name || res.channel || res.title || 'View Resource';
+
                                 return `
-                                    <a href="${res.url}" target="_blank" class="btn btn-resource btn-sm">
-                                        ${icon} ${res.name}
+                                    <a href="${res.url || '#'}" target="_blank" class="btn btn-resource btn-sm">
+                                        ${icon} ${name}
                                     </a>
                                 `;
                             }).join('')}
@@ -2493,9 +2496,9 @@ function exportRoadmap() {
 
 function downloadRoadmapPDF() {
     // PDF generation constants
-    const MIN_ROADMAP_CONTENT_LENGTH = 100; // Minimum text length to consider content valid
-    const MIN_PDF_CONTAINER_HEIGHT = 100; // Minimum height in pixels for valid PDF content
-    const PDF_HEIGHT_BUFFER = 100; // Extra buffer pixels added to window height for proper rendering
+    const MIN_ROADMAP_CONTENT_LENGTH = 100;
+    const MIN_PDF_CONTAINER_HEIGHT = 100;
+    const PDF_HEIGHT_BUFFER = 150;
     
     if (!appState.roadmapJSON) {
         showError('No roadmap data available. Generate a roadmap first.');
@@ -2513,15 +2516,16 @@ function downloadRoadmapPDF() {
 
     // Create a temporary visible container off-screen to ensure full rendering
     const tempContainer = document.createElement('div');
+    tempContainer.id = 'pdf-render-container';
     tempContainer.style.position = 'fixed';
-    tempContainer.style.left = '-9999px';
+    tempContainer.style.left = '-10000px';
     tempContainer.style.top = '0';
     tempContainer.style.width = '850px';
     tempContainer.style.height = 'auto';
     tempContainer.style.overflow = 'visible';
     tempContainer.style.zIndex = '99999';
     tempContainer.style.visibility = 'visible';
-    tempContainer.style.backgroundColor = document.body.classList.contains('mode-oscp') ? '#121212' : '#f0f0f0';
+    tempContainer.style.backgroundColor = document.body.classList.contains('mode-oscp') ? '#121212' : '#faf8f5';
     
     // Add theme class to temp container
     if (document.body.classList.contains('mode-oscp')) {
@@ -2547,21 +2551,20 @@ function downloadRoadmapPDF() {
         });
     }
 
-    // Force a reflow and wait longer for rendering (increased to 1000ms)
+    // Increased delay to ensure all dynamic elements and styles are applied
     setTimeout(() => {
-        // Final validation before PDF generation
         const tempHeight = tempContainer.offsetHeight;
         if (tempHeight < MIN_PDF_CONTAINER_HEIGHT) {
             console.warn('Warning: PDF container height is very small:', tempHeight);
             document.body.removeChild(tempContainer);
-            showError('PDF content validation failed. The roadmap may not be fully rendered. Try again.');
+            showError('PDF content validation failed. The roadmap may not be fully rendered.');
             return;
         }
         
         const opt = {
-            margin: [10, 10],
+            margin: [10, 10, 10, 10],
             filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
+            image: { type: 'jpeg', quality: 1.0 },
             html2canvas: {
                 scale: 2,
                 useCORS: true,
@@ -2570,61 +2573,16 @@ function downloadRoadmapPDF() {
                 scrollY: 0,
                 scrollX: 0,
                 windowWidth: 850,
-                windowHeight: tempHeight + PDF_HEIGHT_BUFFER, // Add buffer for proper rendering
-                backgroundColor: document.body.classList.contains('mode-oscp') ? '#121212' : '#f0f0f0',
-                onclone: (doc) => {
-                    // Ensure the cloned document has the correct styles
-                    const style = doc.createElement('style');
-                    style.innerHTML = `
-                        :root {
-                            --black-v3: #000000;
-                            --white-v3: #ffffff;
-                            --bg-v3: #f0f0f0;
-                            --primary-v3: #ff3e00;
-                            --secondary-v3: #00e5ff;
-                            --accent-v3: #ffff00;
-                            --success-v3: #00ff00;
-                            --error-v3: #ff0000;
-                            --gray-light-v3: #e0e0e0;
-                            --gray-dark-v3: #333333;
-                            --border-v3: 3px solid #000000;
-                            --shadow-v3: 6px 6px 0px #000000;
-                        }
-                        .mode-oscp {
-                            --bg-v3: #121212;
-                            --white-v3: #1e1e1e;
-                            --gray-light-v3: #333333;
-                            --black-v3: #ffffff;
-                            --primary-v3: #ff4d00;
-                            --secondary-v3: #00f2ff;
-                            --border-v3: 3px solid #ffffff;
-                            --shadow-v3: 6px 6px 0px #ffffff;
-                        }
-                        body { background-color: var(--bg-v3) !important; color: var(--black-v3) !important; }
-                        .roadmap-v3-container { padding: 20px !important; width: 810px !important; background-color: var(--bg-v3) !important; }
-                        .roadmap-v3-header { background: var(--primary-v3) !important; border: var(--border-v3) !important; color: white !important; box-shadow: var(--shadow-v3) !important; }
-                        .phase-card-v3 { break-inside: avoid !important; margin-bottom: 20px !important; background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
-                        .gap-card { background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
-                        .lab-mini-card { background: var(--white-v3) !important; border: 2px solid var(--black-v3) !important; box-shadow: 4px 4px 0px var(--black-v3) !important; }
-                        .btn-resource { background: var(--accent-v3) !important; color: black !important; border: 2px solid black !important; box-shadow: 3px 3px 0 black !important; }
-                        .phase-badge-v3 { background: var(--black-v3) !important; color: var(--white-v3) !important; }
-                        .phase-meta-tag { background: white !important; color: black !important; border: 2px solid black !important; }
-                        .mode-oscp .phase-meta-tag { background: #333 !important; color: #fff !important; border-color: var(--primary-v3) !important; }
-                        .command-item { background: #f5f0e8 !important; border: 1px solid black !important; }
-                        .mode-oscp .command-item { background: #21262d !important; border-color: #ffffff !important; }
-                        .tool-mastery-card-v3 { background: var(--white-v3) !important; border: var(--border-v3) !important; box-shadow: var(--shadow-v3) !important; }
-                        /* Ensure all content is visible */
-                        * { visibility: visible !important; opacity: 1 !important; }
-                        .hidden { display: block !important; }
-                    `;
-                    doc.head.appendChild(style);
-                }
+                windowHeight: tempHeight + PDF_HEIGHT_BUFFER,
+                backgroundColor: document.body.classList.contains('mode-oscp') ? '#121212' : '#faf8f5'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
+        html2pdf().set(opt).from(tempContainer).toPdf().get('pdf').then((pdf) => {
+            // Success
+        }).save().then(() => {
             document.body.removeChild(tempContainer);
             showSuccess('Roadmap downloaded as PDF!');
         }).catch(err => {
@@ -2634,7 +2592,7 @@ function downloadRoadmapPDF() {
             }
             showError('PDF generation failed. Try exporting as JSON instead.');
         });
-    }, 1000); // Increased to 1000ms delay to ensure DOM is fully ready
+    }, 1500);
 }
 
 // ============================================================================
@@ -2889,7 +2847,7 @@ function revealSecret(containerId) {
     secretDiv.classList.add('revealed');
     
     // Generate unique QR container ID
-    const qrContainerId = 'qr-code-' + Date.now();
+    const qrContainerId = 'qr-code-' + Math.random().toString(36).substring(7);
     
     // Create rickroll reveal content
     secretDiv.innerHTML = `
@@ -2897,57 +2855,42 @@ function revealSecret(containerId) {
             <p class="reveal-text">🎉 Your Cyber Wisdom Awaits! 🎉</p>
             <div class="qr-wrapper">
                 <div id="${qrContainerId}"></div>
-                <p style="margin-top: 12px; color: #333; font-weight: 600;">Scan the QR code</p>
+                <p style="margin-top: 12px; color: #000; font-weight: 700; text-transform: uppercase; font-size: 12px;">Scan for Wisdom</p>
             </div>
             <p class="or-text">OR</p>
             <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
                target="_blank" 
                class="btn btn-wisdom">
-                🎵 Click for Ultimate Hacking Knowledge
+                🎵 Click for Knowledge
             </a>
         </div>
     `;
     
     // Generate QR code after DOM is updated
     setTimeout(() => {
+        const qrElement = document.getElementById(qrContainerId);
+        if (!qrElement) return;
+
         if (typeof QRCode !== 'undefined') {
             try {
-                const qrElement = document.getElementById(qrContainerId);
-                if (!qrElement) {
-                    console.error('QR container element not found');
-                    return;
-                }
-                
-                const qrOptions = {
+                qrElement.innerHTML = ''; // Clear any existing
+                new QRCode(qrElement, {
                     text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    width: 200,
-                    height: 200,
+                    width: 180,
+                    height: 180,
                     colorDark: "#000000",
-                    colorLight: "#ffffff"
-                };
-                
-                // Add correctLevel if available
-                if (QRCode.CorrectLevel && QRCode.CorrectLevel.H) {
-                    qrOptions.correctLevel = QRCode.CorrectLevel.H;
-                }
-                
-                new QRCode(qrElement, qrOptions);
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel?.H || 2
+                });
             } catch (e) {
-                console.error('QR Code generation failed:', e);
-                const qrContainer = document.getElementById(qrContainerId);
-                if (qrContainer) {
-                    qrContainer.innerHTML = '<p style="padding: 20px;">QR Code unavailable</p>';
-                }
+                console.error('QR generation error:', e);
+                qrElement.innerHTML = '<span>QR Load Error</span>';
             }
         } else {
-            const qrContainer = document.getElementById(qrContainerId);
-            if (qrContainer) {
-                qrContainer.innerHTML = '<p style="padding: 20px;">QR Code library not loaded</p>';
-            }
+            qrElement.innerHTML = '<span style="color:red">QR Library Not Found</span>';
         }
-    }, 100);
+    }, 200);
     
-    // Add confetti animation (optional)
     addConfetti();
 }
 
