@@ -29,6 +29,43 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Boot Screen -->
+    <div id="boot-screen" class="hidden">
+        <div class="console-container">
+            <div id="console-output"></div>
+            <div class="cursor-line">
+                <span style="color:#ff3e00;">root@offsec-mentor:~#</span>
+                <span id="typing-cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel v2 (Skill Details) -->
+    <div class="side-panel-v2" id="skillPanel">
+        <button class="close-panel-btn" id="closeSkillPanel">X</button>
+        <div class="panel-header-v2">
+            <div style="font-size: 3rem; margin-bottom: 10px;" id="skillIcon">🐧</div>
+            <h2 id="skillTitle">Skill Name</h2>
+            <p id="skillCategory" style="font-weight: bold; color: #555;">Category</p>
+        </div>
+        <div class="data-section-v2">
+            <div class="data-title-v2">📖 DESCRIPTION</div>
+            <p id="skillDescription" style="line-height: 1.6;"></p>
+        </div>
+        <div class="data-section-v2">
+            <div class="data-title-v2">🎯 KEY OBJECTIVES</div>
+            <ul id="skillObjectives" style="line-height: 1.8; padding-left: 20px;"></ul>
+        </div>
+        <div class="data-section-v2">
+            <div class="data-title-v2">🧪 PRACTICE LABS</div>
+            <ul id="skillLabs" style="line-height: 1.8; padding-left: 20px;"></ul>
+        </div>
+        <div class="data-section-v2">
+            <div class="data-title-v2">🛠️ TOOLS</div>
+            <div id="skillTools" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
+    </div>
+
     <!-- Auth Modal -->
     <div id="authModal" class="modal hidden">
         <div class="modal-backdrop"></div>
@@ -437,9 +474,30 @@
                 <p class="section-subtitle" id="roadmapSubtitle">Building your path to certification success</p>
             </div>
 
-            <div class="roadmap-container">
+            <!-- New Neo-Brutalist Timeline Container -->
+            <div class="roadmap-container-v2" id="roadmapTimelineV2">
+                <div class="spine-v2"></div>
+                <div id="roadmapContentV2">
+                    <!-- Dynamic Timeline content will be generated here -->
+                </div>
+            </div>
+
+            <!-- Fallback for legacy roadmaps or markdown -->
+            <div class="roadmap-container hidden" id="roadmapContainerLegacy">
                 <div id="roadmapContent" class="roadmap-content">
                     <!-- Roadmap will be generated here -->
+                </div>
+            </div>
+
+            <!-- Skill Tree Section -->
+            <div id="skillTreeSection" class="skill-tree-section-v2 hidden">
+                <div class="section-header">
+                    <h2>Skill Constellation</h2>
+                    <p class="section-subtitle">Your visual progress through the learning domains</p>
+                </div>
+                <div class="skill-tree-container-v2">
+                    <svg id="tree-svg-v2"></svg>
+                    <div id="skillNodesContainer"></div>
                 </div>
             </div>
 

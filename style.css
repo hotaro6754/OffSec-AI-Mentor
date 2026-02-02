@@ -3,6 +3,22 @@
    ============================================================ */
 
 :root {
+    /* Base V2 Colors */
+    --black: #1a1a2e;
+    --white: #fffef9;
+    --bg: #faf8f5;
+    --cream: #f5f0e8;
+    --gray: #d4cfc4;
+    --gray-dark: #4a4a4a;
+    --primary: #e63946;
+    --primary-light: #ff6b6b;
+    --secondary: #457b9d;
+    --accent: #f4d35e;
+    --success: #2a9d8f;
+    --error: #e63946;
+    --purple: #7b68ee;
+
+    /* V3 Neo-Brutalist Palette */
     --black-v3: #000000;
     --white-v3: #ffffff;
     --bg-v3: #f0f0f0;
@@ -14,13 +30,33 @@
     --gray-light-v3: #e0e0e0;
     --gray-dark-v3: #333333;
 
+    /* Borders & Shadows */
     --border-v3: 3px solid var(--black-v3);
     --shadow-v3: 6px 6px 0px var(--black-v3);
     --shadow-sm-v3: 3px 3px 0px var(--black-v3);
     --shadow-lg-v3: 10px 10px 0px var(--black-v3);
+
+    --border: 2.5px solid var(--black);
+    --border-thick: 3.5px solid var(--black);
+    --border-thin: 1.5px solid var(--black);
+    --shadow: 5px 5px 0 var(--black);
+    --shadow-lg: 8px 8px 0 var(--black);
+
+    /* Typography */
+    --font: 'IBM Plex Mono', 'Courier New', monospace;
+    --font-display: 'Space Mono', monospace;
+    --font-handwritten: 'Caveat', cursive;
 }
 
 body.mode-oscp {
+    --bg: #0d1117;
+    --white: #161b22;
+    --cream: #1a1f26;
+    --gray: #30363d;
+    --gray-dark: #8b949e;
+    --primary: #ff4757;
+    --black: #c9d1d9;
+
     --bg-v3: #121212;
     --white-v3: #1e1e1e;
     --gray-light-v3: #333333;
@@ -3031,4 +3067,263 @@ body.mode-oscp #pdf-root table td {
 #pdf-root * {
     box-shadow: none !important;
     text-shadow: none !important;
+}
+/* --- NEO-BRUTALIST ROADMAP V2.0 STYLES --- */
+
+/* Timeline Spine and Year Blocks */
+.roadmap-container-v2 {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px 20px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.spine-v2 {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: var(--black-v3);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.year-block-v2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 120px;
+  position: relative;
+  width: 100%;
+}
+
+.year-block-v2:nth-child(odd) {
+  flex-direction: row-reverse;
+}
+
+/* Animated Node (SPIN & POP) */
+.node-v2 {
+  position: absolute;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  background: var(--white-v3);
+  border: var(--border-v3);
+  transform: translateX(-50%) scale(1) rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: var(--shadow-v3);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.node-v2 i {
+  transform: rotate(-45deg);
+  font-size: 1.5rem;
+  color: var(--black-v3);
+}
+
+.node-v2:hover {
+  background: var(--black-v3);
+  transform: translateX(-50%) rotate(45deg) scale(1.1);
+}
+
+.node-v2:hover i {
+  color: var(--white-v3);
+}
+
+/* Animated Card (SLIDE IN/OUT) */
+.content-card-v2 {
+  width: 42%;
+  background: var(--white-v3);
+  border: var(--border-v3);
+  padding: 25px;
+  box-shadow: var(--shadow-v3);
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.content-card-v2:hover {
+  transform: translate(-5px, -5px);
+  box-shadow: 10px 10px 0 var(--black-v3);
+}
+
+.year-badge-v2 {
+  font-weight: 900;
+  padding: 4px 10px;
+  border: 2px solid var(--black-v3);
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  box-shadow: 2px 2px 0 var(--black-v3);
+  color: var(--black-v3);
+  text-transform: uppercase;
+}
+
+.card-title-v2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+/* --- SIDE PANEL --- */
+.side-panel-v2 {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  background: var(--white-v3);
+  border-left: var(--border-v3);
+  z-index: 2100;
+  padding: 40px;
+  overflow-y: auto;
+  transition: right 0.4s cubic-bezier(0.8, 0, 0.2, 1);
+  background-image: linear-gradient(var(--bg-v3) 2px, transparent 2px), linear-gradient(90deg, var(--bg-v3) 2px, transparent 2px);
+  background-size: 40px 40px;
+}
+
+.side-panel-v2.open {
+  right: 0;
+  box-shadow: -20px 0 100px rgba(0, 0, 0, 0.3);
+}
+
+.close-panel-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--primary-v3);
+  border: var(--border-v3);
+  width: 40px;
+  height: 40px;
+  font-weight: 900;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--black-v3);
+  transition: 0.2s;
+  color: white;
+}
+
+.panel-header-v2 {
+  margin-bottom: 30px;
+  border-bottom: 4px solid var(--black-v3);
+  padding-bottom: 20px;
+}
+
+.data-section-v2 {
+  margin-bottom: 25px;
+  background: var(--white-v3);
+  border: 2px solid var(--black-v3);
+  padding: 20px;
+  box-shadow: 4px 4px 0 var(--black-v3);
+}
+
+.data-title-v2 {
+  font-weight: 900;
+  text-transform: uppercase;
+  background: var(--black-v3);
+  color: var(--white-v3);
+  padding: 4px 12px;
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+/* --- SKILL TREE SECTION --- */
+.skill-tree-section-v2 {
+  position: relative;
+  background: var(--bg-v3);
+  min-height: 80vh;
+  padding: 80px 20px;
+  overflow: hidden;
+  border-top: 4px solid var(--black-v3);
+  margin-top: 50px;
+}
+
+.skill-tree-container-v2 {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 600px;
+}
+
+.skill-node-v2 {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 3px solid var(--black-v3);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 4px 4px 0 var(--black-v3);
+  background: var(--accent-v3);
+}
+
+.skill-node-v2:hover {
+  transform: scale(1.15);
+  z-index: 10;
+  box-shadow: 8px 8px 0 var(--black-v3);
+}
+
+.skill-node-icon-v2 {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.skill-node-label-v2 {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--black-v3);
+  text-align: center;
+  line-height: 1.1;
+  padding: 0 5px;
+}
+
+#tree-svg-v2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.connection-line-v2 {
+  stroke: var(--black-v3);
+  stroke-width: 2;
+  fill: none;
+  opacity: 0.3;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .spine-v2 { left: 30px; }
+  .year-block-v2 {
+    flex-direction: column !important;
+    align-items: flex-start;
+    padding-left: 70px;
+    margin-bottom: 60px;
+  }
+  .content-card-v2 { width: 100%; }
+  .node-v2 { left: 30px; }
+  .side-panel-v2 { max-width: 100%; }
 }
