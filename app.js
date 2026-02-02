@@ -2609,28 +2609,36 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    showNotification('Generating PDF via iLovePDF...', 'info');
-    
-    const isDarkMode = document.body.classList.contains('mode-oscp');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const originalText = downloadPdfBtn.innerHTML;
     
     try {
+        // Loading state
+        downloadPdfBtn.disabled = true;
+        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Generating PDF...';
+        showNotification('Preparing your roadmap for high-quality PDF export...', 'info');
+
+        const isDarkMode = document.body.classList.contains('mode-oscp');
+
         // Step 1: Create print-safe HTML content
         const pdfRoot = document.createElement('div');
         pdfRoot.className = 'roadmap-v3-container';
+        // Apply critical styles directly to ensure they are captured by outerHTML
         pdfRoot.style.cssText = `
-            width: 900px;
+            width: 1000px;
             display: block;
             background: ${isDarkMode ? '#121212' : '#ffffff'};
-            color: ${isDarkMode ? '#1a1a2e' : '#000000'};
+            color: ${isDarkMode ? '#ffffff' : '#000000'};
             padding: 40px;
             margin: 0 auto;
+            min-height: 100vh;
         `;
         
         // Clone roadmap content
         const contentClone = elements.roadmapContent.cloneNode(true);
         
         // Strip interactive elements but keep layout
-        contentClone.querySelectorAll('button, input, select, .btn-reveal-secret').forEach(el => el.remove());
+        contentClone.querySelectorAll('button, input, select, .btn-reveal-secret, .hidden').forEach(el => el.remove());
         
         // Ensure all links are absolute and styled
         contentClone.querySelectorAll('a').forEach(link => {
@@ -2639,7 +2647,7 @@ async function downloadRoadmapPDF() {
             link.style.fontWeight = 'bold';
         });
 
-        // Add header
+        // Add branding header
         const header = document.createElement('div');
         header.className = 'roadmap-v3-header';
         header.style.cssText = `
@@ -2656,9 +2664,9 @@ async function downloadRoadmapPDF() {
                 OffSec Learning Roadmap
             </h1>
             <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
-                <span class="meta-item">Target: <strong>${appState.selectedCert.toUpperCase()}</strong></span>
-                <span class="meta-item">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
-                <span class="meta-item">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
+                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Target: <strong>${appState.selectedCert?.toUpperCase() || 'Roadmap'}</strong></span>
+                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
+                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
             </div>
         `;
         
@@ -2693,58 +2701,32 @@ async function downloadRoadmapPDF() {
         footer.innerHTML = `
             <p><strong>OFFSEC AI MENTOR</strong> - Your Path to Mastery</p>
             <p style="margin-top: 5px; opacity: 0.7;">This roadmap is generated based on your unique skill profile.</p>
-            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API</p>
+            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API & iLovePDF</p>
         `;
         pdfRoot.appendChild(footer);
         
-        // Extract relevant styles from style.css
-        // For the sake of this task, I'll inject the most critical roadmap styles
-        const roadmapStyles = `
-            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; background: ${isDarkMode ? '#121212' : '#fff'}; color: ${isDarkMode ? '#e6edf3' : '#1a1a2e'}; }
-            .roadmap-v3-container { display: flex; flex-direction: column; gap: 30px; }
-            .roadmap-v3-header { background: #ff3e00; border: 3px solid #000; padding: 30px; color: white; box-shadow: 6px 6px 0px #000; }
-            .meta-item { background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2); }
-            .phase-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 25px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; margin-bottom: 30px; page-break-inside: avoid; }
-            .phase-badge-v3 { display: inline-block; background: #000; color: #fff; padding: 5px 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .phase-meta-tag { background: ${isDarkMode ? '#333' : '#f5f0e8'}; color: ${isDarkMode ? '#fff' : '#000'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 4px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-            .gap-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-            .gap-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 20px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .section-header-v3 { display: flex; align-items: center; gap: 15px; margin-top: 40px; margin-bottom: 20px; border-bottom: 4px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding-bottom: 10px; }
-            .outcomes-list-v3 { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
-            .outcomes-list-v3 li { background: ${isDarkMode ? '#2a2a2a' : '#e0e0e0'}; color: ${isDarkMode ? '#fff' : '#000'}; padding: 8px 12px; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; font-size: 13px; }
-            .labs-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-            .lab-mini-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 15px; box-shadow: 4px 4px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .lab-platform-tag { font-size: 10px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .tools-mastery-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .tool-mastery-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3.5px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 24px; box-shadow: 5px 5px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .command-item { background: ${isDarkMode ? '#21262d' : '#f5f0e8'}; padding: 12px; border: 1px solid ${isDarkMode ? '#484f58' : '#000'}; margin-top: 10px; }
-            .command-item code { background: #000; color: #00e5ff; padding: 4px 8px; }
-            .btn-resource { display: none; }
-            h1, h2, h3, h4 { text-transform: uppercase; color: ${isDarkMode ? '#fff' : '#1a1a2e'}; }
-            a { color: #ff3e00 !important; }
-        `;
-
-        // Create complete HTML document
+        // Create complete HTML document - using outerHTML to preserve root styles
+        // Note: style.css is now injected by the backend for higher reliability
         const htmlContent = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>OffSec Learning Roadmap</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        ${roadmapStyles}
-        * { box-sizing: border-box; }
-        body { padding: 40px; }
+        body { margin: 0; padding: 0; background: ${isDarkMode ? '#121212' : '#ffffff'}; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        @page { margin: 0; size: A4; }
     </style>
 </head>
-<body>
-    ${pdfRoot.innerHTML}
+<body class="${isDarkMode ? 'mode-oscp' : ''}">
+    ${pdfRoot.outerHTML}
 </body>
 </html>
         `.trim();
         
-        const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const filename = `OffSec-Roadmap-${appState.selectedCert || 'Learning'}-${new Date().toISOString().split('T')[0]}.pdf`;
         
         // Prepare headers with custom keys if available
         const headers = {
@@ -2788,13 +2770,10 @@ async function downloadRoadmapPDF() {
         
     } catch (error) {
         console.error('❌ PDF generation error:', error);
-        console.info('📋 Troubleshooting:');
-        console.info('   • Check your internet connection');
-        console.info('   • Verify the backend server is running');
-        console.info('   • Check if iLovePDF API is configured');
-        console.info('💡 Alternative: Use "Export as JSON" button - no API needed!');
-        
         showError(`PDF generation failed: ${error.message}. Please use "Export as JSON" instead.`);
+    } finally {
+        downloadPdfBtn.disabled = false;
+        downloadPdfBtn.innerHTML = originalText;
     }
 }
 

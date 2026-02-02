@@ -22,6 +22,7 @@ const cors = require('cors');
 const path = require('path');
 const db = require('./database');
 const fs = require('fs');
+const os = require('os');
 const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
 const ILovePDFFile = require('@ilovepdf/ilovepdf-nodejs/ILovePDFFile');
 
@@ -1904,10 +1905,9 @@ app.get('/api/health', (req, res) => {
 // PDF Generation endpoint using iLovePDF
 app.post('/api/generate-pdf', async (req, res) => {
     let tempHtmlPath = null;
-    let tempPdfPath = null;
 
     try {
-        const { html, filename } = req.body;
+        let { html, filename } = req.body;
         
         if (!html) {
             return res.status(400).json({ error: 'HTML content is required' });
@@ -1923,20 +1923,36 @@ app.post('/api/generate-pdf', async (req, res) => {
             });
         }
 
+        // High-fidelity rendering: Inject local style.css content directly into HTML
+        try {
+            const cssPath = path.join(__dirname, 'style.css');
+            if (fs.existsSync(cssPath)) {
+                const cssContent = fs.readFileSync(cssPath, 'utf8');
+                const styleTag = `\n<style>\n${cssContent}\n</style>\n`;
+
+                // Inject style tag into head or at the beginning of body
+                if (html.includes('</head>')) {
+                    html = html.replace('</head>', `${styleTag}</head>`);
+                } else if (html.includes('<body>')) {
+                    html = html.replace('<body>', `<body>${styleTag}`);
+                } else {
+                    html = styleTag + html;
+                }
+                console.log('✅ Injected style.css into PDF HTML payload');
+            }
+        } catch (cssError) {
+            console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
+        }
+
         console.log('📄 Generating PDF via iLovePDF API...');
 
         // Initialize iLovePDF API
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        // Create a temporary HTML file
-        const tempDir = path.join(__dirname, 'temp');
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir);
-        }
-        
+        // Use system temp directory (standard for Render and Cloud environments)
+        const tempDir = os.tmpdir();
         const timestamp = Date.now();
-        tempHtmlPath = path.join(tempDir, `roadmap-${timestamp}.html`);
-        tempPdfPath = path.join(tempDir, `roadmap-${timestamp}.pdf`);
+        tempHtmlPath = path.join(tempDir, `offsec-roadmap-${timestamp}.html`);
         
         // Write HTML to temporary file
         fs.writeFileSync(tempHtmlPath, html, 'utf8');
@@ -1949,8 +1965,15 @@ app.post('/api/generate-pdf', async (req, res) => {
         const file = new ILovePDFFile(tempHtmlPath);
         await task.addFile(file);
         
-        // Process the conversion
-        await task.process();
+        // Process the conversion with optimized parameters for Neo-Brutalist design
+        await task.process({
+            view_width: 1024,    // Wide enough for timeline layout
+            delay: 1500,         // Wait for fonts and CSS animations to settle
+            single_page: false,  // Standard multi-page output
+            page_size: 'A4',
+            page_orientation: 'portrait',
+            page_margin: 10      // Small margin
+        });
         
         // Download the generated PDF buffer
         const pdfBuffer = await task.download();
@@ -1971,10 +1994,11 @@ app.post('/api/generate-pdf', async (req, res) => {
     } finally {
         // Clean up temporary files
         try {
-            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
-            if (tempPdfPath && fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) {
+                fs.unlinkSync(tempHtmlPath);
+            }
         } catch (cleanupError) {
-            console.warn('⚠️  Temporary file cleanup failed:', cleanupError.message);
+            console.warn('⚠️ Temporary file cleanup failed:', cleanupError.message);
         }
     }
 });
