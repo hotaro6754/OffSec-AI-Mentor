@@ -332,108 +332,6 @@ const elements = {
 };
 
 // ============================================================================
-// PDF LIBRARY STATUS MANAGEMENT
-// ============================================================================
-
-// Track if event listeners have been registered to prevent duplicates
-let pdfLibraryEventsRegistered = false;
-
-function checkPdfLibraryStatus() {
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    
-    // Check current library state
-    if (window.pdfLibraryState && window.pdfLibraryState.loaded) {
-        console.log(`✅ PDF library ready (loaded from ${window.pdfLibraryState.source})`);
-        updatePdfButtonState(true);
-        return;
-    }
-    
-    if (window.pdfLibraryState && window.pdfLibraryState.loading) {
-        console.log('⏳ PDF library still loading...');
-        updatePdfButtonState(false, 'Loading PDF library...');
-    } else if (window.pdfLibraryState && window.pdfLibraryState.error) {
-        console.error('❌ PDF library failed to load:', window.pdfLibraryState.error);
-        updatePdfButtonState(false, 'PDF export unavailable');
-    }
-    
-    // Register event listeners only once
-    if (!pdfLibraryEventsRegistered) {
-        pdfLibraryEventsRegistered = true;
-        
-        window.addEventListener('jspdfLoaded', function(e) {
-            console.log(`✅ PDF library loaded from ${e.detail.source}`);
-            updatePdfButtonState(true);
-            showNotification('PDF export is now available!', 'success');
-        });
-        
-        window.addEventListener('jspdfLoadError', function(e) {
-            console.error('❌ PDF library failed to load:', e.detail.error);
-            updatePdfButtonState(false, 'PDF export unavailable');
-            console.warn('PDF Export Unavailable - Alternative export options (JSON, Copy) are still available');
-        });
-    }
-}
-
-function updatePdfButtonState(enabled, tooltipText = '') {
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    if (!downloadPdfBtn) return;
-    
-    if (enabled) {
-        downloadPdfBtn.disabled = false;
-        downloadPdfBtn.classList.remove('btn-disabled');
-        downloadPdfBtn.title = 'Download roadmap as PDF';
-        downloadPdfBtn.innerHTML = '📄 Download as PDF';
-    } else {
-        downloadPdfBtn.disabled = true;
-        downloadPdfBtn.classList.add('btn-disabled');
-        downloadPdfBtn.title = tooltipText || 'PDF library not available';
-        downloadPdfBtn.innerHTML = tooltipText ? `📄 ${tooltipText}` : '📄 PDF Unavailable';
-    }
-}
-
-function attemptReloadPdfLibrary() {
-    console.log('🔄 Attempting to reload PDF library...');
-    
-    // Remove existing scripts
-    const existingScripts = document.querySelectorAll('#jspdf-primary, #jspdf-fallback');
-    existingScripts.forEach(script => script.remove());
-    
-    // Reset state
-    window.pdfLibraryState = {
-        loaded: false,
-        loading: true,
-        error: null,
-        source: null
-    };
-    
-    // Try loading from unpkg directly
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
-    script.crossOrigin = 'anonymous';
-    script.id = 'jspdf-retry';
-    
-    script.addEventListener('load', function() {
-        if (typeof jspdf !== 'undefined' && jspdf.jsPDF) {
-            console.log('✅ PDF library loaded successfully after retry');
-            window.pdfLibraryState.loaded = true;
-            window.pdfLibraryState.loading = false;
-            window.pdfLibraryState.source = 'unpkg (retry)';
-            updatePdfButtonState(true);
-            showSuccess('PDF export is now available!');
-        }
-    });
-    
-    script.addEventListener('error', function() {
-        console.error('❌ Retry failed - PDF library could not be loaded');
-        window.pdfLibraryState.error = 'Retry failed';
-        window.pdfLibraryState.loading = false;
-        showError('PDF library still unavailable. Please use JSON or Text export instead.');
-    });
-    
-    document.head.appendChild(script);
-}
-
-// ============================================================================
 // INITIALIZATION
 // ============================================================================
 
@@ -454,10 +352,6 @@ function init() {
     if (elements.modeCheckbox) {
         toggleLearningMode();
     }
-    
-    // Check PDF library loading status
-    checkPdfLibraryStatus();
-    
     console.log('✅ Initialization complete');
 }
 
@@ -2606,37 +2500,28 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    // Check if jsPDF is loaded with detailed diagnostics
+    // Simple check if jsPDF is loaded
     if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        console.error('❌ PDF library check failed:', {
-            jspdfDefined: typeof jspdf !== 'undefined',
-            jsPDFClass: typeof jspdf === 'undefined' ? 'N/A' : typeof jspdf.jsPDF,
-            libraryState: window.pdfLibraryState
-        });
-        
-        const errorMessage = `
-            <strong>PDF Export Unavailable</strong><br>
-            The PDF library is not loaded. This may be due to:<br>
-            • Network connectivity issues<br>
-            • Ad blocker or firewall restrictions<br>
-            • CDN unavailability<br>
-            <br>
-            <strong>Alternative Options:</strong><br>
-            • Use the <strong>💾 Export as JSON</strong> button instead<br>
-            • Use the <strong>📋 Copy Roadmap</strong> button to copy text<br>
-            <br>
-            <small>Tip: Try refreshing the page to reload the PDF library, or use JSON export which contains all your roadmap data.</small>
-        `;
-        
-        showError(errorMessage);
+        showError('PDF library not loaded. Please refresh the page and try again.');
         return;
     }
     
-    showNotification('Generating text-based PDF...', 'info');
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    if (loadingOverlay && loadingText) {
+        loadingText.textContent = 'Generating PDF with neo-brutalist styling...';
+        loadingOverlay.classList.remove('hidden');
+    }
     
     const isDarkMode = document.body.classList.contains('mode-oscp');
+    const primaryColor = isDarkMode ? '#ff4d00' : '#ff3e00';
+    const bgColor = isDarkMode ? '#121212' : '#ffffff';
+    const textColor = isDarkMode ? '#e6edf3' : '#000000';
+    const borderColor = isDarkMode ? '#ffffff' : '#000000';
+    const shadowColor = isDarkMode ? 'rgba(255, 77, 0, 0.3)' : 'rgba(0, 0, 0, 0.3)';
     
-    // Step 1: Create print-safe container
+    // Step 1: Create print-safe container with neo-brutalist styling
     const pdfRoot = document.createElement('div');
     pdfRoot.id = 'pdf-root';
     pdfRoot.style.cssText = `
@@ -2645,8 +2530,8 @@ async function downloadRoadmapPDF() {
         top: 0;
         width: 800px;
         display: block;
-        background: ${isDarkMode ? '#121212' : '#ffffff'};
-        color: ${isDarkMode ? '#e6edf3' : '#000000'};
+        background: ${bgColor};
+        color: ${textColor};
         font-family: 'IBM Plex Mono', monospace;
         font-size: 12px;
         line-height: 1.6;
@@ -2668,6 +2553,37 @@ async function downloadRoadmapPDF() {
         if (el.style.display === 'grid' || el.style.display === 'flex') {
             el.style.display = 'block';
         }
+        
+        // Apply neo-brutalist styling to phase cards
+        if (el.classList.contains('phase-card-v3')) {
+            el.style.border = `3px solid ${borderColor}`;
+            el.style.padding = '15px';
+            el.style.marginBottom = '20px';
+            el.style.background = isDarkMode ? '#1e1e1e' : '#f0f0f0';
+            el.style.pageBreakInside = 'avoid';
+            // Add shadow effect (simulated with border for PDF)
+            el.style.borderBottom = `6px solid ${borderColor}`;
+            el.style.borderRight = `6px solid ${borderColor}`;
+        }
+        
+        // Style phase headers
+        if (el.classList.contains('roadmap-v3-header') || el.tagName === 'H2') {
+            el.style.background = primaryColor;
+            el.style.color = '#ffffff';
+            el.style.padding = '15px';
+            el.style.border = `3px solid ${borderColor}`;
+            el.style.marginBottom = '15px';
+            el.style.fontWeight = 'bold';
+        }
+        
+        // Style task items
+        if (el.classList.contains('task-v3-item') || (el.tagName === 'LI' && el.parentElement?.tagName === 'UL')) {
+            el.style.border = `2px solid ${borderColor}`;
+            el.style.padding = '8px';
+            el.style.marginBottom = '8px';
+            el.style.background = bgColor;
+        }
+        
         // Ensure readable colors
         const computedStyle = window.getComputedStyle(el);
         if (isDarkMode) {
@@ -2679,50 +2595,52 @@ async function downloadRoadmapPDF() {
                 el.style.color = '#000000';
             }
         }
-        // Add page-break hints
-        if (el.classList.contains('phase-card-v3')) {
-            el.style.pageBreakInside = 'avoid';
-        }
     });
     
     // Remove interactive elements
     contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
     
-    // Add header
+    // Add header with neo-brutalist styling
     const header = document.createElement('div');
     header.style.cssText = `
         text-align: center;
         margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
+        padding: 20px;
+        background: ${primaryColor};
+        color: #ffffff;
+        border: 3px solid ${borderColor};
+        border-bottom: 6px solid ${borderColor};
+        border-right: 6px solid ${borderColor};
     `;
     header.innerHTML = `
-        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
+        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #ffffff; font-weight: bold; text-transform: uppercase;">
             OffSec Learning Roadmap
         </h1>
-        <p style="margin: 5px 0; font-size: 16px;">
-            <strong>Certification:</strong> ${appState.selectedCert}
+        <p style="margin: 5px 0; font-size: 16px; font-weight: bold;">
+            📋 Certification: ${appState.selectedCert}
         </p>
-        <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
-            Generated: ${new Date().toLocaleDateString()} | 
-            Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
+        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
+            📅 Generated: ${new Date().toLocaleDateString()} | 
+            🎯 Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
         </p>
     `;
     
     pdfRoot.appendChild(header);
     pdfRoot.appendChild(contentClone);
     
-    // Add footer
+    // Add footer with neo-brutalist styling
     const footer = document.createElement('div');
     footer.style.cssText = `
         margin-top: 40px;
-        padding-top: 20px;
+        padding: 15px;
         text-align: center;
         font-size: 10px;
-        color: ${isDarkMode ? '#6e7681' : '#999'};
-        border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
+        color: ${textColor};
+        border: 3px solid ${borderColor};
+        border-top: 6px solid ${borderColor};
+        background: ${isDarkMode ? '#1e1e1e' : '#f0f0f0'};
     `;
-    footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
+    footer.textContent = '⚡ Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
     pdfRoot.appendChild(footer);
     
     document.body.appendChild(pdfRoot);
@@ -2733,62 +2651,48 @@ async function downloadRoadmapPDF() {
     // Verify content rendered
     if (pdfRoot.offsetHeight < 100) {
         document.body.removeChild(pdfRoot);
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
         showError('PDF content failed to render. Try regenerating roadmap.');
         return;
     }
     
-    // Step 4: Generate text-based PDF
+    // Step 4: Generate PDF with neo-brutalist styling
     try {
         const doc = new jspdf.jsPDF('p', 'mm', 'a4');
         
         await doc.html(pdfRoot, {
             callback: function(doc) {
                 doc.save(`OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`);
+                
+                // Hide loading overlay on success
+                if (loadingOverlay) loadingOverlay.classList.add('hidden');
+                showSuccess('✅ PDF generated with neo-brutalist styling!');
             },
             autoPaging: 'text',
             margin: [10, 10, 10, 10],
             width: 190,
             windowWidth: 800,
             html2canvas: {
-                scale: 1,
-                logging: false
+                scale: 1.5,
+                logging: false,
+                backgroundColor: bgColor
             }
         });
         
-        // Step 5: Cleanup
+        // Cleanup
         document.body.removeChild(pdfRoot);
-        showSuccess('PDF generated with selectable text!');
         
     } catch (error) {
-        console.error('❌ PDF generation error:', {
-            error: error.message,
-            stack: error.stack,
-            libraryState: window.pdfLibraryState
-        });
+        console.error('❌ PDF generation error:', error);
         
         if (document.body.contains(pdfRoot)) {
             document.body.removeChild(pdfRoot);
         }
         
-        // Provide detailed error message with alternatives
-        const detailedError = `
-            <strong>PDF Generation Failed</strong><br>
-            ${error.message || 'An unexpected error occurred during PDF generation.'}<br>
-            <br>
-            <strong>Alternative Export Options:</strong><br>
-            • Click <strong>💾 Export as JSON</strong> to save your roadmap data<br>
-            • Click <strong>📋 Copy Roadmap</strong> to copy as text<br>
-            <br>
-            <strong>Troubleshooting Tips:</strong><br>
-            • Ensure you have a stable internet connection<br>
-            • Try disabling ad blockers or browser extensions<br>
-            • Clear your browser cache and reload the page<br>
-            • Try using a different browser<br>
-            <br>
-            <small>If the problem persists, JSON export contains all your roadmap data and can be imported later.</small>
-        `;
+        // Hide loading overlay on error
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
         
-        showError(detailedError);
+        showError('PDF generation failed. Please try again or use JSON export instead.');
     }
 }
 
