@@ -2514,7 +2514,233 @@ body.mode-oscp .resources-section { border-color: #30363d; }
 body.mode-oscp .resource-type { background: #30363d; }
 
 /* ============ MENTOR CHAT ============ */
-.mentor-container { max-width: 680px; margin: 0 auto; }
+.mentor-container { 
+    max-width: 800px; 
+    margin: 0 auto; 
+}
+
+.chat-history {
+    background: var(--white-v3);
+    border: 4px solid var(--black-v3);
+    box-shadow: 6px 6px 0px var(--black-v3);
+    min-height: 320px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 20px;
+    margin-bottom: 24px;
+    transform: rotate(-0.3deg);
+}
+body.mode-oscp .chat-history { 
+    background: #161b22; 
+    border-color: #30363d;
+    box-shadow: 6px 6px 0px #30363d;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border: 3px solid var(--black-v3);
+    font-size: 14px;
+    line-height: 1.6;
+    box-shadow: 4px 4px 0px var(--black-v3);
+    font-family: var(--font);
+}
+
+.chat-bubble.mentor { 
+    background: var(--white-v3); 
+    margin-right: auto;
+    transform: rotate(-1deg);
+}
+body.mode-oscp .chat-bubble.mentor { 
+    background: #21262d; 
+    border-color: #30363d;
+    box-shadow: 4px 4px 0px #30363d;
+    color: #c9d1d9;
+}
+
+.chat-bubble.user { 
+    background: var(--primary-v3); 
+    color: #fff; 
+    margin-left: auto;
+    transform: rotate(1deg);
+    border-color: var(--black-v3);
+}
+body.mode-oscp .chat-bubble.user {
+    background: #ff4d00;
+}
+
+/* Intent Buttons Grid */
+.chat-input-section {
+    margin-bottom: 20px;
+}
+
+.mentor-intent-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.btn-intent {
+    padding: 14px 18px;
+    background: var(--white-v3);
+    border: 3px solid var(--black-v3);
+    box-shadow: 4px 4px 0px var(--black-v3);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    transform: rotate(-0.5deg);
+}
+
+.btn-intent:nth-child(even) {
+    transform: rotate(0.5deg);
+}
+
+.btn-intent:hover {
+    transform: translateY(-3px) rotate(0deg);
+    box-shadow: 6px 6px 0px var(--black-v3);
+    background: var(--accent-v3);
+}
+
+.btn-intent:active {
+    transform: translateY(0px) rotate(0deg);
+    box-shadow: 2px 2px 0px var(--black-v3);
+}
+
+body.mode-oscp .btn-intent {
+    background: #21262d;
+    border-color: #30363d;
+    box-shadow: 4px 4px 0px #30363d;
+    color: #c9d1d9;
+}
+
+body.mode-oscp .btn-intent:hover {
+    background: #30363d;
+    box-shadow: 6px 6px 0px #30363d;
+}
+
+/* Chat Input Area */
+.chat-input-area {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+    border: 4px solid var(--black-v3);
+    box-shadow: 6px 6px 0px var(--black-v3);
+    background: var(--white-v3);
+    transform: rotate(0.2deg);
+}
+
+body.mode-oscp .chat-input-area {
+    background: #161b22;
+    border-color: #30363d;
+    box-shadow: 6px 6px 0px #30363d;
+}
+
+.mentor-input, .chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 3px solid var(--black-v3);
+    font-family: var(--font);
+    font-size: 14px;
+    background: var(--white-v3);
+    transition: all 0.2s ease;
+}
+
+.mentor-input:focus, .chat-input:focus {
+    outline: none;
+    box-shadow: 3px 3px 0px var(--black-v3);
+    transform: translateY(-2px);
+}
+
+body.mode-oscp .mentor-input, 
+body.mode-oscp .chat-input { 
+    background: #0d1117; 
+    color: #c9d1d9; 
+    border-color: #30363d;
+}
+
+body.mode-oscp .mentor-input:focus,
+body.mode-oscp .chat-input:focus {
+    box-shadow: 3px 3px 0px #30363d;
+}
+
+/* Mentor Info */
+.mentor-info {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--accent-v3);
+    border: 3px solid var(--black-v3);
+    box-shadow: 4px 4px 0px var(--black-v3);
+    font-size: 13px;
+    transform: rotate(-0.3deg);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.mode-oscp .mentor-info {
+    background: #21262d;
+    border-color: #30363d;
+    box-shadow: 4px 4px 0px #30363d;
+    color: #c9d1d9;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .mentor-intent-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .btn-intent {
+        font-size: 11px;
+        padding: 12px 14px;
+    }
+    
+    .chat-history {
+        max-height: 400px;
+        padding: 16px;
+    }
+    
+    .chat-bubble {
+        max-width: 85%;
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+    
+    .chat-input-area {
+        padding: 14px;
+        flex-direction: column;
+    }
+    
+    .mentor-input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .mentor-intent-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .chat-history {
+        transform: rotate(0deg);
+    }
+    
+    .chat-input-area {
+        transform: rotate(0deg);
+    }
+    
+    .mentor-info {
+        transform: rotate(0deg);
+    }
+}
+
+/* Legacy card styles - keeping for backward compatibility */
 .mentor-card {
     background: var(--white);
     border: var(--border-thick);
@@ -2536,40 +2762,6 @@ body.mode-oscp .mentor-card { background: #161b22; border-color: #30363d; }
     background: var(--cream);
 }
 body.mode-oscp .chat-area { background: #0d1117; }
-.chat-bubble {
-    max-width: 80%;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    border: var(--border);
-    font-size: 13px;
-    line-height: 1.6;
-}
-.chat-bubble.mentor { 
-    background: var(--white); 
-    margin-right: auto;
-    transform: rotate(-0.5deg);
-}
-body.mode-oscp .chat-bubble.mentor { background: #21262d; border-color: #30363d; }
-.chat-bubble.user { 
-    background: var(--primary); 
-    color: #fff; 
-    margin-left: auto;
-    transform: rotate(0.5deg);
-}
-.chat-input-area {
-    display: flex;
-    gap: 10px;
-    padding: 14px;
-    border-top: var(--border);
-}
-.chat-input {
-    flex: 1;
-    padding: 10px;
-    border: var(--border);
-    font-family: var(--font);
-    font-size: 13px;
-}
-body.mode-oscp .chat-input { background: #0d1117; color: #c9d1d9; border-color: #30363d; }
 
 /* ============ FOOTER ============ */
 .footer {

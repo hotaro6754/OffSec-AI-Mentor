@@ -2787,172 +2787,138 @@ async function downloadRoadmapPDF() {
         // Loading state
         downloadPdfBtn.disabled = true;
         downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Generating PDF...';
-        showNotification('Preparing your roadmap for high-quality PDF export...', 'info');
+        showNotification('Generating your roadmap PDF client-side...', 'info');
 
         const isDarkMode = document.body.classList.contains('mode-oscp');
+        
+        // Check if libraries are loaded
+        if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+            throw new Error('PDF libraries not loaded. Please refresh the page and try again.');
+        }
 
-        // Step 1: Create print-safe HTML content
-        const pdfRoot = document.createElement('div');
-        pdfRoot.id = 'pdf-root';
-        pdfRoot.className = 'roadmap-v3-container';
-        // Apply critical styles directly to ensure they are captured by outerHTML
-        pdfRoot.style.cssText = `
-            width: 1000px;
-            display: block;
+        // Create a temporary container for PDF content
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 800px;
             background: ${isDarkMode ? '#121212' : '#ffffff'};
             color: ${isDarkMode ? '#ffffff' : '#000000'};
             padding: 40px;
-            margin: 0 auto;
-            min-height: 100vh;
+            font-family: 'IBM Plex Mono', monospace;
         `;
+        
+        // Add branding header
+        const header = document.createElement('div');
+        header.style.cssText = `
+            background: #ff3e00;
+            border: 3px solid #000;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        `;
+        header.innerHTML = `
+            <h1 style="font-size: 28px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">
+                OffSec Learning Roadmap
+            </h1>
+            <div style="font-size: 12px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <span>Target: <strong>${appState.selectedCert?.toUpperCase() || 'General'}</strong></span>
+                <span>Date: <strong>${new Date().toLocaleDateString()}</strong></span>
+                <span>Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
+            </div>
+        `;
+        pdfContainer.appendChild(header);
         
         // Clone roadmap content
         const contentClone = elements.roadmapContent.cloneNode(true);
         
-        // Strip interactive elements and scripts but keep layout
+        // Strip interactive elements
         contentClone.querySelectorAll('button, input, select, script, .btn-reveal-secret, .hidden').forEach(el => el.remove());
         
-        // Ensure all links are absolute and styled
-        contentClone.querySelectorAll('a').forEach(link => {
-            link.style.color = '#ff3e00';
-            link.style.textDecoration = 'underline';
-            link.style.fontWeight = 'bold';
-        });
-
-        // Add branding header
-        const header = document.createElement('div');
-        header.className = 'roadmap-v3-header';
-        header.style.cssText = `
-            background: #ff3e00;
-            border: 3px solid #000;
-            padding: 30px;
-            box-shadow: 6px 6px 0px #000;
-            color: white;
-            margin-bottom: 30px;
-            text-align: center;
-        `;
-        header.innerHTML = `
-            <h1 style="font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">
-                OffSec Learning Roadmap
-            </h1>
-            <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Target: <strong>${appState.selectedCert?.toUpperCase() || 'Roadmap'}</strong></span>
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
-            </div>
+        // Apply styles to content
+        contentClone.style.cssText = `
+            background: ${isDarkMode ? '#121212' : '#ffffff'};
+            color: ${isDarkMode ? '#ffffff' : '#000000'};
         `;
         
-        pdfRoot.appendChild(header);
-        pdfRoot.appendChild(contentClone);
+        pdfContainer.appendChild(contentClone);
         
-        // Add Raw JSON data (hidden in UI but present in PDF for copy-paste)
-        const jsonSection = document.createElement('div');
-        jsonSection.style.cssText = `
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border: 2px dashed #000;
-            page-break-before: always;
-        `;
-        jsonSection.innerHTML = `
-            <h2 style="font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px;">Raw Roadmap Data (JSON)</h2>
-            <pre style="font-size: 10px; white-space: pre-wrap; word-break: break-all; color: #333;">${JSON.stringify(appState.roadmapJSON, null, 2)}</pre>
-        `;
-        pdfRoot.appendChild(jsonSection);
-
         // Add footer
         const footer = document.createElement('div');
         footer.style.cssText = `
-            margin-top: 50px;
-            padding: 20px;
+            margin-top: 30px;
+            padding: 15px;
             text-align: center;
-            font-size: 12px;
-            border-top: 3px solid #000;
-            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            border-top: 2px solid #000;
         `;
         footer.innerHTML = `
             <p><strong>OFFSEC AI MENTOR</strong> - Your Path to Mastery</p>
-            <p style="margin-top: 5px; opacity: 0.7;">This roadmap is generated based on your unique skill profile.</p>
-            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API & iLovePDF</p>
+            <p style="margin-top: 5px;">&copy; 2026 OffSec AI Mentor</p>
         `;
-        pdfRoot.appendChild(footer);
+        pdfContainer.appendChild(footer);
         
-        // Create complete HTML document - using outerHTML to preserve root styles
-        // Note: style.css is now injected by the backend for higher reliability
-        const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>OffSec Learning Roadmap</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { margin: 0; padding: 0; background: ${isDarkMode ? '#121212' : '#ffffff'}; }
-        * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        @page { margin: 0; size: A4; }
-    </style>
-</head>
-<body class="${isDarkMode ? 'mode-oscp' : ''}">
-    ${pdfRoot.outerHTML}
-</body>
-</html>
-        `.trim();
+        // Add to DOM temporarily
+        document.body.appendChild(pdfContainer);
         
-        const filename = `OffSec-Roadmap-${appState.selectedCert || 'Learning'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        // Wait for fonts and images to load
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Prepare headers with custom keys if available
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-
-        const ilovepdfPublic = localStorage.getItem('ilovepdfPublicKey');
-        const ilovepdfSecret = localStorage.getItem('ilovepdfSecretKey');
-
-        if (ilovepdfPublic) headers['X-ILovePDF-Public-Key'] = ilovepdfPublic;
-        if (ilovepdfSecret) headers['X-ILovePDF-Secret-Key'] = ilovepdfSecret;
-
-        // Step 2: Send to backend API
-        const response = await fetch('/api/generate-pdf', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                html: htmlContent,
-                filename: filename
-            })
+        // Capture as canvas
+        const canvas = await html2canvas(pdfContainer, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: isDarkMode ? '#121212' : '#ffffff',
+            logging: false
         });
         
-        if (!response.ok) {
-            // Robust error parsing for non-JSON responses
-            let errorMsg = 'Failed to generate PDF';
-            const responseText = await response.text();
+        // Remove temporary container
+        document.body.removeChild(pdfContainer);
+        
+        // Create PDF using jsPDF
+        const { jsPDF } = window.jspdf;
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
 
-            try {
-                const errorData = JSON.parse(responseText);
-                errorMsg = errorData.details ? `${errorData.error} (${errorData.details})` : (errorData.error || errorMsg);
-            } catch (e) {
-                // Fallback for HTML error pages or other non-JSON content
-                console.error('Non-JSON error from PDF API:', responseText.substring(0, 200));
-                errorMsg = `Server Error (${response.status}): The PDF service is temporarily unavailable.`;
-            }
-            throw new Error(errorMsg);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png');
+
+        // Add first page
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        // Add more pages if content is longer
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
         }
+
+        // Download the PDF
+        const filename = `OffSec-Roadmap-${appState.selectedCert || 'Learning'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
         
-        // Step 3: Download the PDF
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showSuccess('PDF generated successfully via iLovePDF!');
+        showSuccess('PDF generated successfully!');
         
     } catch (error) {
         console.error('❌ PDF generation error:', error);
-        showError(`PDF generation failed: ${error.message}. Please use "Export as JSON" instead.`);
+        showError(`PDF generation failed: ${error.message}. Trying JSON export as fallback...`);
+        
+        // Fallback to JSON export
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            downloadRoadmapJSON();
+            showNotification('Roadmap exported as JSON instead of PDF', 'info');
+        } catch (fallbackError) {
+            console.error('❌ Fallback export error:', fallbackError);
+            showError('Both PDF and JSON export failed. Please try again later.');
+        }
     } finally {
         downloadPdfBtn.disabled = false;
         downloadPdfBtn.innerHTML = originalText;
