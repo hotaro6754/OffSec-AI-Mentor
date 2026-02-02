@@ -2336,8 +2336,79 @@ function displayRoadmap(roadmapData) {
         lucide.createIcons();
     }
 
+    // Final Outcome & Special Resource
+    renderFinalOutcome(roadmapObj);
+
     // Scroll to top of roadmap
     window.scrollTo({ top: elements.roadmapSection.offsetTop - 100, behavior: 'smooth' });
+}
+
+function renderFinalOutcome(roadmapObj) {
+    const section = document.getElementById('roadmapSection');
+    if (!section) return;
+    const roadmapContainer = section.querySelector('.container') || section;
+
+    // Remove existing if any
+    const existing = document.getElementById('finalOutcomeCard');
+    if (existing) existing.remove();
+
+    const outcome = roadmapObj.final_outcome;
+    const secret = roadmapObj.special_resource;
+
+    if (!outcome) return;
+
+    const outcomeCard = document.createElement('div');
+    outcomeCard.id = 'finalOutcomeCard';
+    outcomeCard.className = 'neo-card-v3 animate__animated animate__fadeInUp';
+    outcomeCard.style.marginTop = '40px';
+    outcomeCard.style.border = '4px solid black';
+    outcomeCard.style.boxShadow = '10px 10px 0 var(--primary-v3)';
+
+    outcomeCard.innerHTML = `
+        <div class="card-header-v3" style="background: var(--primary-v3); color: white; border-bottom: 4px solid black;">
+            <h3>🎓 THE PATH TO MASTERY: ENDGAME</h3>
+            <p>What you will achieve after following this 1-year mentor path</p>
+        </div>
+        <div class="card-body-v3" style="padding: 30px; background: white;">
+            <div style="margin-bottom: 25px;">
+                <h4 style="text-transform: uppercase; font-weight: 900; font-size: 1.2rem; color: var(--primary-v3); margin-bottom: 10px;">Mastery Level Achieved</h4>
+                <p style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">${outcome.mastery_level}</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <div>
+                    <h4 style="text-transform: uppercase; font-weight: 900; margin-bottom: 15px; border-bottom: 2px solid black;">Core Achievements</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${(outcome.achievements || []).map(a => `
+                            <li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;">
+                                <span style="background: var(--secondary-v3); border: 2px solid black; padding: 0 5px; font-weight: 900;">✓</span>
+                                <span style="font-weight: 600;">${a}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="text-transform: uppercase; font-weight: 900; margin-bottom: 15px; border-bottom: 2px solid black;">Career Readiness</h4>
+                    <div style="background: var(--bg-v3); border: 2px solid black; padding: 15px; font-weight: 700;">
+                        ${outcome.career_readiness}
+                    </div>
+                </div>
+            </div>
+
+            ${secret ? `
+                <div style="border: 4px dashed black; padding: 25px; text-align: center; background: var(--secondary-v3);">
+                    <h3 style="margin-bottom: 15px; font-weight: 900;">🎁 MENTOR'S FINAL GIFT</h3>
+                    <p style="margin-bottom: 20px; font-weight: 600;">"Knowledge is power, but wisdom is eternal." - Your AI Mentor</p>
+                    <button class="btn btn-primary" onclick="revealSecret('roadmap-secret-content')" style="width: auto; padding: 15px 30px;">
+                        ${secret.name}
+                    </button>
+                    <div id="roadmap-secret-content" class="hidden" style="margin-top: 20px;"></div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    roadmapContainer.appendChild(outcomeCard);
 }
 
 function openSkillPanel(phaseData) {
@@ -2346,8 +2417,16 @@ function openSkillPanel(phaseData) {
 
     document.getElementById('skillTitle').innerText = phaseData.phase_name;
     document.getElementById('skillIcon').innerText = '🛡️';
-    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks`;
-    document.getElementById('skillDescription').innerText = phaseData.why_it_matters || 'Advanced mentor guidance for this phase.';
+    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks | Mentor Session`;
+
+    // Combine why it matters and mentor notes
+    let descriptionHtml = `<strong>Syllabus Alignment:</strong> ${phaseData.why_it_matters || 'N/A'}`;
+    if (phaseData.mentor_notes) {
+        descriptionHtml += `<div style="margin-top: 15px; padding: 12px; background: var(--secondary-v3); color: black; border: 2px solid black; font-weight: 600; font-size: 0.85rem;">
+            💡 MENTOR NOTES: ${phaseData.mentor_notes}
+        </div>`;
+    }
+    document.getElementById('skillDescription').innerHTML = descriptionHtml;
 
     // Objectives
     const objectivesList = document.getElementById('skillObjectives');
@@ -2358,19 +2437,52 @@ function openSkillPanel(phaseData) {
     const labsList = document.getElementById('skillLabs');
     labsList.innerHTML = (phaseData.mandatory_labs || [])
         .map(lab => `
-            <li style="margin-bottom: 15px;">
-                <div style="font-weight: 800; color: var(--primary-v3);">${lab.name} (${lab.platform})</div>
-                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 3px solid var(--black-v3); margin-top: 5px;">
+            <li style="margin-bottom: 20px; list-style: none; border: 2px solid black; padding: 15px; background: white; box-shadow: 4px 4px 0 black;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 900; text-transform: uppercase; font-size: 0.9rem;">${lab.name}</span>
+                    <span style="background: black; color: white; padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">${lab.platform}</span>
+                </div>
+                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 4px solid var(--primary-v3); margin-bottom: 10px;">
                     <strong>Mentor Key Points:</strong> ${lab.key_points || 'Focus on systematic enumeration and methodology.'}
                 </div>
-                ${lab.url ? `<a href="${lab.url}" target="_blank" style="display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--secondary-v3); font-weight: 700;">Start Lab →</a>` : ''}
+                ${lab.url ? `<a href="${lab.url}" target="_blank" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; font-size: 0.75rem;">Access Lab Room →</a>` : ''}
             </li>
         `).join('');
 
     // Tools
     const toolsContainer = document.getElementById('skillTools');
     toolsContainer.innerHTML = (phaseData.tools || [])
-        .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); border-style: dashed;">${t.name || t}</span>`).join('');
+        .map(t => {
+            const toolName = typeof t === 'string' ? t : (t.name || 'Tool');
+            const toolHow = typeof t === 'object' && t.how_to_use ? t.how_to_use : '';
+            return `
+                <div style="width: 100%; margin-bottom: 8px;">
+                    <span class="year-badge-v2" style="background: var(--accent-v3); border-style: solid; font-size: 0.75rem; width: auto;">${toolName}</span>
+                    ${toolHow ? `<div style="font-size: 0.7rem; color: #555; margin-left: 5px; font-style: italic;">How to use: ${toolHow}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+
+    // Phase Checklist
+    if (phaseData.completion_checklist && phaseData.completion_checklist.length > 0) {
+        const checklistDiv = document.createElement('div');
+        checklistDiv.className = 'data-section-v2';
+        checklistDiv.innerHTML = `
+            <div class="data-title-v2">✅ PHASE CHECKLIST</div>
+            <ul style="list-style: none; padding: 0;">
+                ${phaseData.completion_checklist.map(item => `
+                    <li style="margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem;">
+                        <input type="checkbox" style="margin-top: 4px;"> <span>${item}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+        // Append or replace
+        const existingChecklist = panel.querySelector('.phase-internal-checklist');
+        if (existingChecklist) existingChecklist.remove();
+        checklistDiv.classList.add('phase-internal-checklist');
+        panel.appendChild(checklistDiv);
+    }
 
     panel.classList.add('open');
 }
@@ -2383,63 +2495,86 @@ function createSkillTree(treeData) {
     container.innerHTML = '';
     svg.innerHTML = '';
 
-    const width = container.offsetWidth || 800;
-    const height = 600;
+    // Wait for layout to be stable
+    const width = container.offsetWidth || 1000;
+    const height = 800;
     const centerX = width / 2;
     const centerY = height / 2;
 
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
     const categories = treeData.categories || [];
-    const radius = 220;
+    const baseRadius = 240;
+
+    // Colors based on user's repo style
+    const colors = ['var(--y1, #4ECDC4)', 'var(--y2, #FF9F1C)', 'var(--y3, #FF6B6B)', 'var(--y4, #9D4EDD)'];
 
     categories.forEach((cat, catIdx) => {
+        // Spread categories around the circle
         const angle = (catIdx / categories.length) * 2 * Math.PI - Math.PI / 2;
+        const color = colors[catIdx % colors.length];
 
         cat.skills.forEach((skill, skillIdx) => {
-            const skillRadius = radius + (skillIdx * 40);
-            const x = centerX + skillRadius * Math.cos(angle + (skillIdx * 0.1));
-            const y = centerY + skillRadius * Math.sin(angle + (skillIdx * 0.1));
+            // Further skills are further out
+            const skillRadius = baseRadius + (skillIdx * 55);
 
-            // Create node
+            // Add slight angular variance for better spacing
+            const angularShift = (skillIdx % 2 === 0 ? 0.05 : -0.05) * (skillIdx + 1);
+            const x = centerX + skillRadius * Math.cos(angle + angularShift);
+            const y = centerY + skillRadius * Math.sin(angle + angularShift);
+
+            // Create node (Neo-Brutalist Circle)
             const node = document.createElement('div');
             node.className = 'skill-node-v2';
-            node.style.left = `${x - 50}px`;
-            node.style.top = `${y - 50}px`;
+            node.style.left = `${x - 45}px`;
+            node.style.top = `${y - 45}px`;
+            node.style.width = '90px';
+            node.style.height = '90px';
+            node.style.background = color;
+            node.style.border = '3px solid black';
+            node.style.boxShadow = '5px 5px 0 black';
+
             node.innerHTML = `
-                <div class="skill-node-icon-v2">${skill.icon || '🛡️'}</div>
-                <div class="skill-node-label-v2">${skill.name}</div>
+                <div class="skill-node-icon-v2" style="font-size: 1.5rem;">${skill.icon || '🛡️'}</div>
+                <div class="skill-node-label-v2" style="font-size: 0.6rem; line-height: 1; font-weight: 800;">${skill.name}</div>
             `;
             
             node.addEventListener('click', () => {
-                showNotification(`Mastered: ${skill.name}`, 'success');
+                showNotification(`Mastered: ${skill.name} (${skill.level})`, 'success');
             });
 
             container.appendChild(node);
 
-            // Create line to center
+            // Create stylized connection line to center
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', centerX);
             line.setAttribute('y1', centerY);
             line.setAttribute('x2', x);
             line.setAttribute('y2', y);
-            line.setAttribute('class', 'connection-line-v2');
+            line.setAttribute('stroke', 'black');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', '5,5');
+            line.setAttribute('opacity', '0.4');
             svg.appendChild(line);
         });
     });
 
-    // Central Core Node
+    // Central Core Node (Certification Goal)
     const core = document.createElement('div');
-    core.className = 'skill-node-v2';
-    core.style.width = '120px';
-    core.style.height = '120px';
-    core.style.left = `${centerX - 60}px`;
-    core.style.top = `${centerY - 60}px`;
+    core.className = 'skill-node-v2 core-goal';
+    core.style.width = '130px';
+    core.style.height = '130px';
+    core.style.left = `${centerX - 65}px`;
+    core.style.top = `${centerY - 65}px`;
     core.style.background = 'var(--primary-v3)';
     core.style.color = 'white';
+    core.style.border = '4px solid black';
+    core.style.boxShadow = '8px 8px 0 black';
+    core.style.zIndex = '10';
+
     core.innerHTML = `
-        <div class="skill-node-icon-v2">🎯</div>
-        <div class="skill-node-label-v2" style="color: white;">CERTIFIED</div>
+        <div class="skill-node-icon-v2" style="font-size: 2.5rem;">🎯</div>
+        <div class="skill-node-label-v2" style="color: white; font-size: 0.8rem; font-weight: 900;">TARGET CERT</div>
     `;
     container.appendChild(core);
 }
