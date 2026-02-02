@@ -206,7 +206,7 @@ const CYBER_QUOTES = [
 // GLOBAL STATE
 // ============================================================================
 
-const appState = {
+let appState = {
     currentQuestion: 0,
     questions: [],
     answers: {},
@@ -1794,6 +1794,9 @@ async function generateRoadmapForCert(certId) {
     
     // Show roadmap section
     showSection('roadmapSection');
+    // Ensure the container for loading screen is visible
+    document.getElementById('roadmapContainerLegacy')?.classList.remove('hidden');
+    document.getElementById('roadmapTimelineV2')?.classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Update header
@@ -1835,41 +1838,44 @@ async function generateRoadmapForCert(certId) {
     roadmapContent.innerHTML = `
         <div class="loading-state enhanced neo-brutal-loading">
             <div class="loading-header">
-                <h3 class="neo-brutal-title">CONSTRUCTING ROADMAP...</h3>
-                <p class="loading-cert-name">${certName}</p>
+                <h3 class="neo-brutal-title glitch-text">COMPILING ROADMAP</h3>
+                <p class="loading-cert-name-v3">${certName}</p>
             </div>
             
-            <div class="cyber-loader-container">
-                <div class="cyber-loader">
-                    <div class="loader-ring"></div>
-                    <div class="loader-ring"></div>
-                    <div class="loader-ring"></div>
-                    <div class="loader-icon">⚙️</div>
-                </div>
-                <div class="loading-joke-container" id="loadingJoke">
+            <div class="brutal-percentage-container">
+                <div class="brutal-percentage-value" id="progressPercentage">0%</div>
+                <div class="brutal-percentage-label">SYSTEM_COMPILING...</div>
+            </div>
+
+            <div class="cyber-loader-container-v3">
+                <div class="loading-joke-container-v3" id="loadingJoke">
                     "🔧 75% of bugs are fixed by checking the API key..."
                 </div>
             </div>
             
-            <div class="loading-stages-neo">
+            <div class="loading-stages-neo-v3">
                 ${loadingStages.map((s, i) => `
-                    <div class="stage-item-neo ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
-                        <div class="stage-indicator-neo">
-                            <span class="stage-num">${s.stage}</span>
-                            <span class="stage-done">✓</span>
+                    <div class="stage-item-neo-v3 ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
+                        <div class="stage-indicator-neo-v3">
+                            <span class="stage-num-v3">${s.stage}</span>
+                            <span class="stage-done-v3">DONE</span>
                         </div>
-                        <div class="stage-label">${s.text}</div>
+                        <div class="stage-label-v3">${s.text}</div>
                     </div>
                 `).join('')}
             </div>
             
-            <div class="neo-progress-container">
-                <div class="neo-progress-bar" id="roadmapProgressBar" style="width: 0%"></div>
-                <div class="neo-progress-text" id="progressPercentage">0%</div>
+            <div class="neo-progress-container-v3">
+                <div class="neo-progress-bar-v3" id="roadmapProgressBar" style="width: 0%"></div>
+                <div class="neo-progress-glitch"></div>
             </div>
             
-            <div class="neo-loading-footer">
-                <span class="status-dot"></span> SYSTEM ONLINE: GENERATING NEURAL PATHWAY...
+            <div class="neo-loading-footer-v3">
+                <div class="terminal-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">KERNEL_STATUS: ACTIVE</span>
+                </div>
+                <div class="terminal-command">EXEC roadmap_gen --target "${certId}"</div>
             </div>
         </div>
     `;
@@ -1895,7 +1901,7 @@ async function generateRoadmapForCert(certId) {
     
     // Function to update stage UI
     const updateStage = (stageIndex) => {
-        const stageItems = document.querySelectorAll('.stage-item-neo');
+        const stageItems = document.querySelectorAll('.stage-item-neo-v3');
         stageItems.forEach((item, i) => {
             if (i < stageIndex) {
                 item.classList.remove('active');
@@ -1954,7 +1960,7 @@ async function generateRoadmapForCert(certId) {
         if (progressPercentage) progressPercentage.textContent = '100%';
         
         // Mark all stages complete
-        document.querySelectorAll('.stage-item-neo').forEach(item => {
+        document.querySelectorAll('.stage-item-neo-v3').forEach(item => {
             item.classList.remove('active');
             item.classList.add('completed');
         });
@@ -2916,8 +2922,18 @@ async function downloadRoadmapPDF() {
         });
         
         if (!response.ok) {
-            const error = await response.json();
-            const errorMsg = error.details ? `${error.error} (${error.details})` : (error.error || 'Failed to generate PDF');
+            // Robust error parsing for non-JSON responses
+            let errorMsg = 'Failed to generate PDF';
+            const responseText = await response.text();
+
+            try {
+                const errorData = JSON.parse(responseText);
+                errorMsg = errorData.details ? `${errorData.error} (${errorData.details})` : (errorData.error || errorMsg);
+            } catch (e) {
+                // Fallback for HTML error pages or other non-JSON content
+                console.error('Non-JSON error from PDF API:', responseText.substring(0, 200));
+                errorMsg = `Server Error (${response.status}): The PDF service is temporarily unavailable.`;
+            }
             throw new Error(errorMsg);
         }
         

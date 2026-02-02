@@ -1935,6 +1935,7 @@ app.post('/api/generate-pdf', async (req, res) => {
 
         // High-fidelity rendering: Inject local style.css content directly into HTML
         try {
+            console.log('🎨 [1/6] Preparing CSS injection for PDF...');
             const cssPath = path.join(__dirname, 'style.css');
             if (fs.existsSync(cssPath)) {
                 let cssContent = fs.readFileSync(cssPath, 'utf8');
@@ -1945,49 +1946,50 @@ app.post('/api/generate-pdf', async (req, res) => {
                     .replace(/\s+/g, ' ')             // Collapse whitespace
                     .trim();
 
-                const styleTag = `\n<style>\n${cssContent}\n</style>\n`;
+                const styleTag = `\n<style id="injected-style">\n${cssContent}\n</style>\n`;
 
                 // Inject style tag into head or at the beginning of body
-                if (html.includes('</head>')) {
+                if (html.includes('</head>') && !html.includes('id="injected-style"')) {
                     html = html.replace('</head>', `${styleTag}</head>`);
-                } else if (html.includes('<body>')) {
+                } else if (html.includes('<body>') && !html.includes('id="injected-style"')) {
                     html = html.replace('<body>', `<body>${styleTag}`);
-                } else {
+                } else if (!html.includes('id="injected-style"')) {
                     html = styleTag + html;
                 }
-                console.log(`✅ Injected and minified style.css into PDF HTML payload (${cssContent.length} bytes)`);
+                console.log(`✅ CSS injected and minified (${cssContent.length} bytes)`);
             }
         } catch (cssError) {
             console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
         }
 
-        console.log('📄 [1/4] Initializing iLovePDF API...');
+        console.log('📄 [2/6] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
         const tempDir = os.tmpdir();
         const timestamp = Date.now();
         tempHtmlPath = path.join(tempDir, `offsec-roadmap-${timestamp}.html`);
         
-        console.log(`📄 [2/4] Creating temporary HTML file: ${tempHtmlPath}`);
+        console.log(`📄 [3/6] Creating temporary HTML file: ${tempHtmlPath}`);
         fs.writeFileSync(tempHtmlPath, html, 'utf8');
         
+        console.log('📄 [4/6] Starting iLovePDF task...');
         const task = instance.newTask('htmlpdf');
         await task.start();
         
         const file = new ILovePDFFile(tempHtmlPath);
         await task.addFile(file);
         
-        console.log('📄 [3/4] Processing HTML to PDF conversion...');
+        console.log('📄 [5/6] Processing HTML to PDF conversion...');
         await task.process({
             view_width: 1024,
-            delay: 2000, // Increased delay for better asset loading
+            delay: 3000, // Slightly more delay for asset loading
             single_page: false,
             page_size: 'A4',
             page_orientation: 'portrait',
             page_margin: 10
         });
         
-        console.log('📄 [4/4] Downloading generated PDF buffer...');
+        console.log('📄 [6/6] Downloading generated PDF buffer...');
         const pdfBuffer = await task.download();
         
         console.log('✅ PDF generation workflow completed successfully');
