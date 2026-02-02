@@ -2708,7 +2708,8 @@ async function downloadRoadmapPDF() {
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Failed to generate PDF');
+            const errorMsg = error.details ? `${error.error} (${error.details})` : (error.error || 'Failed to generate PDF');
+            throw new Error(errorMsg);
         }
         
         // Step 3: Download the PDF

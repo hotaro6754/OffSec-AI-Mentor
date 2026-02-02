@@ -23,6 +23,7 @@ const path = require('path');
 const db = require('./database');
 const fs = require('fs');
 const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
+const ILovePDFFile = require('@ilovepdf/ilovepdf-nodejs/ILovePDFFile');
 
 // ============================================================================
 // CONFIGURATION
@@ -1868,6 +1869,9 @@ app.get('/api/health', (req, res) => {
 
 // PDF Generation endpoint using iLovePDF
 app.post('/api/generate-pdf', async (req, res) => {
+    let tempHtmlPath = null;
+    let tempPdfPath = null;
+
     try {
         const { html, filename } = req.body;
         
@@ -1897,8 +1901,8 @@ app.post('/api/generate-pdf', async (req, res) => {
         }
         
         const timestamp = Date.now();
-        const tempHtmlPath = path.join(tempDir, `roadmap-${timestamp}.html`);
-        const tempPdfPath = path.join(tempDir, `roadmap-${timestamp}.pdf`);
+        tempHtmlPath = path.join(tempDir, `roadmap-${timestamp}.html`);
+        tempPdfPath = path.join(tempDir, `roadmap-${timestamp}.pdf`);
         
         // Write HTML to temporary file
         fs.writeFileSync(tempHtmlPath, html, 'utf8');
@@ -1907,31 +1911,22 @@ app.post('/api/generate-pdf', async (req, res) => {
         const task = instance.newTask('htmlpdf');
         await task.start();
         
-        // Upload HTML file
-        await task.addFile(tempHtmlPath);
+        // Upload HTML file using ILovePDFFile object
+        const file = new ILovePDFFile(tempHtmlPath);
+        await task.addFile(file);
         
         // Process the conversion
         await task.process();
         
-        // Download the generated PDF
-        const data = await task.download();
-        
-        // Save the PDF temporarily
-        fs.writeFileSync(tempPdfPath, data);
-        
-        // Read the PDF file
-        const pdfBuffer = fs.readFileSync(tempPdfPath);
-        
-        // Clean up temporary files
-        fs.unlinkSync(tempHtmlPath);
-        fs.unlinkSync(tempPdfPath);
+        // Download the generated PDF buffer
+        const pdfBuffer = await task.download();
         
         console.log('✅ PDF generated successfully');
         
         // Send PDF as response
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename || 'roadmap.pdf'}"`);
-        res.send(pdfBuffer);
+        res.send(Buffer.from(pdfBuffer));
         
     } catch (error) {
         console.error('❌ PDF generation error:', error);
@@ -1939,6 +1934,14 @@ app.post('/api/generate-pdf', async (req, res) => {
             error: 'Failed to generate PDF. Please try again or use the JSON export option.',
             details: error.message 
         });
+    } finally {
+        // Clean up temporary files
+        try {
+            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+            if (tempPdfPath && fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+        } catch (cleanupError) {
+            console.warn('⚠️  Temporary file cleanup failed:', cleanupError.message);
+        }
     }
 });
 
