@@ -1091,10 +1091,10 @@ Phases 13-14: Certification Mastery, Reporting, & Mock Exams`;
 CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
 - Focus: ${certContent.focus}
 - Exam: ${certContent.examFormat}
-- Syllabus to cover: ${certContent.syllabus?.join(', ')}
-- MUST USE THESE LABS: ${certContent.specificLabs.map(l => l.name).join(', ')}
-- MUST USE THESE TOOLS: ${certContent.coreTools.join(', ')}
-- YT RESOURCES: ${certContent.youtubeChannels.map(y => `${y.name} (${y.url})`).join(', ')}`;
+- Syllabus to cover: ${certContent.syllabus?.join(', ') || 'N/A'}
+- MUST USE THESE LABS: ${certContent.specificLabs?.map(l => l.name).join(', ') || 'N/A'}
+- MUST USE THESE TOOLS: ${certContent.coreTools?.join(', ') || 'N/A'}
+- YT RESOURCES: ${certContent.youtubeChannels?.map(y => `${y.name} (${y.url})`).join(', ') || 'N/A'}`;
         }
 
         return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap as an AI Mentor.
