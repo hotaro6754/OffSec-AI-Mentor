@@ -176,17 +176,26 @@ const RESOURCES = {
         }
     },
     tools: {
-        reconnaissance: ['Nmap', 'Masscan', 'Rustscan', 'Amass', 'Subfinder', 'httpx', 'Shodan', 'theHarvester', 'Gobuster', 'ffuf', 'Recon-ng', 'Maltego'],
-        webTesting: ['Burp Suite', 'OWASP ZAP', 'Nikto', 'SQLMap', 'wfuzz', 'XSStrike', 'Commix', 'WPScan', 'Postman', 'Dirsearch'],
-        exploitation: ['Metasploit', 'searchsploit', 'msfvenom', 'CrackMapExec', 'Impacket', 'Responder', 'Evil-WinRM', 'ExploitDB'],
-        passwordAttacks: ['Hashcat', 'John the Ripper', 'Hydra', 'CeWL', 'Crunch', 'LaZagne', 'Medusa', 'Ncrack'],
-        postExploitation: ['Mimikatz', 'BloodHound', 'PowerView', 'Rubeus', 'Covenant', 'Ligolo-ng', 'PowerUp', 'Seatbelt', 'WinPEAS', 'LinPEAS', 'SharpUp', 'Watson'],
-        c2Frameworks: ['Cobalt Strike', 'Sliver', 'Empire', 'Mythic', 'Havoc', 'Covenant', 'PowerShell Empire'],
-        enumeration: ['enum4linux', 'smbclient', 'ldapsearch', 'ADExplorer', 'AzureHound', 'SMBMap', 'RPCClient', 'SNMPwalk'],
-        cloud: ['Pacu', 'ScoutSuite', 'Prowler', 'AADInternals', 'ROADtools', 'CloudFox', 'Trivy'],
-        wireless: ['Aircrack-ng', 'Wifite', 'Bettercap', 'Kismet', 'Reaver', 'Wash'],
-        forensics: ['Volatility', 'Autopsy', 'Wireshark', 'FTK Imager', 'Sysmon', 'Splunk', 'ELK Stack'],
-        scripting: ['Python 3', 'Bash', 'PowerShell']
+        operatingSystems: ['Kali Linux', 'Parrot OS', 'Ubuntu (attacker & lab server)', 'Windows (Client & Server)', 'Windows AD Lab'],
+        virtualization: ['VMware Workstation', 'VirtualBox', 'QEMU', 'Vagrant'],
+        networking: ['Nmap', 'Masscan', 'RustScan', 'Unicornscan', 'Naabu'],
+        serviceEnumeration: ['Enum4linux', 'Enum4linux-ng', 'CrackMapExec', 'SMBMap', 'RPCClient', 'SNMPwalk', 'LDAPSearch'],
+        dnsOsint: ['Dig', 'Nslookup', 'Amass', 'Subfinder', 'Assetfinder', 'theHarvester', 'Recon-ng', 'Maltego'],
+        passwords: ['Hashcat', 'John the Ripper', 'Hydra', 'Medusa', 'Ncrack', 'SecLists', 'RockYou', 'Weakpass'],
+        webTesting: ['Burp Suite', 'OWASP ZAP', 'Postman', 'HTTPie', 'Gobuster', 'Dirsearch', 'FFUF', 'Wfuzz', 'Nikto', 'WhatWeb', 'SQLmap', 'XSStrike', 'NoSQLMap', 'Commix', 'SSRFmap', 'JWT-tool'],
+        exploitation: ['Metasploit Framework', 'Searchsploit', 'ExploitDB', 'Canvas (theory)', 'Core Impact (theory)'],
+        privesc: ['LinPEAS', 'LinEnum', 'Linux-Exploit-Suggester', 'pspy', 'WinPEAS', 'PowerUp', 'Seatbelt', 'SharpUp', 'Watson'],
+        activeDirectory: ['BloodHound', 'SharpHound', 'PowerView', 'ADExplorer', 'Responder', 'Impacket', 'Mimikatz', 'Rubeus', 'Evil-WinRM', 'Kerbrute', 'CrackMapExec (AD)', 'PsExec', 'WMIExec', 'SMBExec', 'WinRM', 'RDP'],
+        redTeam: ['Sliver', 'Mythic', 'Empire', 'Covenant', 'Donut', 'Shellter', 'Veil', 'MSFvenom', 'Nimcrypt', 'LOLBins', 'GTFOBins'],
+        pivoting: ['Chisel', 'Ligolo-NG', 'SSH Tunneling', 'ProxyChains', 'Socat', 'Plink'],
+        wireless: ['Aircrack-ng', 'Airmon-ng', 'Airodump-ng', 'Aireplay-ng', 'Reaver', 'Wash', 'Bettercap', 'Kismet', 'Wifite'],
+        exploitDev: ['WinDbg', 'x64dbg', 'Immunity Debugger', 'GDB', 'Radare2', 'Ghidra', 'IDA Pro', 'NASM', 'MASM', 'GCC', 'Mingw', 'Visual Studio', 'AFL', 'Peach Fuzzer', 'BooFuzz', 'Radamsa'],
+        shells: ['Netcat', 'Ncat', 'Socat', 'Reverse shells (bash, python, powershell)', 'Web shells', 'PowerShell Empire agents'],
+        packetAnalysis: ['Wireshark', 'tcpdump', 'Tshark'],
+        defensive: ['Splunk', 'Elastic Stack', 'Security Onion', 'Wazuh', 'Sigma', 'YARA', 'Suricata', 'Zeek'],
+        macos: ['Objective-C tools', 'Hopper', 'LLDB', 'Frida', 'Xcode', 'class-dump', 'otool'],
+        cloud: ['Docker', 'Docker-Compose', 'Kubernetes (kubectl)', 'Trivy', 'ScoutSuite', 'Pacu'],
+        misc: ['tmux', 'zsh', 'Oh-My-Zsh', 'Terminator', 'Obsidian (notes)', 'CherryTree', 'Flameshot']
     },
     books: [
         { title: "TCP/IP Illustrated", author: "W. Richard Stevens", focus: "Networking Fundamentals" },
@@ -1054,27 +1063,34 @@ UNIVERSAL FOUNDATION (Required for all certs):
 - Ethics: Cybersecurity ethics & legal boundaries`;
 
         const masterToolList = `
-MASTER TOOL LIST (Select relevant tools based on cert and phase):
-- Recon: Nmap, Masscan, RustScan, Enum4linux, Amass, Subfinder
-- Passwords: Hashcat, John, Hydra, SecLists
-- Web: Burp Suite, OWASP ZAP, Gobuster, FFUF, SQLmap
-- Exploitation: Metasploit, Searchsploit, Impacket, Responder
+MASTER TOOL LIST (Include ALL relevant tools for ${cert}):
+- OS: Kali, Parrot, Ubuntu, Windows AD Lab
+- Recon: Nmap, Masscan, RustScan, Amass, Subfinder
+- Enumeration: Enum4linux, CrackMapExec, SMBMap, SNMPwalk, LDAPSearch
+- Passwords: Hashcat, John, Hydra, SecLists, RockYou
+- Web: Burp Suite, OWASP ZAP, FFUF, SQLmap, XSStrike, Gobuster
+- Exploitation: Metasploit Framework, Searchsploit, ExploitDB
 - PrivEsc: LinPEAS, WinPEAS, PowerUp, pspy
-- AD: BloodHound, Mimikatz, Rubeus, Evil-WinRM
-- Red Team: Sliver, Empire, Donut, LolBins
-- Pivoting: Chisel, Ligolo-NG, ProxyChains
-- Wireless: Aircrack-ng suite, Bettercap`;
+- AD: BloodHound, Mimikatz, Rubeus, Evil-WinRM, Impacket, Responder
+- Red Team: Sliver, Mythic, Empire, Donut, LOLBins, GTFOBins
+- Pivoting: Chisel, Ligolo-NG, ProxyChains, Socat
+- Wireless: Aircrack-ng, Bettercap, Wifite
+- Exploit Dev: WinDbg, x64dbg, Ghidra, GDB, AFL
+- Analysis: Wireshark, tcpdump, Splunk, Elastic, Security Onion`;
 
         const instructions = `
 CRITICAL INSTRUCTIONS FOR AI MENTOR:
 1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be CONCISE, PRACTICAL, and HIGH-IMPACT.
 2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (8-10 phases). Focus on quality over quantity.
-3. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
-4. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
-5. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
-6. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
-7. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
-8. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
+4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
+5. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
+6. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
+7. **CLICKABLE LINKS**: For YouTube, Web resources, and Books, you MUST provide working clickable links in the "url" field. If a specific URL is unknown, use a high-quality search URL or the primary site.
+8. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
+9. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
+10. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
+11. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
 
 PHASE STRUCTURE (8-10 Phases):
 Phases 1-2: Foundations (Linux, Networking, Windows, Scripting)
@@ -1112,12 +1128,12 @@ REQUIREMENTS:
 2. **Dynamic Phases**: MUST generate exactly 8-10 phases. Each phase MUST have:
    - "Why it matters for ${cert}" - syllabus alignment
    - Specific Learning Outcomes
-   - Tools needed for THIS phase
+   - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
    - Mandatory Labs with WORKING URLs and brief "Mentor Key Points"
-   - Resources (YouTube, Web, Books)
+   - Resources (YouTube, Web, Books) with CLICKABLE LINKS
 3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
 4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
-5. **Special Resource**: Rickroll at the end.
+5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 STRICT RULES:
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
@@ -1921,7 +1937,14 @@ app.post('/api/generate-pdf', async (req, res) => {
         try {
             const cssPath = path.join(__dirname, 'style.css');
             if (fs.existsSync(cssPath)) {
-                const cssContent = fs.readFileSync(cssPath, 'utf8');
+                let cssContent = fs.readFileSync(cssPath, 'utf8');
+
+                // Simple minification to reduce payload size
+                cssContent = cssContent
+                    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+                    .replace(/\s+/g, ' ')             // Collapse whitespace
+                    .trim();
+
                 const styleTag = `\n<style>\n${cssContent}\n</style>\n`;
 
                 // Inject style tag into head or at the beginning of body
@@ -1932,47 +1955,42 @@ app.post('/api/generate-pdf', async (req, res) => {
                 } else {
                     html = styleTag + html;
                 }
-                console.log('✅ Injected style.css into PDF HTML payload');
+                console.log(`✅ Injected and minified style.css into PDF HTML payload (${cssContent.length} bytes)`);
             }
         } catch (cssError) {
             console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
         }
 
-        console.log('📄 Generating PDF via iLovePDF API...');
-
-        // Initialize iLovePDF API
+        console.log('📄 [1/4] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        // Use system temp directory (standard for Render and Cloud environments)
         const tempDir = os.tmpdir();
         const timestamp = Date.now();
         tempHtmlPath = path.join(tempDir, `offsec-roadmap-${timestamp}.html`);
         
-        // Write HTML to temporary file
+        console.log(`📄 [2/4] Creating temporary HTML file: ${tempHtmlPath}`);
         fs.writeFileSync(tempHtmlPath, html, 'utf8');
         
-        // Start HTML to PDF task
         const task = instance.newTask('htmlpdf');
         await task.start();
         
-        // Upload HTML file using ILovePDFFile object
         const file = new ILovePDFFile(tempHtmlPath);
         await task.addFile(file);
         
-        // Process the conversion with optimized parameters for Neo-Brutalist design
+        console.log('📄 [3/4] Processing HTML to PDF conversion...');
         await task.process({
-            view_width: 1024,    // Wide enough for timeline layout
-            delay: 1500,         // Wait for fonts and CSS animations to settle
-            single_page: false,  // Standard multi-page output
+            view_width: 1024,
+            delay: 2000, // Increased delay for better asset loading
+            single_page: false,
             page_size: 'A4',
             page_orientation: 'portrait',
-            page_margin: 10      // Small margin
+            page_margin: 10
         });
         
-        // Download the generated PDF buffer
+        console.log('📄 [4/4] Downloading generated PDF buffer...');
         const pdfBuffer = await task.download();
         
-        console.log('✅ PDF generated successfully');
+        console.log('✅ PDF generation workflow completed successfully');
         
         // Send PDF as response
         res.setHeader('Content-Type', 'application/pdf');

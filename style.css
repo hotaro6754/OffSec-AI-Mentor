@@ -31,10 +31,10 @@
     --gray-dark-v3: #333333;
 
     /* Borders & Shadows */
-    --border-v3: 3px solid var(--black-v3);
-    --shadow-v3: 6px 6px 0px var(--black-v3);
-    --shadow-sm-v3: 3px 3px 0px var(--black-v3);
-    --shadow-lg-v3: 10px 10px 0px var(--black-v3);
+    --border-v3: 4px solid var(--black-v3);
+    --shadow-v3: 8px 8px 0px var(--black-v3);
+    --shadow-sm-v3: 4px 4px 0px var(--black-v3);
+    --shadow-lg-v3: 12px 12px 0px var(--black-v3);
 
     --border: 2.5px solid var(--black);
     --border-thick: 3.5px solid var(--black);
@@ -1301,6 +1301,137 @@ body.mode-oscp .form-group input { background: #0d1117; color: #c9d1d9; border-c
     background: var(--cream);
     border: 3px solid var(--black);
     box-shadow: 6px 6px 0 var(--shadow);
+}
+
+.neo-brutal-loading {
+    background: var(--accent-v3) !important;
+    border: 5px solid var(--black-v3) !important;
+    box-shadow: 15px 15px 0px var(--black-v3) !important;
+    padding: 60px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.neo-brutal-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2.5rem;
+    color: var(--black-v3);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.cyber-loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin: 40px 0;
+    background: var(--white-v3);
+    border: 3px solid var(--black-v3);
+    padding: 20px;
+    box-shadow: 8px 8px 0 var(--black-v3);
+}
+
+.loading-joke-container {
+    font-family: var(--font-handwritten);
+    font-size: 1.8rem;
+    color: var(--black-v3);
+    text-align: left;
+    max-width: 400px;
+    transition: opacity 0.3s ease;
+}
+
+.loading-stages-neo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.stage-item-neo {
+    background: var(--white-v3);
+    border: 3px solid var(--black-v3);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 0 var(--black-v3);
+}
+
+.stage-item-neo.active {
+    background: var(--primary-v3);
+    color: white;
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--black-v3);
+}
+
+.stage-item-neo.completed {
+    background: var(--success-v3);
+    color: var(--black-v3);
+}
+
+.stage-indicator-neo {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--black-v3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    background: var(--bg-v3);
+}
+
+.stage-item-neo.completed .stage-num { display: none; }
+.stage-item-neo.completed .stage-done { display: block; }
+.stage-done { display: none; font-size: 1.2rem; }
+
+.neo-progress-container {
+    margin-top: 40px;
+    height: 40px;
+    background: var(--white-v3);
+    border: 4px solid var(--black-v3);
+    position: relative;
+    box-shadow: 6px 6px 0 var(--black-v3);
+}
+
+.neo-progress-bar {
+    height: 100%;
+    background: var(--primary-v3);
+    transition: width 0.3s ease;
+}
+
+.neo-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 900;
+    font-family: var(--font-display);
+    color: var(--black-v3);
+    mix-blend-mode: difference;
+    font-size: 1.2rem;
+}
+
+.neo-loading-footer {
+    margin-top: 30px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-transform: uppercase;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--success-v3);
+    border-radius: 50%;
+    animation: blink 0.5s infinite alternate;
 }
 
 .mode-oscp .loading-state.enhanced {
@@ -3263,7 +3394,7 @@ body.mode-oscp #pdf-root table td {
   position: absolute;
   width: 100px;
   height: 100px;
-  border: 3px solid var(--black-v3);
+  border: 4px solid var(--black-v3);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -3272,8 +3403,61 @@ body.mode-oscp #pdf-root table td {
   cursor: pointer;
   z-index: 5;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 4px 4px 0 var(--black-v3);
+  box-shadow: 6px 6px 0 var(--black-v3);
   background: var(--accent-v3);
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.skill-node-v2:hover {
+  transform: scale(1.1) rotate(5deg);
+  z-index: 10;
+  box-shadow: 10px 10px 0 var(--black-v3);
+  background: var(--primary-v3);
+  color: white;
+}
+
+.category-hub {
+  background: var(--secondary-v3) !important;
+  border-radius: 12px !important;
+}
+
+.core-node {
+  background: var(--primary-v3) !important;
+  color: white !important;
+  border-width: 6px !important;
+}
+
+.skill-leaf {
+  background: var(--white-v3);
+}
+
+.connection-line-v2 {
+  stroke: var(--black-v3);
+  stroke-width: 3;
+  fill: none;
+  opacity: 0.8;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 1.5s ease-out forwards;
+}
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+.core-line {
+  stroke-width: 5;
+  stroke: var(--primary-v3);
+}
+
+.skill-line {
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
 }
 
 .skill-node-v2:hover {
@@ -3326,4 +3510,126 @@ body.mode-oscp #pdf-root table td {
   .content-card-v2 { width: 100%; }
   .node-v2 { left: 30px; }
   .side-panel-v2 { max-width: 100%; }
+}
+
+/* Roadmap Resource Grid V3 */
+.resources-grid-v3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.resource-card-v3 {
+    background: white;
+    border: 3px solid var(--black-v3);
+    padding: 1.25rem;
+    box-shadow: 6px 6px 0px var(--black-v3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.res-link-btn-v3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--primary-v3);
+    border: 2px solid var(--black-v3);
+    color: var(--black-v3);
+    text-decoration: none;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0px var(--black-v3);
+    transition: all 0.2s ease;
+}
+
+.res-link-btn-v3:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--black-v3);
+}
+
+/* Skill Panel V3 */
+.skill-panel-v3 {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 400px;
+    height: 100vh;
+    background: var(--bg-v3);
+    border-left: 5px solid var(--black-v3);
+    z-index: 2000;
+    box-shadow: -10px 0 0 rgba(0,0,0,0.1);
+    transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-panel-v3.active {
+    right: 0;
+}
+
+.skill-panel-header {
+    background: var(--primary-v3);
+    border-bottom: 5px solid var(--black-v3);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skill-panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+
+.neo-close-btn {
+    background: white;
+    border: 3px solid var(--black-v3);
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 3px 3px 0px var(--black-v3);
+}
+
+.skill-panel-content {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.skill-desc-v3 {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px dashed var(--black-v3);
+}
+
+.skill-section-v3 {
+    margin-bottom: 2rem;
+}
+
+.skill-section-v3 h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--secondary-v3);
+}
+
+.skill-links-v3 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
