@@ -408,6 +408,12 @@ function setupEventListeners() {
 
     // Settings
     elements.settingsBtn?.addEventListener('click', showSettingsModal);
+    document.getElementById('lastRoadmapBtn')?.addEventListener('click', () => {
+        if (appState.roadmap) {
+            showSection('roadmapSection');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
     elements.closeSettingsModal?.addEventListener('click', hideSettingsModal);
     elements.saveSettingsBtn?.addEventListener('click', saveSettings);
     elements.clearSettingsBtn?.addEventListener('click', clearSettings);
@@ -1102,6 +1108,8 @@ function showSettingsModal() {
 
     // Load existing keys
     document.getElementById('groqKey').value = localStorage.getItem('groqKey') || '';
+    document.getElementById('ilovepdfPublicKey').value = localStorage.getItem('ilovepdfPublicKey') || '';
+    document.getElementById('ilovepdfSecretKey').value = localStorage.getItem('ilovepdfSecretKey') || '';
 }
 
 function hideSettingsModal() {
@@ -1110,6 +1118,8 @@ function hideSettingsModal() {
 
 function saveSettings() {
     localStorage.setItem('groqKey', document.getElementById('groqKey').value.trim());
+    localStorage.setItem('ilovepdfPublicKey', document.getElementById('ilovepdfPublicKey').value.trim());
+    localStorage.setItem('ilovepdfSecretKey', document.getElementById('ilovepdfSecretKey').value.trim());
 
     showNotification('Settings saved successfully', 'success');
     hideSettingsModal();
@@ -1123,7 +1133,12 @@ function saveSettings() {
 
 function clearSettings() {
     localStorage.removeItem('groqKey');
+    localStorage.removeItem('ilovepdfPublicKey');
+    localStorage.removeItem('ilovepdfSecretKey');
+
     document.getElementById('groqKey').value = '';
+    document.getElementById('ilovepdfPublicKey').value = '';
+    document.getElementById('ilovepdfSecretKey').value = '';
 
     showNotification('API keys cleared', 'info');
 }
@@ -1883,6 +1898,9 @@ async function generateRoadmapForCert(certId) {
         appState.roadmap = data.roadmap;
         displayRoadmap(data.roadmap);
         
+        // Show "Latest Roadmap" button in navbar
+        document.getElementById('lastRoadmapBtn')?.classList.remove('hidden');
+
         // Show actions
         document.getElementById('roadmapActionsDiv')?.classList.remove('hidden');
         
@@ -2537,89 +2555,114 @@ async function downloadRoadmapPDF() {
     try {
         // Step 1: Create print-safe HTML content
         const pdfRoot = document.createElement('div');
+        pdfRoot.className = 'roadmap-v3-container';
         pdfRoot.style.cssText = `
-            width: 800px;
+            width: 900px;
             display: block;
             background: ${isDarkMode ? '#121212' : '#ffffff'};
-            color: ${isDarkMode ? '#e6edf3' : '#000000'};
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 12px;
-            line-height: 1.6;
-            padding: 20px;
+            color: ${isDarkMode ? '#1a1a2e' : '#000000'};
+            padding: 40px;
+            margin: 0 auto;
         `;
         
         // Clone roadmap content
         const contentClone = elements.roadmapContent.cloneNode(true);
         
-        // Strip interactive elements and animations
-        contentClone.querySelectorAll('*').forEach(el => {
-            el.style.animation = 'none';
-            el.style.transition = 'none';
-            el.style.transform = 'none';
-            if (el.style.position === 'fixed') {
-                el.style.position = 'static';
-            }
-            // Convert grid/flex to block
-            if (el.style.display === 'grid' || el.style.display === 'flex') {
-                el.style.display = 'block';
-            }
-            // Ensure readable colors
-            const computedStyle = window.getComputedStyle(el);
-            if (isDarkMode) {
-                if (computedStyle.color === 'rgb(255, 255, 255)') {
-                    el.style.color = '#e6edf3';
-                }
-            } else {
-                if (computedStyle.color === 'rgb(0, 0, 0)') {
-                    el.style.color = '#000000';
-                }
-            }
-            // Add page-break hints
-            if (el.classList.contains('phase-card-v3')) {
-                el.style.pageBreakInside = 'avoid';
-            }
+        // Strip interactive elements but keep layout
+        contentClone.querySelectorAll('button, input, select, .btn-reveal-secret').forEach(el => el.remove());
+        
+        // Ensure all links are absolute and styled
+        contentClone.querySelectorAll('a').forEach(link => {
+            link.style.color = '#ff3e00';
+            link.style.textDecoration = 'underline';
+            link.style.fontWeight = 'bold';
         });
-        
-        // Remove interactive elements
-        contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
-        
+
         // Add header
         const header = document.createElement('div');
+        header.className = 'roadmap-v3-header';
         header.style.cssText = `
-            text-align: center;
+            background: #ff3e00;
+            border: 3px solid #000;
+            padding: 30px;
+            box-shadow: 6px 6px 0px #000;
+            color: white;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
+            text-align: center;
         `;
         header.innerHTML = `
-            <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
+            <h1 style="font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">
                 OffSec Learning Roadmap
             </h1>
-            <p style="margin: 5px 0; font-size: 16px;">
-                <strong>Certification:</strong> ${appState.selectedCert}
-            </p>
-            <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
-                Generated: ${new Date().toLocaleDateString()} | 
-                Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
-            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
+                <span class="meta-item">Target: <strong>${appState.selectedCert.toUpperCase()}</strong></span>
+                <span class="meta-item">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
+                <span class="meta-item">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
+            </div>
         `;
         
         pdfRoot.appendChild(header);
         pdfRoot.appendChild(contentClone);
         
+        // Add Raw JSON data (hidden in UI but present in PDF for copy-paste)
+        const jsonSection = document.createElement('div');
+        jsonSection.style.cssText = `
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px dashed #000;
+            page-break-before: always;
+        `;
+        jsonSection.innerHTML = `
+            <h2 style="font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px;">Raw Roadmap Data (JSON)</h2>
+            <pre style="font-size: 10px; white-space: pre-wrap; word-break: break-all; color: #333;">${JSON.stringify(appState.roadmapJSON, null, 2)}</pre>
+        `;
+        pdfRoot.appendChild(jsonSection);
+
         // Add footer
         const footer = document.createElement('div');
         footer.style.cssText = `
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 50px;
+            padding: 20px;
             text-align: center;
-            font-size: 10px;
-            color: ${isDarkMode ? '#6e7681' : '#999'};
-            border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
+            font-size: 12px;
+            border-top: 3px solid #000;
+            font-family: 'Space Mono', monospace;
         `;
-        footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
+        footer.innerHTML = `
+            <p><strong>OFFSEC AI MENTOR</strong> - Your Path to Mastery</p>
+            <p style="margin-top: 5px; opacity: 0.7;">This roadmap is generated based on your unique skill profile.</p>
+            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API</p>
+        `;
         pdfRoot.appendChild(footer);
         
+        // Extract relevant styles from style.css
+        // For the sake of this task, I'll inject the most critical roadmap styles
+        const roadmapStyles = `
+            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; background: ${isDarkMode ? '#121212' : '#fff'}; color: ${isDarkMode ? '#e6edf3' : '#1a1a2e'}; }
+            .roadmap-v3-container { display: flex; flex-direction: column; gap: 30px; }
+            .roadmap-v3-header { background: #ff3e00; border: 3px solid #000; padding: 30px; color: white; box-shadow: 6px 6px 0px #000; }
+            .meta-item { background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2); }
+            .phase-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 25px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; margin-bottom: 30px; page-break-inside: avoid; }
+            .phase-badge-v3 { display: inline-block; background: #000; color: #fff; padding: 5px 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
+            .phase-meta-tag { background: ${isDarkMode ? '#333' : '#f5f0e8'}; color: ${isDarkMode ? '#fff' : '#000'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 4px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+            .gap-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+            .gap-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 20px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
+            .section-header-v3 { display: flex; align-items: center; gap: 15px; margin-top: 40px; margin-bottom: 20px; border-bottom: 4px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding-bottom: 10px; }
+            .outcomes-list-v3 { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+            .outcomes-list-v3 li { background: ${isDarkMode ? '#2a2a2a' : '#e0e0e0'}; color: ${isDarkMode ? '#fff' : '#000'}; padding: 8px 12px; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; font-size: 13px; }
+            .labs-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+            .lab-mini-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 15px; box-shadow: 4px 4px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
+            .lab-platform-tag { font-size: 10px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
+            .tools-mastery-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .tool-mastery-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3.5px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 24px; box-shadow: 5px 5px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
+            .command-item { background: ${isDarkMode ? '#21262d' : '#f5f0e8'}; padding: 12px; border: 1px solid ${isDarkMode ? '#484f58' : '#000'}; margin-top: 10px; }
+            .command-item code { background: #000; color: #00e5ff; padding: 4px 8px; }
+            .btn-resource { display: none; }
+            h1, h2, h3, h4 { text-transform: uppercase; color: ${isDarkMode ? '#fff' : '#1a1a2e'}; }
+            a { color: #ff3e00 !important; }
+        `;
+
         // Create complete HTML document
         const htmlContent = `
 <!DOCTYPE html>
@@ -2627,15 +2670,11 @@ async function downloadRoadmapPDF() {
 <head>
     <meta charset="UTF-8">
     <title>OffSec Learning Roadmap</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Arial', sans-serif;
-        }
-        * {
-            box-sizing: border-box;
-        }
+        ${roadmapStyles}
+        * { box-sizing: border-box; }
+        body { padding: 40px; }
     </style>
 </head>
 <body>
@@ -2646,12 +2685,21 @@ async function downloadRoadmapPDF() {
         
         const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
         
+        // Prepare headers with custom keys if available
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        const ilovepdfPublic = localStorage.getItem('ilovepdfPublicKey');
+        const ilovepdfSecret = localStorage.getItem('ilovepdfSecretKey');
+
+        if (ilovepdfPublic) headers['X-ILovePDF-Public-Key'] = ilovepdfPublic;
+        if (ilovepdfSecret) headers['X-ILovePDF-Secret-Key'] = ilovepdfSecret;
+
         // Step 2: Send to backend API
         const response = await fetch('/api/generate-pdf', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: headers,
             body: JSON.stringify({
                 html: htmlContent,
                 filename: filename

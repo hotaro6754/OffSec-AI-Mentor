@@ -103,7 +103,9 @@ app.use((req, res, next) => {
     
     // Extract custom API keys from request headers
     req.customKeys = {
-        groq: req.headers['x-groq-api-key']
+        groq: req.headers['x-groq-api-key'],
+        ilovepdfPublic: req.headers['x-ilovepdf-public-key'],
+        ilovepdfSecret: req.headers['x-ilovepdf-secret-key']
     };
     next();
 });
@@ -1873,7 +1875,11 @@ app.post('/api/generate-pdf', async (req, res) => {
             return res.status(400).json({ error: 'HTML content is required' });
         }
 
-        if (!ILOVEPDF_PUBLIC_KEY || !ILOVEPDF_SECRET_KEY) {
+        // Prioritize custom keys from headers for BYOK support
+        const publicKey = req.customKeys?.ilovepdfPublic || ILOVEPDF_PUBLIC_KEY;
+        const secretKey = req.customKeys?.ilovepdfSecret || ILOVEPDF_SECRET_KEY;
+
+        if (!publicKey || !secretKey) {
             return res.status(503).json({ 
                 error: 'PDF generation service is not configured. Please contact the administrator.' 
             });
@@ -1882,7 +1888,7 @@ app.post('/api/generate-pdf', async (req, res) => {
         console.log('📄 Generating PDF via iLovePDF API...');
 
         // Initialize iLovePDF API
-        const instance = new ILovePDFApi(ILOVEPDF_PUBLIC_KEY, ILOVEPDF_SECRET_KEY);
+        const instance = new ILovePDFApi(publicKey, secretKey);
         
         // Create a temporary HTML file
         const tempDir = path.join(__dirname, 'temp');
