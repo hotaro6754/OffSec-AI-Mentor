@@ -515,7 +515,7 @@ const CERTIFICATION_CONTENT = {
         ],
         youtubeChannels: [
             { name: 'Patrick Wardle', url: 'https://www.youtube.com/@ObjectiveSee', why: 'The leading macOS security researcher' },
-            { name: 'BlackHat macOS Talks', url: 'YouTube', why: 'State-of-the-art macOS research' }
+            { name: 'BlackHat macOS Talks', url: 'https://www.youtube.com/@BlackHatOfficialYT', why: 'State-of-the-art macOS research' }
         ],
         specificLabs: [
             { name: 'Objective-See Tools', platform: 'Personal Lab' },
