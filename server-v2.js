@@ -21,6 +21,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./database');
+const fs = require('fs');
+const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
 
 // ============================================================================
 // CONFIGURATION
@@ -58,6 +60,17 @@ if (GROQ_API_KEY) {
 
 if (AI_PROVIDER !== 'none') {
     console.log('✅ API key loaded successfully');
+}
+
+// iLovePDF Configuration
+const ILOVEPDF_PUBLIC_KEY = process.env.ILOVEPDF_PUBLIC_KEY;
+const ILOVEPDF_SECRET_KEY = process.env.ILOVEPDF_SECRET_KEY;
+
+if (ILOVEPDF_PUBLIC_KEY && ILOVEPDF_SECRET_KEY) {
+    console.log('✅ iLovePDF API configured for PDF generation');
+} else {
+    console.warn('⚠️  WARNING: No iLovePDF API keys found!');
+    console.warn('   PDF export will not be available.');
 }
 
 
@@ -1849,6 +1862,78 @@ app.get('/api/health', (req, res) => {
         version: '2.0',
         timestamp: new Date().toISOString()
     });
+});
+
+// PDF Generation endpoint using iLovePDF
+app.post('/api/generate-pdf', async (req, res) => {
+    try {
+        const { html, filename } = req.body;
+        
+        if (!html) {
+            return res.status(400).json({ error: 'HTML content is required' });
+        }
+
+        if (!ILOVEPDF_PUBLIC_KEY || !ILOVEPDF_SECRET_KEY) {
+            return res.status(503).json({ 
+                error: 'PDF generation service is not configured. Please contact the administrator.' 
+            });
+        }
+
+        console.log('📄 Generating PDF via iLovePDF API...');
+
+        // Initialize iLovePDF API
+        const instance = new ILovePDFApi(ILOVEPDF_PUBLIC_KEY, ILOVEPDF_SECRET_KEY);
+        
+        // Create a temporary HTML file
+        const tempDir = path.join(__dirname, 'temp');
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir);
+        }
+        
+        const timestamp = Date.now();
+        const tempHtmlPath = path.join(tempDir, `roadmap-${timestamp}.html`);
+        const tempPdfPath = path.join(tempDir, `roadmap-${timestamp}.pdf`);
+        
+        // Write HTML to temporary file
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+        
+        // Start HTML to PDF task
+        const task = instance.newTask('htmlpdf');
+        await task.start();
+        
+        // Upload HTML file
+        await task.addFile(tempHtmlPath);
+        
+        // Process the conversion
+        await task.process();
+        
+        // Download the generated PDF
+        const data = await task.download();
+        
+        // Save the PDF temporarily
+        fs.writeFileSync(tempPdfPath, data);
+        
+        // Read the PDF file
+        const pdfBuffer = fs.readFileSync(tempPdfPath);
+        
+        // Clean up temporary files
+        fs.unlinkSync(tempHtmlPath);
+        fs.unlinkSync(tempPdfPath);
+        
+        console.log('✅ PDF generated successfully');
+        
+        // Send PDF as response
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename || 'roadmap.pdf'}"`);
+        res.send(pdfBuffer);
+        
+    } catch (error) {
+        console.error('❌ PDF generation error:', error);
+        res.status(500).json({ 
+            error: 'Failed to generate PDF. Please try again or use the JSON export option.',
+            details: error.message 
+        });
+    }
 });
 
 
