@@ -2346,8 +2346,16 @@ function openSkillPanel(phaseData) {
 
     document.getElementById('skillTitle').innerText = phaseData.phase_name;
     document.getElementById('skillIcon').innerText = '🛡️';
-    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks`;
-    document.getElementById('skillDescription').innerText = phaseData.why_it_matters || 'Advanced mentor guidance for this phase.';
+    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks | Mentor Session`;
+
+    // Combine why it matters and mentor notes
+    let descriptionHtml = `<strong>Syllabus Alignment:</strong> ${phaseData.why_it_matters || 'N/A'}`;
+    if (phaseData.mentor_notes) {
+        descriptionHtml += `<div style="margin-top: 15px; padding: 12px; background: var(--secondary-v3); color: black; border: 2px solid black; font-weight: 600; font-size: 0.85rem;">
+            💡 MENTOR NOTES: ${phaseData.mentor_notes}
+        </div>`;
+    }
+    document.getElementById('skillDescription').innerHTML = descriptionHtml;
 
     // Objectives
     const objectivesList = document.getElementById('skillObjectives');
@@ -2358,19 +2366,52 @@ function openSkillPanel(phaseData) {
     const labsList = document.getElementById('skillLabs');
     labsList.innerHTML = (phaseData.mandatory_labs || [])
         .map(lab => `
-            <li style="margin-bottom: 15px;">
-                <div style="font-weight: 800; color: var(--primary-v3);">${lab.name} (${lab.platform})</div>
-                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 3px solid var(--black-v3); margin-top: 5px;">
+            <li style="margin-bottom: 20px; list-style: none; border: 2px solid black; padding: 15px; background: white; box-shadow: 4px 4px 0 black;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 900; text-transform: uppercase; font-size: 0.9rem;">${lab.name}</span>
+                    <span style="background: black; color: white; padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">${lab.platform}</span>
+                </div>
+                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 4px solid var(--primary-v3); margin-bottom: 10px;">
                     <strong>Mentor Key Points:</strong> ${lab.key_points || 'Focus on systematic enumeration and methodology.'}
                 </div>
-                ${lab.url ? `<a href="${lab.url}" target="_blank" style="display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--secondary-v3); font-weight: 700;">Start Lab →</a>` : ''}
+                ${lab.url ? `<a href="${lab.url}" target="_blank" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; font-size: 0.75rem;">Access Lab Room →</a>` : ''}
             </li>
         `).join('');
 
     // Tools
     const toolsContainer = document.getElementById('skillTools');
     toolsContainer.innerHTML = (phaseData.tools || [])
-        .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); border-style: dashed;">${t.name || t}</span>`).join('');
+        .map(t => {
+            const toolName = typeof t === 'string' ? t : (t.name || 'Tool');
+            const toolHow = typeof t === 'object' && t.how_to_use ? t.how_to_use : '';
+            return `
+                <div style="width: 100%; margin-bottom: 8px;">
+                    <span class="year-badge-v2" style="background: var(--accent-v3); border-style: solid; font-size: 0.75rem; width: auto;">${toolName}</span>
+                    ${toolHow ? `<div style="font-size: 0.7rem; color: #555; margin-left: 5px; font-style: italic;">How to use: ${toolHow}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+
+    // Phase Checklist
+    if (phaseData.completion_checklist && phaseData.completion_checklist.length > 0) {
+        const checklistDiv = document.createElement('div');
+        checklistDiv.className = 'data-section-v2';
+        checklistDiv.innerHTML = `
+            <div class="data-title-v2">✅ PHASE CHECKLIST</div>
+            <ul style="list-style: none; padding: 0;">
+                ${phaseData.completion_checklist.map(item => `
+                    <li style="margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem;">
+                        <input type="checkbox" style="margin-top: 4px;"> <span>${item}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+        // Append or replace
+        const existingChecklist = panel.querySelector('.phase-internal-checklist');
+        if (existingChecklist) existingChecklist.remove();
+        checklistDiv.classList.add('phase-internal-checklist');
+        panel.appendChild(checklistDiv);
+    }
 
     panel.classList.add('open');
 }
@@ -2383,152 +2424,90 @@ function createSkillTree(treeData) {
     container.innerHTML = '';
     svg.innerHTML = '';
 
-    const width = container.offsetWidth || 800;
-    const height = 600;
+    // Wait for layout to be stable
+    const width = container.offsetWidth || 1000;
+    const height = 800;
     const centerX = width / 2;
     const centerY = height / 2;
 
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
     const categories = treeData.categories || [];
-    const radius = 220;
+    const baseRadius = 240;
+
+    // Colors based on user's repo style
+    const colors = ['var(--y1, #4ECDC4)', 'var(--y2, #FF9F1C)', 'var(--y3, #FF6B6B)', 'var(--y4, #9D4EDD)'];
 
     categories.forEach((cat, catIdx) => {
+        // Spread categories around the circle
         const angle = (catIdx / categories.length) * 2 * Math.PI - Math.PI / 2;
+        const color = colors[catIdx % colors.length];
 
         cat.skills.forEach((skill, skillIdx) => {
-            const skillRadius = radius + (skillIdx * 40);
-            const x = centerX + skillRadius * Math.cos(angle + (skillIdx * 0.1));
-            const y = centerY + skillRadius * Math.sin(angle + (skillIdx * 0.1));
+            // Further skills are further out
+            const skillRadius = baseRadius + (skillIdx * 55);
 
-            // Create node
+            // Add slight angular variance for better spacing
+            const angularShift = (skillIdx % 2 === 0 ? 0.05 : -0.05) * (skillIdx + 1);
+            const x = centerX + skillRadius * Math.cos(angle + angularShift);
+            const y = centerY + skillRadius * Math.sin(angle + angularShift);
+
+            // Create node (Neo-Brutalist Circle)
             const node = document.createElement('div');
             node.className = 'skill-node-v2';
-            node.style.left = `${x - 50}px`;
-            node.style.top = `${y - 50}px`;
+            node.style.left = `${x - 45}px`;
+            node.style.top = `${y - 45}px`;
+            node.style.width = '90px';
+            node.style.height = '90px';
+            node.style.background = color;
+            node.style.border = '3px solid black';
+            node.style.boxShadow = '5px 5px 0 black';
+
             node.innerHTML = `
-                <div class="skill-node-icon-v2">${skill.icon || '🛡️'}</div>
-                <div class="skill-node-label-v2">${skill.name}</div>
+                <div class="skill-node-icon-v2" style="font-size: 1.5rem;">${skill.icon || '🛡️'}</div>
+                <div class="skill-node-label-v2" style="font-size: 0.6rem; line-height: 1; font-weight: 800;">${skill.name}</div>
             `;
             
             node.addEventListener('click', () => {
-                showNotification(`Mastered: ${skill.name}`, 'success');
+                showNotification(`Mastered: ${skill.name} (${skill.level})`, 'success');
             });
 
             container.appendChild(node);
 
-            // Create line to center
+            // Create stylized connection line to center
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', centerX);
             line.setAttribute('y1', centerY);
             line.setAttribute('x2', x);
             line.setAttribute('y2', y);
-            line.setAttribute('class', 'connection-line-v2');
+            line.setAttribute('stroke', 'black');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', '5,5');
+            line.setAttribute('opacity', '0.4');
             svg.appendChild(line);
         });
     });
 
-    // Central Core Node
+    // Central Core Node (Certification Goal)
     const core = document.createElement('div');
-    core.className = 'skill-node-v2';
-    core.style.width = '120px';
-    core.style.height = '120px';
-    core.style.left = `${centerX - 60}px`;
-    core.style.top = `${centerY - 60}px`;
+    core.className = 'skill-node-v2 core-goal';
+    core.style.width = '130px';
+    core.style.height = '130px';
+    core.style.left = `${centerX - 65}px`;
+    core.style.top = `${centerY - 65}px`;
     core.style.background = 'var(--primary-v3)';
     core.style.color = 'white';
+    core.style.border = '4px solid black';
+    core.style.boxShadow = '8px 8px 0 black';
+    core.style.zIndex = '10';
+
     core.innerHTML = `
-        <div class="skill-node-icon-v2">🎯</div>
-        <div class="skill-node-label-v2" style="color: white;">CERTIFIED</div>
+        <div class="skill-node-icon-v2" style="font-size: 2.5rem;">🎯</div>
+        <div class="skill-node-label-v2" style="color: white; font-size: 0.8rem; font-weight: 900;">TARGET CERT</div>
     `;
     container.appendChild(core);
 }
 
-    // 4. Pre-OSCP Alignment
-    if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
-        const alignHeader = document.createElement('div');
-        alignHeader.className = 'section-header-v3';
-        alignHeader.innerHTML = `
-            <i data-lucide="award" class="w-8 h-8"></i>
-            <h2>Pre-OSCP Alignment</h2>
-        `;
-        container.appendChild(alignHeader);
-
-        const alignGrid = document.createElement('div');
-        alignGrid.className = 'align-grid-v3';
-        alignGrid.innerHTML = roadmapObj.pre_oscp_alignment.map(a => `
-            <div class="align-card-v3">
-                <h4>${a.cert}</h4>
-                <p><strong>Reason:</strong> ${a.reason}</p>
-                <p><strong>Bridges Gap:</strong> ${a.gap_it_bridges}</p>
-                <div class="overlap-v3">Overlap with OSCP: ${a.overlap_with_oscp}</div>
-            </div>
-        `).join('');
-        container.appendChild(alignGrid);
-    }
-
-    // 5. Tools Mastery Guide
-    if (roadmapObj.tools_mastery_guide && Array.isArray(roadmapObj.tools_mastery_guide)) {
-        const guideHeader = document.createElement('div');
-        guideHeader.className = 'section-header-v3';
-        guideHeader.innerHTML = `
-            <i data-lucide="wrench" class="w-8 h-8"></i>
-            <h2>Tools Mastery Guide</h2>
-        `;
-        container.appendChild(guideHeader);
-
-        const guideGrid = document.createElement('div');
-        guideGrid.className = 'tools-mastery-grid-v3';
-        guideGrid.innerHTML = roadmapObj.tools_mastery_guide.map(tool => `
-            <div class="tool-mastery-card-v3">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="lab-platform-tag">${tool.category || 'Tool'}</span>
-                    <span class="phase-meta-tag">${tool.skill_level || 'General'}</span>
-                </div>
-                <h4>${tool.tool}</h4>
-                <div class="commands-v3">
-                    ${(tool.commands || []).map(c => `
-                        <div class="command-item">
-                            <code>${c.cmd}</code>
-                            <span>${c.purpose}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-        container.appendChild(guideGrid);
-    }
-
-    // 6. Special Resource (Rickroll Easter Egg)
-    if (roadmapObj.special_resource) {
-        const randomQuote = getRandomQuote();
-        
-        const motivationalSection = document.createElement('div');
-        motivationalSection.className = 'motivational-section';
-        motivationalSection.innerHTML = `
-            <blockquote class="cyber-quote">
-                "${randomQuote}"
-            </blockquote>
-            <div class="secret-wisdom-container">
-                <p class="wisdom-prompt">🎯 Completed your roadmap? Here's a special gift...</p>
-                <button class="btn-reveal-secret" onclick="revealSecret('secret-content-roadmap')">
-                    🎁 Reveal Cyber Wisdom
-                </button>
-                <div id="secret-content-roadmap" class="hidden">
-                    <!-- QR Code and link will be generated here -->
-                </div>
-            </div>
-        `;
-        container.appendChild(motivationalSection);
-    }
-
-    elements.roadmapContent.appendChild(container);
-
-    // Initialize icons
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-}
 
 // displayRoadmapMarkdown - handles markdown content when JSON parsing fails
 function displayRoadmapMarkdown(markdownContent) {
@@ -2609,119 +2588,118 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    showNotification('Generating PDF via iLovePDF...', 'info');
+    showNotification('Generating DETAILED PDF via iLovePDF...', 'info');
     
     const isDarkMode = document.body.classList.contains('mode-oscp');
+    const roadmap = appState.roadmapJSON;
     
     try {
-        // Step 1: Create print-safe HTML content
-        const pdfRoot = document.createElement('div');
-        pdfRoot.className = 'roadmap-v3-container';
-        pdfRoot.style.cssText = `
-            width: 900px;
-            display: block;
-            background: ${isDarkMode ? '#121212' : '#ffffff'};
-            color: ${isDarkMode ? '#1a1a2e' : '#000000'};
-            padding: 40px;
-            margin: 0 auto;
-        `;
+        // Step 1: Build comprehensive print-safe HTML from JSON (not just cloning DOM)
+        let detailedHtml = '';
         
-        // Clone roadmap content
-        const contentClone = elements.roadmapContent.cloneNode(true);
-        
-        // Strip interactive elements but keep layout
-        contentClone.querySelectorAll('button, input, select, .btn-reveal-secret').forEach(el => el.remove());
-        
-        // Ensure all links are absolute and styled
-        contentClone.querySelectorAll('a').forEach(link => {
-            link.style.color = '#ff3e00';
-            link.style.textDecoration = 'underline';
-            link.style.fontWeight = 'bold';
-        });
-
-        // Add header
-        const header = document.createElement('div');
-        header.className = 'roadmap-v3-header';
-        header.style.cssText = `
-            background: #ff3e00;
-            border: 3px solid #000;
-            padding: 30px;
-            box-shadow: 6px 6px 0px #000;
-            color: white;
-            margin-bottom: 30px;
-            text-align: center;
-        `;
-        header.innerHTML = `
-            <h1 style="font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">
-                OffSec Learning Roadmap
-            </h1>
-            <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
-                <span class="meta-item">Target: <strong>${appState.selectedCert.toUpperCase()}</strong></span>
-                <span class="meta-item">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
-                <span class="meta-item">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
+        // Header
+        detailedHtml += `
+            <div class="roadmap-v3-header" style="background: #ff3e00; border: 4px solid #000; padding: 30px; box-shadow: 8px 8px 0px #000; color: white; margin-bottom: 40px; text-align: center;">
+                <h1 style="font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">Elite OffSec Learning Roadmap</h1>
+                <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
+                    <span style="background: rgba(0,0,0,0.2); padding: 5px 12px; border: 1px solid white;">Target: <strong>${roadmap.targetCertification?.toUpperCase()}</strong></span>
+                    <span style="background: rgba(0,0,0,0.2); padding: 5px 12px; border: 1px solid white;">Duration: <strong>1 YEAR</strong></span>
+                    <span style="background: rgba(0,0,0,0.2); padding: 5px 12px; border: 1px solid white;">Mode: <strong>${isDarkMode ? 'OSCP' : 'Beginner'}</strong></span>
+                </div>
             </div>
         `;
-        
-        pdfRoot.appendChild(header);
-        pdfRoot.appendChild(contentClone);
-        
-        // Add Raw JSON data (hidden in UI but present in PDF for copy-paste)
-        const jsonSection = document.createElement('div');
-        jsonSection.style.cssText = `
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border: 2px dashed #000;
-            page-break-before: always;
-        `;
-        jsonSection.innerHTML = `
-            <h2 style="font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px;">Raw Roadmap Data (JSON)</h2>
-            <pre style="font-size: 10px; white-space: pre-wrap; word-break: break-all; color: #333;">${JSON.stringify(appState.roadmapJSON, null, 2)}</pre>
-        `;
-        pdfRoot.appendChild(jsonSection);
 
-        // Add footer
-        const footer = document.createElement('div');
-        footer.style.cssText = `
-            margin-top: 50px;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            border-top: 3px solid #000;
-            font-family: 'Space Mono', monospace;
+        // Phases
+        detailedHtml += '<div class="phases-container">';
+        detailedHtml += (roadmap.roadmap || []).map((phase, idx) => {
+            return `
+                <div class="phase-card-v3" style="background: white; border: 4px solid #000; padding: 30px; box-shadow: 8px 8px 0px #000; margin-bottom: 40px; page-break-inside: avoid;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 3px solid #000; padding-bottom: 10px;">
+                        <span style="background: black; color: white; padding: 5px 15px; font-weight: 900; font-size: 14px;">PHASE ${idx + 1}</span>
+                        <span style="font-weight: 800; text-transform: uppercase;">${phase.duration_weeks} WEEKS</span>
+                    </div>
+                    <h2 style="font-size: 24px; margin: 0 0 15px 0; text-transform: uppercase; color: #ff3e00;">${phase.phase_name}</h2>
+                    <p style="font-weight: 700; margin-bottom: 15px;">${phase.why_it_matters}</p>
+
+                    <div style="background: #e0f7fa; border: 2px solid #000; padding: 15px; margin-bottom: 20px;">
+                        <strong style="display: block; margin-bottom: 5px; text-transform: uppercase; font-size: 12px;">💡 Mentor Notes:</strong>
+                        <div style="font-size: 13px; font-weight: 500;">${phase.mentor_notes || 'Focus on methodology and systematic enumeration.'}</div>
+                    </div>
+
+                    <h3 style="font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #000; margin-bottom: 10px;">🧪 Mandatory Labs</h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
+                        ${(phase.mandatory_labs || []).map(lab => `
+                            <div style="border: 2px solid #000; padding: 15px; background: #f9f9f9;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <strong style="font-size: 14px;">${lab.name}</strong>
+                                    <span style="font-size: 11px; background: #000; color: #fff; padding: 2px 6px;">${lab.platform}</span>
+                                </div>
+                                <div style="font-size: 12px; margin-bottom: 8px; color: #444;"><strong>Key Points:</strong> ${lab.key_points}</div>
+                                ${lab.url ? `<a href="${lab.url}" style="color: #ff3e00; font-weight: 800; font-size: 12px;">GO TO LAB: ${lab.url}</a>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <h3 style="font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #000; margin-bottom: 10px;">🛠️ Tools Used</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        ${(phase.tools || []).map(tool => `
+                            <div style="background: #ffff00; border: 2px solid #000; padding: 5px 10px; font-size: 12px; font-weight: 800;">
+                                ${typeof tool === 'string' ? tool : tool.name}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <h3 style="font-size: 16px; text-transform: uppercase; border-bottom: 2px solid #000; margin-bottom: 10px;">✅ Phase Checklist</h3>
+                    <ul style="list-style: none; padding: 0; font-size: 13px;">
+                        ${(phase.completion_checklist || []).map(item => `
+                            <li style="margin-bottom: 5px; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 18px;">☐</span> ${item}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }).join('');
+        detailedHtml += '</div>';
+
+        // Tools Mastery Guide
+        if (roadmap.tools_mastery_guide) {
+            detailedHtml += `
+                <div style="page-break-before: always; border-top: 4px solid #000; padding-top: 40px;">
+                    <h2 style="font-size: 28px; text-transform: uppercase; margin-bottom: 25px;">🛠️ Tools Mastery Guide</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        ${roadmap.tools_mastery_guide.map(tool => `
+                            <div style="border: 3px solid #000; padding: 20px; background: white; box-shadow: 5px 5px 0px #000;">
+                                <h4 style="margin: 0 0 15px 0; color: #ff3e00; border-bottom: 2px solid #ffff00;">${tool.tool}</h4>
+                                ${(tool.commands || []).map(c => `
+                                    <div style="background: #f0f0f0; padding: 10px; border: 1px solid #000; margin-top: 8px;">
+                                        <code style="background: black; color: #00e5ff; padding: 2px 6px; display: block; margin-bottom: 5px;">${c.cmd}</code>
+                                        <span style="font-size: 11px;">${c.purpose}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Footer
+        detailedHtml += `
+            <div style="margin-top: 60px; padding-top: 20px; border-top: 4px solid #000; text-align: center; font-family: 'Space Mono', monospace;">
+                <p style="font-weight: 900; margin-bottom: 10px;">OFFSEC AI MENTOR - YOUR PATH TO MASTERY</p>
+                <p style="font-size: 11px; opacity: 0.7;">This document contains a comprehensive 1-year learning plan. Stick to the methodology.</p>
+                <p style="font-size: 10px; margin-top: 20px;">&copy; 2026 OffSec AI Mentor | Generated on ${new Date().toLocaleDateString()}</p>
+            </div>
         `;
-        footer.innerHTML = `
-            <p><strong>OFFSEC AI MENTOR</strong> - Your Path to Mastery</p>
-            <p style="margin-top: 5px; opacity: 0.7;">This roadmap is generated based on your unique skill profile.</p>
-            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API</p>
-        `;
-        pdfRoot.appendChild(footer);
-        
-        // Extract relevant styles from style.css
-        // For the sake of this task, I'll inject the most critical roadmap styles
-        const roadmapStyles = `
-            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; background: ${isDarkMode ? '#121212' : '#fff'}; color: ${isDarkMode ? '#e6edf3' : '#1a1a2e'}; }
-            .roadmap-v3-container { display: flex; flex-direction: column; gap: 30px; }
-            .roadmap-v3-header { background: #ff3e00; border: 3px solid #000; padding: 30px; color: white; box-shadow: 6px 6px 0px #000; }
-            .meta-item { background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2); }
-            .phase-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 25px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; margin-bottom: 30px; page-break-inside: avoid; }
-            .phase-badge-v3 { display: inline-block; background: #000; color: #fff; padding: 5px 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .phase-meta-tag { background: ${isDarkMode ? '#333' : '#f5f0e8'}; color: ${isDarkMode ? '#fff' : '#000'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 4px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-            .gap-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-            .gap-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 20px; box-shadow: 6px 6px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .section-header-v3 { display: flex; align-items: center; gap: 15px; margin-top: 40px; margin-bottom: 20px; border-bottom: 4px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding-bottom: 10px; }
-            .outcomes-list-v3 { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
-            .outcomes-list-v3 li { background: ${isDarkMode ? '#2a2a2a' : '#e0e0e0'}; color: ${isDarkMode ? '#fff' : '#000'}; padding: 8px 12px; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; font-size: 13px; }
-            .labs-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-            .lab-mini-card { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 2px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 15px; box-shadow: 4px 4px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .lab-platform-tag { font-size: 10px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border: 1px solid ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .tools-mastery-grid-v3 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .tool-mastery-card-v3 { background: ${isDarkMode ? '#1e1e1e' : '#fff'}; border: 3.5px solid ${isDarkMode ? '#ff4d00' : '#000'}; padding: 24px; box-shadow: 5px 5px 0px ${isDarkMode ? '#ff4d00' : '#000'}; }
-            .command-item { background: ${isDarkMode ? '#21262d' : '#f5f0e8'}; padding: 12px; border: 1px solid ${isDarkMode ? '#484f58' : '#000'}; margin-top: 10px; }
-            .command-item code { background: #000; color: #00e5ff; padding: 4px 8px; }
-            .btn-resource { display: none; }
-            h1, h2, h3, h4 { text-transform: uppercase; color: ${isDarkMode ? '#fff' : '#1a1a2e'}; }
-            a { color: #ff3e00 !important; }
+
+        // Extract relevant styles for PDF document
+        const pdfStyles = `
+            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; background: white; color: black; padding: 40px; margin: 0; line-height: 1.5; }
+            * { box-sizing: border-box; }
+            a { color: #ff3e00; text-decoration: underline; word-break: break-all; }
+            h1, h2, h3, h4 { font-family: 'Space Mono', sans-serif; font-weight: 900; }
+            @page { margin: 0.5cm; }
         `;
 
         // Create complete HTML document
@@ -2730,16 +2708,12 @@ async function downloadRoadmapPDF() {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>OffSec Learning Roadmap</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        ${roadmapStyles}
-        * { box-sizing: border-box; }
-        body { padding: 40px; }
-    </style>
+    <title>OffSec Roadmap - ${roadmap.targetCertification}</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>${pdfStyles}</style>
 </head>
 <body>
-    ${pdfRoot.innerHTML}
+    ${detailedHtml}
 </body>
 </html>
         `.trim();
