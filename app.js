@@ -335,6 +335,9 @@ const elements = {
 // PDF LIBRARY STATUS MANAGEMENT
 // ============================================================================
 
+// Track if event listeners have been registered to prevent duplicates
+let pdfLibraryEventsRegistered = false;
+
 function checkPdfLibraryStatus() {
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
     
@@ -353,30 +356,22 @@ function checkPdfLibraryStatus() {
         updatePdfButtonState(false, 'PDF export unavailable');
     }
     
-    // Listen for library load events
-    window.addEventListener('jspdfLoaded', function(e) {
-        console.log(`✅ PDF library loaded from ${e.detail.source}`);
-        updatePdfButtonState(true);
-        showNotification('PDF export is now available!', 'success');
-    });
-    
-    window.addEventListener('jspdfLoadError', function(e) {
-        console.error('❌ PDF library failed to load:', e.detail.error);
-        updatePdfButtonState(false, 'PDF export unavailable');
+    // Register event listeners only once
+    if (!pdfLibraryEventsRegistered) {
+        pdfLibraryEventsRegistered = true;
         
-        // Show persistent warning to user
-        const warningMessage = `
-            <strong>PDF Export Unavailable</strong><br>
-            The PDF library failed to load. You can still use:<br>
-            • JSON Export (💾 button)<br>
-            • Copy Roadmap (📋 button)<br>
-            <br>
-            <small>Troubleshooting: Check your internet connection, disable ad blockers, or try refreshing the page.</small>
-        `;
+        window.addEventListener('jspdfLoaded', function(e) {
+            console.log(`✅ PDF library loaded from ${e.detail.source}`);
+            updatePdfButtonState(true);
+            showNotification('PDF export is now available!', 'success');
+        });
         
-        // Display warning in console for debugging
-        console.warn('PDF Export Unavailable - Alternative export options are still available');
-    });
+        window.addEventListener('jspdfLoadError', function(e) {
+            console.error('❌ PDF library failed to load:', e.detail.error);
+            updatePdfButtonState(false, 'PDF export unavailable');
+            console.warn('PDF Export Unavailable - Alternative export options (JSON, Copy) are still available');
+        });
+    }
 }
 
 function updatePdfButtonState(enabled, tooltipText = '') {
@@ -2630,19 +2625,10 @@ async function downloadRoadmapPDF() {
             • Use the <strong>💾 Export as JSON</strong> button instead<br>
             • Use the <strong>📋 Copy Roadmap</strong> button to copy text<br>
             <br>
-            <small>Would you like to retry loading the PDF library?</small>
+            <small>Tip: Try refreshing the page to reload the PDF library, or use JSON export which contains all your roadmap data.</small>
         `;
         
         showError(errorMessage);
-        
-        // Offer retry option
-        setTimeout(() => {
-            const retryConfirm = confirm('PDF library failed to load. Would you like to try reloading it?\n\nNote: If this continues to fail, please use JSON export instead.');
-            if (retryConfirm) {
-                attemptReloadPdfLibrary();
-            }
-        }, 1000);
-        
         return;
     }
     
