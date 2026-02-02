@@ -359,21 +359,29 @@ function init() {
     console.log('✅ Initialization complete');
 }
 
-function checkPDFLibraryStatus() {
-    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        console.warn('⚠️ jsPDF library not loaded. PDF export will be unavailable.');
+async function checkPDFLibraryStatus() {
+    try {
+        // Check if backend PDF generation API is available
+        const response = await fetch('/api/health');
+        const health = await response.json();
+        
+        if (health.status === 'ok') {
+            console.log('✅ PDF generation API available (iLovePDF)');
+        } else {
+            throw new Error('Backend not healthy');
+        }
+    } catch (error) {
+        console.warn('⚠️ PDF generation API unavailable. PDF export will not work.');
         console.warn('💡 Users can still export as JSON or TXT format.');
         
         // Disable PDF download button
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
         if (downloadPdfBtn) {
             downloadPdfBtn.disabled = true;
-            downloadPdfBtn.title = 'PDF export unavailable - library not loaded';
+            downloadPdfBtn.title = 'PDF export unavailable - API not configured';
             downloadPdfBtn.style.opacity = '0.5';
             downloadPdfBtn.style.cursor = 'not-allowed';
         }
-    } else {
-        console.log('✅ jsPDF library loaded successfully');
     }
 }
 
@@ -2522,153 +2530,161 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    // Check if jsPDF is loaded
-    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        console.error('❌ PDF Export Failed - Library Not Loaded');
-        console.info('📋 Troubleshooting:');
-        console.info('   • Check your internet connection');
-        console.info('   • Disable ad blockers or browser extensions');
-        console.info('   • Check browser console for script loading errors');
-        console.info('   • Try refreshing the page');
-        console.info('💡 Alternative: Use "Export as JSON" button - no library needed!');
-        
-        showError('PDF export is currently unavailable. The PDF library failed to load from the CDN. This might be due to network issues, ad blockers, or browser extensions. Please use the "Export as JSON" button instead, or try refreshing the page.');
-        return;
-    }
-    
-    showNotification('Generating text-based PDF...', 'info');
+    showNotification('Generating PDF via iLovePDF...', 'info');
     
     const isDarkMode = document.body.classList.contains('mode-oscp');
     
-    // Step 1: Create print-safe container
-    const pdfRoot = document.createElement('div');
-    pdfRoot.id = 'pdf-root';
-    pdfRoot.style.cssText = `
-        position: absolute;
-        left: -9999px;
-        top: 0;
-        width: 800px;
-        display: block;
-        background: ${isDarkMode ? '#121212' : '#ffffff'};
-        color: ${isDarkMode ? '#e6edf3' : '#000000'};
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 12px;
-        line-height: 1.6;
-        padding: 20px;
-    `;
-    
-    // Clone roadmap content
-    const contentClone = elements.roadmapContent.cloneNode(true);
-    
-    // Step 2: Strip breaking CSS
-    contentClone.querySelectorAll('*').forEach(el => {
-        el.style.animation = 'none';
-        el.style.transition = 'none';
-        el.style.transform = 'none';
-        if (el.style.position === 'fixed') {
-            el.style.position = 'static';
-        }
-        // Convert grid/flex to block
-        if (el.style.display === 'grid' || el.style.display === 'flex') {
-            el.style.display = 'block';
-        }
-        // Ensure readable colors
-        const computedStyle = window.getComputedStyle(el);
-        if (isDarkMode) {
-            if (computedStyle.color === 'rgb(255, 255, 255)') {
-                el.style.color = '#e6edf3';
-            }
-        } else {
-            if (computedStyle.color === 'rgb(0, 0, 0)') {
-                el.style.color = '#000000';
-            }
-        }
-        // Add page-break hints
-        if (el.classList.contains('phase-card-v3')) {
-            el.style.pageBreakInside = 'avoid';
-        }
-    });
-    
-    // Remove interactive elements
-    contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
-    
-    // Add header
-    const header = document.createElement('div');
-    header.style.cssText = `
-        text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
-    `;
-    header.innerHTML = `
-        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
-            OffSec Learning Roadmap
-        </h1>
-        <p style="margin: 5px 0; font-size: 16px;">
-            <strong>Certification:</strong> ${appState.selectedCert}
-        </p>
-        <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
-            Generated: ${new Date().toLocaleDateString()} | 
-            Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
-        </p>
-    `;
-    
-    pdfRoot.appendChild(header);
-    pdfRoot.appendChild(contentClone);
-    
-    // Add footer
-    const footer = document.createElement('div');
-    footer.style.cssText = `
-        margin-top: 40px;
-        padding-top: 20px;
-        text-align: center;
-        font-size: 10px;
-        color: ${isDarkMode ? '#6e7681' : '#999'};
-        border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
-    `;
-    footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
-    pdfRoot.appendChild(footer);
-    
-    document.body.appendChild(pdfRoot);
-    
-    // Step 3: Wait for DOM paint (500ms minimum to ensure rendering completes)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Verify content rendered
-    if (pdfRoot.offsetHeight < 100) {
-        document.body.removeChild(pdfRoot);
-        showError('PDF content failed to render. Try regenerating roadmap.');
-        return;
-    }
-    
-    // Step 4: Generate text-based PDF
     try {
-        const doc = new jspdf.jsPDF('p', 'mm', 'a4');
+        // Step 1: Create print-safe HTML content
+        const pdfRoot = document.createElement('div');
+        pdfRoot.style.cssText = `
+            width: 800px;
+            display: block;
+            background: ${isDarkMode ? '#121212' : '#ffffff'};
+            color: ${isDarkMode ? '#e6edf3' : '#000000'};
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 20px;
+        `;
         
-        await doc.html(pdfRoot, {
-            callback: function(doc) {
-                doc.save(`OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`);
-            },
-            autoPaging: 'text',
-            margin: [10, 10, 10, 10],
-            width: 190,
-            windowWidth: 800,
-            html2canvas: {
-                scale: 1,
-                logging: false
+        // Clone roadmap content
+        const contentClone = elements.roadmapContent.cloneNode(true);
+        
+        // Strip interactive elements and animations
+        contentClone.querySelectorAll('*').forEach(el => {
+            el.style.animation = 'none';
+            el.style.transition = 'none';
+            el.style.transform = 'none';
+            if (el.style.position === 'fixed') {
+                el.style.position = 'static';
+            }
+            // Convert grid/flex to block
+            if (el.style.display === 'grid' || el.style.display === 'flex') {
+                el.style.display = 'block';
+            }
+            // Ensure readable colors
+            const computedStyle = window.getComputedStyle(el);
+            if (isDarkMode) {
+                if (computedStyle.color === 'rgb(255, 255, 255)') {
+                    el.style.color = '#e6edf3';
+                }
+            } else {
+                if (computedStyle.color === 'rgb(0, 0, 0)') {
+                    el.style.color = '#000000';
+                }
+            }
+            // Add page-break hints
+            if (el.classList.contains('phase-card-v3')) {
+                el.style.pageBreakInside = 'avoid';
             }
         });
         
-        // Step 5: Cleanup
-        document.body.removeChild(pdfRoot);
-        showSuccess('PDF generated with selectable text!');
+        // Remove interactive elements
+        contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
+        
+        // Add header
+        const header = document.createElement('div');
+        header.style.cssText = `
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
+        `;
+        header.innerHTML = `
+            <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
+                OffSec Learning Roadmap
+            </h1>
+            <p style="margin: 5px 0; font-size: 16px;">
+                <strong>Certification:</strong> ${appState.selectedCert}
+            </p>
+            <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
+                Generated: ${new Date().toLocaleDateString()} | 
+                Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
+            </p>
+        `;
+        
+        pdfRoot.appendChild(header);
+        pdfRoot.appendChild(contentClone);
+        
+        // Add footer
+        const footer = document.createElement('div');
+        footer.style.cssText = `
+            margin-top: 40px;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: ${isDarkMode ? '#6e7681' : '#999'};
+            border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
+        `;
+        footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
+        pdfRoot.appendChild(footer);
+        
+        // Create complete HTML document
+        const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OffSec Learning Roadmap</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    ${pdfRoot.innerHTML}
+</body>
+</html>
+        `.trim();
+        
+        const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
+        
+        // Step 2: Send to backend API
+        const response = await fetch('/api/generate-pdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                html: htmlContent,
+                filename: filename
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to generate PDF');
+        }
+        
+        // Step 3: Download the PDF
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showSuccess('PDF generated successfully via iLovePDF!');
         
     } catch (error) {
-        console.error('PDF generation error:', error);
-        if (document.body.contains(pdfRoot)) {
-            document.body.removeChild(pdfRoot);
-        }
-        showError('PDF generation failed. Try exporting as JSON instead.');
+        console.error('❌ PDF generation error:', error);
+        console.info('📋 Troubleshooting:');
+        console.info('   • Check your internet connection');
+        console.info('   • Verify the backend server is running');
+        console.info('   • Check if iLovePDF API is configured');
+        console.info('💡 Alternative: Use "Export as JSON" button - no API needed!');
+        
+        showError(`PDF generation failed: ${error.message}. Please use "Export as JSON" instead.`);
     }
 }
 

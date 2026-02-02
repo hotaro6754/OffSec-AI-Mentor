@@ -18,6 +18,7 @@
   "author": "OffSec AI Mentor Team",
   "license": "MIT",
   "dependencies": {
+    "@ilovepdf/ilovepdf-js-core": "^0.3.2",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
