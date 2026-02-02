@@ -25,6 +25,7 @@ const fs = require('fs');
 const os = require('os');
 const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
 const ILovePDFFile = require('@ilovepdf/ilovepdf-nodejs/ILovePDFFile');
+const AdmZip = require('adm-zip');
 
 // ============================================================================
 // CONFIGURATION
@@ -1915,8 +1916,6 @@ app.get('/api/health', (req, res) => {
 
 // PDF Generation endpoint using iLovePDF
 app.post('/api/generate-pdf', async (req, res) => {
-    let tempHtmlPath = null;
-
     try {
         let { html, filename } = req.body;
         
@@ -1966,18 +1965,18 @@ app.post('/api/generate-pdf', async (req, res) => {
         console.log('📄 [2/6] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        const tempDir = os.tmpdir();
-        const timestamp = Date.now();
-        tempHtmlPath = path.join(tempDir, `offsec-roadmap-${timestamp}.html`);
-        
-        console.log(`📄 [3/6] Creating temporary HTML file: ${tempHtmlPath}`);
-        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+        console.log('📄 [3/6] Packaging HTML into ZIP buffer...');
+        // iLovePDF htmlpdf tool requires local files to be uploaded as ZIP containing index.html
+        const zip = new AdmZip();
+        zip.addFile('index.html', Buffer.from(html, 'utf8'));
+        const zipBuffer = zip.toBuffer();
         
         console.log('📄 [4/6] Starting iLovePDF task...');
         const task = instance.newTask('htmlpdf');
         await task.start();
         
-        const file = new ILovePDFFile(tempHtmlPath);
+        // Use ILovePDFFile.fromArray to upload the ZIP buffer
+        const file = ILovePDFFile.fromArray(zipBuffer, 'roadmap.zip');
         await task.addFile(file);
         
         console.log('📄 [5/6] Processing HTML to PDF conversion...');
@@ -2018,15 +2017,6 @@ app.post('/api/generate-pdf', async (req, res) => {
             error: 'Failed to generate PDF. Please try again or use the JSON export option.',
             details: detailedError
         });
-    } finally {
-        // Clean up temporary files
-        try {
-            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) {
-                fs.unlinkSync(tempHtmlPath);
-            }
-        } catch (cleanupError) {
-            console.warn('⚠️ Temporary file cleanup failed:', cleanupError.message);
-        }
     }
 });
 

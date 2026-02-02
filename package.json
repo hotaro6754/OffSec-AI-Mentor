@@ -19,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@ilovepdf/ilovepdf-nodejs": "^0.3.1",
+    "adm-zip": "^0.5.16",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
