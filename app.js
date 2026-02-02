@@ -1833,39 +1833,60 @@ async function generateRoadmapForCert(certId) {
     let progress = 0;
     
     roadmapContent.innerHTML = `
-        <div class="loading-state enhanced">
+        <div class="loading-state enhanced neo-brutal-loading">
             <div class="loading-header">
-                <h3>Building Your ${certName.split(' - ')[0]} Roadmap</h3>
+                <h3 class="neo-brutal-title">CONSTRUCTING ROADMAP...</h3>
                 <p class="loading-cert-name">${certName}</p>
             </div>
             
-            <div class="cyber-loader">
-                <div class="loader-ring"></div>
-                <div class="loader-ring"></div>
-                <div class="loader-ring"></div>
-                <div class="loader-icon">🔐</div>
+            <div class="cyber-loader-container">
+                <div class="cyber-loader">
+                    <div class="loader-ring"></div>
+                    <div class="loader-ring"></div>
+                    <div class="loader-ring"></div>
+                    <div class="loader-icon">⚙️</div>
+                </div>
+                <div class="loading-joke-container" id="loadingJoke">
+                    "🔧 75% of bugs are fixed by checking the API key..."
+                </div>
             </div>
             
-            <div class="loading-stages">
+            <div class="loading-stages-neo">
                 ${loadingStages.map((s, i) => `
-                    <div class="stage-item ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
-                        <div class="stage-indicator">
-                            <span class="stage-number">${s.stage}</span>
-                            <span class="stage-check">✓</span>
+                    <div class="stage-item-neo ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
+                        <div class="stage-indicator-neo">
+                            <span class="stage-num">${s.stage}</span>
+                            <span class="stage-done">✓</span>
                         </div>
-                        <div class="stage-text">${s.text}</div>
+                        <div class="stage-label">${s.text}</div>
                     </div>
                 `).join('')}
             </div>
             
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="roadmapProgressBar" style="width: 0%"></div>
-                <div class="progress-percentage" id="progressPercentage">0%</div>
+            <div class="neo-progress-container">
+                <div class="neo-progress-bar" id="roadmapProgressBar" style="width: 0%"></div>
+                <div class="neo-progress-text" id="progressPercentage">0%</div>
             </div>
             
-            <p class="loading-subtext">This may take 15-30 seconds as we create your custom learning path...</p>
+            <div class="neo-loading-footer">
+                <span class="status-dot"></span> SYSTEM ONLINE: GENERATING NEURAL PATHWAY...
+            </div>
         </div>
     `;
+
+    // Start Joke Rotation
+    let jokeIndex = 0;
+    window.roadmapJokeInterval = setInterval(() => {
+        const jokeEl = document.getElementById('loadingJoke');
+        if (jokeEl) {
+            jokeIndex = (jokeIndex + 1) % DEV_JOKES.length;
+            jokeEl.style.opacity = 0;
+            setTimeout(() => {
+                jokeEl.textContent = `"${DEV_JOKES[jokeIndex]}"`;
+                jokeEl.style.opacity = 1;
+            }, 300);
+        }
+    }, 4000);
     
     // Animate progress through stages
     const progressBar = document.getElementById('roadmapProgressBar');
@@ -1874,7 +1895,7 @@ async function generateRoadmapForCert(certId) {
     
     // Function to update stage UI
     const updateStage = (stageIndex) => {
-        const stageItems = document.querySelectorAll('.stage-item');
+        const stageItems = document.querySelectorAll('.stage-item-neo');
         stageItems.forEach((item, i) => {
             if (i < stageIndex) {
                 item.classList.remove('active');
@@ -1933,7 +1954,7 @@ async function generateRoadmapForCert(certId) {
         if (progressPercentage) progressPercentage.textContent = '100%';
         
         // Mark all stages complete
-        document.querySelectorAll('.stage-item').forEach(item => {
+        document.querySelectorAll('.stage-item-neo').forEach(item => {
             item.classList.remove('active');
             item.classList.add('completed');
         });
@@ -2375,6 +2396,19 @@ function displayRoadmap(roadmapData) {
             </div>
 
             <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                <h3>Resources & Documentation</h3>
+            </div>
+            <div class="resources-grid-v3">
+                ${(phase.resources || []).map(res => `
+                    <div class="resource-card-v3">
+                        <div class="res-type-tag">${res.type}</div>
+                        <div style="font-weight:800; margin: 8px 0; font-size: 14px;">${res.name}</div>
+                        ${res.url && res.url !== '#' ? `<a href="${res.url}" target="_blank" class="res-link-btn-v3">Access Resource →</a>` : `<span class="res-link-btn-v3" style="opacity:0.5; cursor:not-allowed;">Link Unavailable</span>`}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
                 <h3>Tools to Master</h3>
             </div>
             <div class="resources-flex-v3">
@@ -2529,65 +2563,136 @@ function createSkillTree(treeData) {
     container.innerHTML = '';
     svg.innerHTML = '';
 
-    const width = container.offsetWidth || 800;
-    const height = 600;
+    const width = container.offsetWidth || 1000;
+    const height = 800;
     const centerX = width / 2;
     const centerY = height / 2;
 
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
     const categories = treeData.categories || [];
-    const radius = 220;
+    const categoryRadius = 180;
+    const skillRadiusOffset = 120;
 
     categories.forEach((cat, catIdx) => {
-        const angle = (catIdx / categories.length) * 2 * Math.PI - Math.PI / 2;
+        const catAngle = (catIdx / categories.length) * 2 * Math.PI - Math.PI / 2;
+        const catX = centerX + categoryRadius * Math.cos(catAngle);
+        const catY = centerY + categoryRadius * Math.sin(catAngle);
 
-        cat.skills.forEach((skill, skillIdx) => {
-            const skillRadius = radius + (skillIdx * 40);
-            const x = centerX + skillRadius * Math.cos(angle + (skillIdx * 0.1));
-            const y = centerY + skillRadius * Math.sin(angle + (skillIdx * 0.1));
+        // Category Hub Node
+        const catNode = document.createElement('div');
+        catNode.className = 'skill-node-v2 category-hub';
+        catNode.style.left = `${catX - 55}px`;
+        catNode.style.top = `${catY - 55}px`;
+        catNode.style.background = 'var(--secondary-v3)';
+        catNode.innerHTML = `
+            <div class="skill-node-icon-v2">📦</div>
+            <div class="skill-node-label-v2">${cat.name}</div>
+        `;
+        container.appendChild(catNode);
 
-            // Create node
+        // Line from center to category
+        const centerLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        centerLine.setAttribute('x1', centerX);
+        centerLine.setAttribute('y1', centerY);
+        centerLine.setAttribute('x2', catX);
+        centerLine.setAttribute('y2', catY);
+        centerLine.setAttribute('class', 'connection-line-v2 core-line');
+        svg.appendChild(centerLine);
+
+        // Skills around category
+        const skills = cat.skills || [];
+        skills.forEach((skill, skillIdx) => {
+            const spreadAngle = 0.5; // radians
+            const skillAngle = catAngle + (skillIdx - (skills.length - 1) / 2) * spreadAngle;
+            const skillX = catX + skillRadiusOffset * Math.cos(skillAngle);
+            const skillY = catY + skillRadiusOffset * Math.sin(skillAngle);
+
+            // Skill Node
             const node = document.createElement('div');
-            node.className = 'skill-node-v2';
-            node.style.left = `${x - 50}px`;
-            node.style.top = `${y - 50}px`;
+            node.className = 'skill-node-v2 skill-leaf';
+            node.style.left = `${skillX - 45}px`;
+            node.style.top = `${skillY - 45}px`;
+            node.style.width = '90px';
+            node.style.height = '90px';
             node.innerHTML = `
                 <div class="skill-node-icon-v2">${skill.icon || '🛡️'}</div>
                 <div class="skill-node-label-v2">${skill.name}</div>
             `;
             
             node.addEventListener('click', () => {
-                showNotification(`Mastered: ${skill.name}`, 'success');
+                openSkillDetailPanel(skill, cat.name);
             });
 
             container.appendChild(node);
 
-            // Create line to center
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', centerX);
-            line.setAttribute('y1', centerY);
-            line.setAttribute('x2', x);
-            line.setAttribute('y2', y);
-            line.setAttribute('class', 'connection-line-v2');
-            svg.appendChild(line);
+            // Line from category to skill
+            const skillLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${catX} ${catY} Q ${(catX + skillX) / 2} ${(catY + skillY) / 2} ${skillX} ${skillY}`;
+            skillLine.setAttribute('d', d);
+            skillLine.setAttribute('class', 'connection-line-v2 skill-line');
+            svg.appendChild(skillLine);
         });
     });
 
     // Central Core Node
     const core = document.createElement('div');
-    core.className = 'skill-node-v2';
-    core.style.width = '120px';
-    core.style.height = '120px';
-    core.style.left = `${centerX - 60}px`;
-    core.style.top = `${centerY - 60}px`;
+    core.className = 'skill-node-v2 core-node';
+    core.style.width = '140px';
+    core.style.height = '140px';
+    core.style.left = `${centerX - 70}px`;
+    core.style.top = `${centerY - 70}px`;
     core.style.background = 'var(--primary-v3)';
     core.style.color = 'white';
+    core.style.zIndex = '10';
     core.innerHTML = `
-        <div class="skill-node-icon-v2">🎯</div>
-        <div class="skill-node-label-v2" style="color: white;">CERTIFIED</div>
+        <div class="skill-node-icon-v2" style="font-size: 3rem;">🎯</div>
+        <div class="skill-node-label-v2" style="color: white; font-size: 0.9rem;">CERTIFIED</div>
     `;
     container.appendChild(core);
+}
+
+function openSkillDetailPanel(skill, categoryName) {
+    const panel = document.getElementById('skillPanel');
+    if (!panel) return;
+
+    document.getElementById('skillTitle').innerText = skill.name;
+    document.getElementById('skillIcon').innerText = skill.icon || '🛡️';
+    document.getElementById('skillCategory').innerText = categoryName + ' • ' + (skill.level || 'Mastery');
+
+    // Use descriptions from assessment or default
+    const descriptions = {
+        'Linux Fundamentals': 'Core proficiency in Linux systems, terminal navigation, and permission management.',
+        'Networking Fundamentals': 'Deep understanding of TCP/IP, OSI model, and network protocol analysis.',
+        'Web Application Pentesting': 'Identifying and exploiting vulnerabilities in web services and applications.',
+        'Active Directory Architecture': 'Understanding domain environments, Kerberos, and GPO structures.'
+    };
+
+    document.getElementById('skillDescription').innerText = descriptions[skill.name] || `Advanced level competency in ${skill.name} required for this certification path.`;
+
+    // Dynamic Objectives
+    const objectivesList = document.getElementById('skillObjectives');
+    objectivesList.innerHTML = [
+        `Master the core concepts of ${skill.name}`,
+        `Implement advanced techniques in a lab environment`,
+        `Apply knowledge to real-world ${appState.selectedCert} scenarios`
+    ].map(obj => `<li>${obj}</li>`).join('');
+
+    // Labs
+    const labsList = document.getElementById('skillLabs');
+    labsList.innerHTML = `
+        <li>TryHackMe: ${skill.name} Modules</li>
+        <li>HackTheBox: Specialized Challenges</li>
+        <li>Custom Lab: Infrastructure Simulation</li>
+    `;
+
+    // Tools
+    const toolsContainer = document.getElementById('skillTools');
+    const tools = (appState.roadmapJSON?.roadmap?.[0]?.tools || ['Nmap', 'Metasploit', 'Burp Suite']).slice(0, 4);
+    toolsContainer.innerHTML = tools
+        .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); font-size: 10px;">${t}</span>`).join('');
+
+    panel.classList.add('open');
 }
 
 // displayRoadmapMarkdown - handles markdown content when JSON parsing fails
