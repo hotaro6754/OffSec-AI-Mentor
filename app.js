@@ -349,10 +349,32 @@ function init() {
     setupNavbarScroll();
     setupCertFilters();
     checkExistingSession();
+    
+    // Check PDF library status
+    checkPDFLibraryStatus();
+    
     if (elements.modeCheckbox) {
         toggleLearningMode();
     }
     console.log('✅ Initialization complete');
+}
+
+function checkPDFLibraryStatus() {
+    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        console.warn('⚠️ jsPDF library not loaded. PDF export will be unavailable.');
+        console.warn('💡 Users can still export as JSON or TXT format.');
+        
+        // Disable PDF download button
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        if (downloadPdfBtn) {
+            downloadPdfBtn.disabled = true;
+            downloadPdfBtn.title = 'PDF export unavailable - library not loaded';
+            downloadPdfBtn.style.opacity = '0.5';
+            downloadPdfBtn.style.cursor = 'not-allowed';
+        }
+    } else {
+        console.log('✅ jsPDF library loaded successfully');
+    }
 }
 
 function checkApiKeyAndStart() {
@@ -2502,7 +2524,15 @@ async function downloadRoadmapPDF() {
     
     // Check if jsPDF is loaded
     if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        showError('PDF library not loaded. Please refresh and try again.');
+        console.error('❌ PDF Export Failed - Library Not Loaded');
+        console.info('📋 Troubleshooting:');
+        console.info('   • Check your internet connection');
+        console.info('   • Disable ad blockers or browser extensions');
+        console.info('   • Check browser console for script loading errors');
+        console.info('   • Try refreshing the page');
+        console.info('💡 Alternative: Use "Export as JSON" button - no library needed!');
+        
+        showError('PDF export is currently unavailable. The PDF library failed to load from the CDN. This might be due to network issues, ad blockers, or browser extensions. Please use the "Export as JSON" button instead, or try refreshing the page.');
         return;
     }
     
