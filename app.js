@@ -2494,105 +2494,152 @@ function exportRoadmap() {
     showSuccess('Roadmap exported!');
 }
 
-function downloadRoadmapPDF() {
+async function downloadRoadmapPDF() {
     if (!appState.roadmapJSON) {
         showError('No roadmap data available. Generate a roadmap first.');
         return;
     }
     
-    // Check if html2pdf is loaded
-    if (typeof html2pdf === 'undefined') {
-        showError('PDF library not loaded. Please refresh the page and try again.');
+    // Check if jsPDF is loaded
+    if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        showError('PDF library not loaded. Please refresh and try again.');
         return;
     }
     
-    showNotification('Preparing PDF... This may take a moment.', 'info');
+    showNotification('Generating text-based PDF...', 'info');
     
-    // Create a temporary container with proper styling
-    const tempContainer = document.createElement('div');
-    tempContainer.style.cssText = `
+    const isDarkMode = document.body.classList.contains('mode-oscp');
+    
+    // Step 1: Create print-safe container
+    const pdfRoot = document.createElement('div');
+    pdfRoot.id = 'pdf-root';
+    pdfRoot.style.cssText = `
         position: absolute;
         left: -9999px;
         top: 0;
-        width: 210mm;
-        padding: 20px;
-        background: white;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 800px;
+        display: block;
+        background: ${isDarkMode ? '#121212' : '#ffffff'};
+        color: ${isDarkMode ? '#e6edf3' : '#000000'};
+        font-family: 'IBM Plex Mono', monospace;
         font-size: 12px;
         line-height: 1.6;
-        color: #333;
+        padding: 20px;
     `;
     
-    // Clone the roadmap content
+    // Clone roadmap content
     const contentClone = elements.roadmapContent.cloneNode(true);
     
-    // Remove interactive elements (buttons, etc.)
-    contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
-    
-    // Ensure all text is black for PDF
+    // Step 2: Strip breaking CSS
     contentClone.querySelectorAll('*').forEach(el => {
-        el.style.color = '#333';
+        el.style.animation = 'none';
+        el.style.transition = 'none';
+        el.style.transform = 'none';
+        if (el.style.position === 'fixed') {
+            el.style.position = 'static';
+        }
+        // Convert grid/flex to block
+        if (el.style.display === 'grid' || el.style.display === 'flex') {
+            el.style.display = 'block';
+        }
+        // Ensure readable colors
+        const computedStyle = window.getComputedStyle(el);
+        if (isDarkMode) {
+            if (computedStyle.color === 'rgb(255, 255, 255)') {
+                el.style.color = '#e6edf3';
+            }
+        } else {
+            if (computedStyle.color === 'rgb(0, 0, 0)') {
+                el.style.color = '#000000';
+            }
+        }
+        // Add page-break hints
+        if (el.classList.contains('phase-card-v3')) {
+            el.style.pageBreakInside = 'avoid';
+        }
     });
+    
+    // Remove interactive elements
+    contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
     
     // Add header
     const header = document.createElement('div');
-    header.style.cssText = 'text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;';
+    header.style.cssText = `
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
+    `;
     header.innerHTML = `
-        <h1 style="margin: 0; font-size: 24px;">OffSec Learning Roadmap</h1>
-        <p style="margin: 5px 0; font-size: 14px;">Certification: ${appState.selectedCert}</p>
-        <p style="margin: 5px 0; font-size: 12px; color: #666;">Generated: ${new Date().toLocaleDateString()}</p>
+        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
+            OffSec Learning Roadmap
+        </h1>
+        <p style="margin: 5px 0; font-size: 16px;">
+            <strong>Certification:</strong> ${appState.selectedCert}
+        </p>
+        <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
+            Generated: ${new Date().toLocaleDateString()} | 
+            Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
+        </p>
     `;
     
-    tempContainer.appendChild(header);
-    tempContainer.appendChild(contentClone);
+    pdfRoot.appendChild(header);
+    pdfRoot.appendChild(contentClone);
     
     // Add footer
     const footer = document.createElement('div');
-    footer.style.cssText = 'margin-top: 30px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ccc; padding-top: 10px;';
-    footer.textContent = 'Created with OffSec AI Mentor | hotaro6754/OffSec-AI-Mentor';
-    tempContainer.appendChild(footer);
+    footer.style.cssText = `
+        margin-top: 40px;
+        padding-top: 20px;
+        text-align: center;
+        font-size: 10px;
+        color: ${isDarkMode ? '#6e7681' : '#999'};
+        border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
+    `;
+    footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
+    pdfRoot.appendChild(footer);
     
-    document.body.appendChild(tempContainer);
+    document.body.appendChild(pdfRoot);
     
-    // Wait for any dynamic content to load (icons, etc.)
-    setTimeout(() => {
-        const opt = {
-            margin: [15, 15, 15, 15],
-            filename: `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            },
-            jsPDF: { 
-                unit: 'mm', 
-                format: 'a4', 
-                orientation: 'portrait'
-            },
-            pagebreak: { 
-                mode: ['avoid-all', 'css', 'legacy'],
-                before: '.phase-card-v3'
-            }
-        };
+    // Step 3: Wait for DOM paint (500ms minimum to ensure rendering completes)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Verify content rendered
+    if (pdfRoot.offsetHeight < 100) {
+        document.body.removeChild(pdfRoot);
+        showError('PDF content failed to render. Try regenerating roadmap.');
+        return;
+    }
+    
+    // Step 4: Generate text-based PDF
+    try {
+        const doc = new jspdf.jsPDF('p', 'mm', 'a4');
         
-        html2pdf()
-            .set(opt)
-            .from(tempContainer)
-            .save()
-            .then(() => {
-                document.body.removeChild(tempContainer);
-                showSuccess('Roadmap downloaded as PDF!');
-            })
-            .catch(err => {
-                console.error('PDF generation failed:', err);
-                if (document.body.contains(tempContainer)) {
-                    document.body.removeChild(tempContainer);
-                }
-                showError('PDF generation failed. Try exporting as JSON instead.');
-            });
-    }, 2000); // Increased delay to ensure full rendering
+        await doc.html(pdfRoot, {
+            callback: function(doc) {
+                doc.save(`OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`);
+            },
+            autoPaging: 'text',
+            margin: [10, 10, 10, 10],
+            width: 190,
+            windowWidth: 800,
+            html2canvas: {
+                scale: 1,
+                logging: false
+            }
+        });
+        
+        // Step 5: Cleanup
+        document.body.removeChild(pdfRoot);
+        showSuccess('PDF generated with selectable text!');
+        
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        if (document.body.contains(pdfRoot)) {
+            document.body.removeChild(pdfRoot);
+        }
+        showError('PDF generation failed. Try exporting as JSON instead.');
+    }
 }
 
 // ============================================================================
