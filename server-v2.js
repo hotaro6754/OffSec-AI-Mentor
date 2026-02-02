@@ -22,7 +22,7 @@ const cors = require('cors');
 const path = require('path');
 const db = require('./database');
 const fs = require('fs');
-const ILovePDFApi = require('@ilovepdf/ilovepdf-js-core').default;
+const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
 
 // ============================================================================
 // CONFIGURATION
