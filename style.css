@@ -2981,3 +2981,54 @@ body.mode-oscp .or-text {
         opacity: 1;
     }
 }
+
+/* ============ PDF EXPORT STYLES ============ */
+#pdf-root {
+    font-family: 'IBM Plex Mono', monospace !important;
+}
+
+#pdf-root * {
+    box-sizing: border-box;
+}
+
+#pdf-root table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+#pdf-root table th,
+#pdf-root table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #333;
+}
+
+#pdf-root table th {
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+body.mode-oscp #pdf-root table th {
+    background: #30363d;
+    color: #e6edf3;
+}
+
+body.mode-oscp #pdf-root table td {
+    border-color: #30363d;
+}
+
+#pdf-root .phase-card-v3 {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+}
+
+#pdf-root h1, #pdf-root h2, #pdf-root h3, #pdf-root h4 {
+    page-break-after: avoid;
+}
+
+/* Remove shadows and transforms for PDF */
+#pdf-root * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
