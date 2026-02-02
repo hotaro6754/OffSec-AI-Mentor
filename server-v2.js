@@ -137,7 +137,8 @@ const RESOURCES = {
             { name: 'TCM Security Official', url: 'https://www.youtube.com/@TCMSecurity', focus: 'Official certification training' },
             { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, Wireless security' },
             { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security, Blue team' },
-            { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' }
+            { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' },
+            { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
         ]
     },
     platforms: {
@@ -204,6 +205,81 @@ const RESOURCES = {
         tools: ["Dradis", "PlexTrac", "PwnDoc", "Markdown", "LaTeX"]
     }
 };
+
+const MASTER_SKILLS = [
+    { id: 0, name: "Linux Fundamentals", category: "Core Foundations", estimatedTime: "3-4 weeks",
+      description: "Master the essential Linux operating system concepts, command-line interface, file system navigation, permissions, and shell scripting basics.",
+      objectives: ["Navigate the Linux file system with confidence", "Understand user permissions and file ownership", "Execute basic to intermediate bash commands", "Manage processes, services, and system resources", "Configure networking on Linux systems"],
+      resources: [{ type: "Platform", text: "TryHackMe: Linux Fundamentals (Parts 1-3)", url: "https://tryhackme.com/module/linux-fundamentals" }, { type: "Wargame", text: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/" }, { type: "Website", text: "Linux Journey", url: "https://linuxjourney.com" }],
+      tools: ["Bash/Zsh", "Vim/Nano", "SSH", "Systemctl", "Grep/Sed/Awk"], labs: ["TryHackMe: Linux Fundamentals Rooms", "HackTheBox: Easy Linux machines"],
+      prerequisites: "None", nextSkills: "Bash Scripting, Reconnaissance Methodology" },
+    { id: 1, name: "Bash Scripting", category: "Automation", estimatedTime: "2-3 weeks",
+      description: "Learn to write efficient bash scripts for automation, reconnaissance, and task management in penetration testing workflows.",
+      objectives: ["Write loops, conditionals, and functions in bash", "Automate reconnaissance and enumeration tasks", "Parse command output and process files", "Handle errors and implement logging"],
+      resources: [{ type: "Website", text: "Bash Academy", url: "https://guide.bash.academy" }],
+      tools: ["Bash", "AWK", "Sed", "Cron"], labs: ["Create automated Nmap scanner", "Build subdomain enumeration tool"],
+      prerequisites: "Linux Fundamentals", nextSkills: "Python Fundamentals" },
+    { id: 2, name: "Networking Fundamentals", category: "Core Foundations", estimatedTime: "4-5 weeks",
+      description: "Understand TCP/IP, DNS, HTTP, network protocols, packet structure, and how data flows across networks.",
+      objectives: ["Explain OSI and TCP/IP models", "Understand IP addressing and subnetting", "Analyze common protocols (HTTP, DNS, FTP, SMB)", "Capture and interpret network packets"],
+      resources: [{ type: "Platform", text: "TryHackMe: Network Fundamentals", url: "https://tryhackme.com" }, { type: "Website", text: "Practical Networking", url: "https://www.practicalnetworking.net" }],
+      tools: ["Wireshark", "tcpdump", "Nmap", "Netcat"], labs: ["TryHackMe: Wireshark 101", "Perform DNS enumeration"],
+      prerequisites: "Basic computer knowledge", nextSkills: "Packet Analysis" },
+    { id: 3, name: "Windows Basics", category: "Core Foundations", estimatedTime: "2-3 weeks",
+      description: "Gain foundational knowledge of Windows operating systems, PowerShell, file system, services, and basic administration.",
+      objectives: ["Navigate Windows file system and registry", "Use PowerShell for system administration", "Understand Windows services and processes"],
+      resources: [{ type: "Platform", text: "TryHackMe: Windows Fundamentals", url: "https://tryhackme.com" }],
+      tools: ["PowerShell", "CMD", "Task Manager"], labs: ["TryHackMe: Windows Fundamentals Rooms"],
+      prerequisites: "Basic OS knowledge", nextSkills: "Windows Privilege Escalation" },
+    { id: 7, name: "Reconnaissance Methodology", category: "Methodology", estimatedTime: "3-4 weeks",
+      description: "Master passive and active reconnaissance techniques to gather information about targets before exploitation.",
+      objectives: ["Perform OSINT and passive reconnaissance", "Conduct active scanning with Nmap", "Enumerate subdomains and DNS records"],
+      resources: [{ type: "Platform", text: "TryHackMe: Recon", url: "https://tryhackme.com" }, { type: "Website", text: "OSINT Framework", url: "https://osintframework.com" }],
+      tools: ["Nmap", "Gobuster", "ffuf", "theHarvester", "Shodan"], labs: ["Enumerate HTB machines", "Directory brute-forcing practice"],
+      prerequisites: "Networking Fundamentals, Linux Fundamentals", nextSkills: "Enumeration Methodology" },
+    { id: 10, name: "Web Application Penetration Testing", category: "Web Security", estimatedTime: "6-8 weeks",
+      description: "Identify and exploit web application vulnerabilities including injection flaws, authentication bypasses, and business logic errors.",
+      objectives: ["Test for common web vulnerabilities", "Exploit SQL injection manually and with tools", "Bypass authentication and authorization", "Identify XSS and CSRF vulnerabilities"],
+      resources: [{ type: "Platform", text: "PortSwigger Academy (All Labs)", url: "https://portswigger.net/web-security" }, { type: "Website", text: "OWASP Juice Shop", url: "https://owasp.org/www-project-juice-shop/" }],
+      tools: ["Burp Suite Pro", "SQLMap", "XSStrike", "Commix", "WPScan"], labs: ["Complete PortSwigger all labs", "Pentest Juice Shop"],
+      prerequisites: "Web Basics, Enumeration Methodology", nextSkills: "OWASP Top 10 Exploitation" },
+    { id: 12, name: "Network Penetration Testing", category: "Network Security", estimatedTime: "4-5 weeks",
+      description: "Conduct comprehensive network penetration tests, exploiting misconfigurations and vulnerable services to gain access.",
+      objectives: ["Perform network vulnerability assessments", "Exploit vulnerable network services", "Pivot through networks"],
+      resources: [{ type: "Platform", text: "TryHackMe: Network Security", url: "https://tryhackme.com" }],
+      tools: ["Nmap", "Metasploit", "Responder", "Impacket", "CrackMapExec"], labs: ["HTB Pro Labs", "TryHackMe Network Security rooms"],
+      prerequisites: "Enumeration Methodology, Networking Fundamentals", nextSkills: "Lateral Movement" },
+    { id: 13, name: "Linux Privilege Escalation", category: "Post-Exploitation", estimatedTime: "3-4 weeks",
+      description: "Escalate privileges on Linux systems by exploiting misconfigurations, SUID binaries, kernel exploits, and more.",
+      objectives: ["Identify privilege escalation vectors", "Exploit SUID/SGID binaries", "Abuse sudo misconfigurations"],
+      resources: [{ type: "Platform", text: "TryHackMe: Linux PrivEsc", url: "https://tryhackme.com/room/linuxprivesc" }, { type: "Website", text: "GTFOBins", url: "https://gtfobins.github.io" }],
+      tools: ["LinPEAS", "LinEnum", "pspy"], labs: ["TryHackMe Linux PrivEsc rooms", "HTB Easy/Medium Linux machines"],
+      prerequisites: "Linux Fundamentals", nextSkills: "Post-Exploitation Techniques" },
+    { id: 14, name: "Windows Privilege Escalation", category: "Post-Exploitation", estimatedTime: "3-4 weeks",
+      description: "Escalate privileges on Windows systems through token manipulation, service exploits, registry abuse, and more.",
+      objectives: ["Enumerate Windows privilege escalation vectors", "Exploit unquoted service paths", "Abuse Windows tokens and privileges"],
+      resources: [{ type: "Platform", text: "TryHackMe: Windows PrivEsc", url: "https://tryhackme.com/room/windowsprivesc20" }],
+      tools: ["WinPEAS", "PowerUp", "Mimikatz"], labs: ["TryHackMe Windows PrivEsc rooms", "HTB Windows machines"],
+      prerequisites: "Windows Basics", nextSkills: "Active Directory Privilege Escalation" },
+    { id: 18, name: "Active Directory Architecture", category: "Active Directory", estimatedTime: "3-4 weeks",
+      description: "Understand Active Directory structure, forests, domains, trusts, GPOs, and authentication mechanisms.",
+      objectives: ["Explain AD forest and domain structure", "Understand domain trusts", "Analyze Group Policy Objects"],
+      resources: [{ type: "Platform", text: "TryHackMe: Active Directory Basics", url: "https://tryhackme.com" }, { type: "Platform", text: "HackTheBox Academy", url: "https://academy.hackthebox.com" }],
+      tools: ["BloodHound", "PowerView", "ADExplorer"], labs: ["Build AD home lab", "TryHackMe AD rooms"],
+      prerequisites: "Windows Basics", nextSkills: "Kerberos Authentication Attacks" },
+    { id: 19, name: "Kerberos Authentication Attacks", category: "Active Directory", estimatedTime: "3-4 weeks",
+      description: "Exploit Kerberos protocol weaknesses including Kerberoasting, AS-REP Roasting, and Golden/Silver Ticket attacks.",
+      objectives: ["Understand Kerberos authentication flow", "Perform Kerberoasting attacks", "Execute AS-REP Roasting", "Generate Golden and Silver Tickets"],
+      resources: [{ type: "Guide", text: "ired.team: Kerberos Attacks", url: "https://www.ired.team" }],
+      tools: ["Rubeus", "Impacket", "Mimikatz", "BloodHound"], labs: ["HTB Active Directory machines"],
+      prerequisites: "Active Directory Architecture", nextSkills: "Lateral Movement" },
+    { id: 27, name: "Red Team Operations", category: "Red Team", estimatedTime: "6-8 weeks",
+      description: "Plan and execute end-to-end red team operations simulating advanced persistent threats against organizations.",
+      objectives: ["Plan red team campaigns", "Simulate APT tactics", "Evade blue team detection"],
+      resources: [{ type: "Platform", text: "TryHackMe: Red Team Path", url: "https://tryhackme.com" }],
+      tools: ["C2 Frameworks", "OPSEC tools"], labs: ["HTB Pro Labs", "Custom red team exercises"],
+      prerequisites: "All Year 3 skills", nextSkills: "C2 Operations" }
+];
 
 // ============================================================================
 // CERTIFICATION-SPECIFIC CONTENT DATABASE
@@ -976,15 +1052,6 @@ UNIVERSAL FOUNDATION (Required for all certs):
 - Tools: Git & Markdown, Virtualization (VMware/VirtualBox)
 - Ethics: Cybersecurity ethics & legal boundaries`;
 
-        const stagesLogic = `
-LEARNING STAGES FRAMEWORK:
-- Stage 0 (Absolute Zero): OverTheWire Bandit/Leviathan, PicoCTF, THM Pre-Security.
-- Stage 1 (Beginner): THM Complete Beginner, HTB Academy Fundamentals, THM JR Pentester.
-- Stage 2 (Junior): THM Offensive Pentesting, HTB Academy Pentester Path, eJPT, PortSwigger Academy.
-- Stage 3 (Industry Ready): Active Directory (THM/HTB), PNPT, PG Practice.
-- Stage 4 (Hardcore): OSCP preparation, Manual exploitation, Time management.
-- Stage 5-12 (Advanced): CPTS, OSEP, OSWE, OSDA, OSWP, OSED, OSEE, OSMR.`;
-
         const masterToolList = `
 MASTER TOOL LIST (Select relevant tools based on cert and phase):
 - Recon: Nmap, Masscan, RustScan, Enum4linux, Amass, Subfinder
@@ -997,60 +1064,25 @@ MASTER TOOL LIST (Select relevant tools based on cert and phase):
 - Pivoting: Chisel, Ligolo-NG, ProxyChains
 - Wireless: Aircrack-ng suite, Bettercap`;
 
-        const beginnerInstructions = `
-IMPORTANT INSTRUCTIONS FOR BEGINNER MODE:
-- TIMELINE: 1-2 years. Start with STAGE 0 & 1.
-- FOUNDATIONS: Include UNIVERSAL FOUNDATION topics.
-- STRUCTURE: MUST generate 11-14 Progressive Phases from absolute zero to certification expert.
-- SYLLABUS: Deep analysis of ${cert} syllabus - map EACH syllabus topic to specific phases.
-- RESOURCE MAPPING: For EACH phase, assign specific:
-  * YouTube channels that cover those exact topics
-  * Lab platforms with specific rooms/boxes for those skills
-  * Tools needed for those specific techniques
-  * Example: Buffer Overflow phase → YouTube: LiveOverflow, Corelan → Labs: HTB Brainpan → Tools: Immunity Debugger, mona.py
-- LABS: Mandatory labs from THM, HTB (Starting Point), OverTheWire with SPECIFIC names and URLs.
-- PHASE PROGRESSION: Beginner phases should follow this structure:
-  Phase 1: Absolute Foundation (Linux, Windows, Networking)
-  Phase 2: Programming Fundamentals (Bash, Python)
-  Phase 3: Reconnaissance & Enumeration
-  Phase 4: Web Application Basics
-  Phase 5: Exploitation Fundamentals
-  Phase 6: Linux Privilege Escalation
-  Phase 7: Windows Privilege Escalation
-  Phase 8: Active Directory Basics
-  Phase 9: Advanced Web Attacks
-  Phase 10: Advanced AD Attacks
-  Phase 11: Reporting & Methodology
-  Phase 12: Certification-Specific Topics
-  Phase 13: Exam Preparation & Practice
-  Phase 14: Final Review & Mock Exams`;
+        const instructions = `
+CRITICAL INSTRUCTIONS FOR AI MENTOR:
+1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be DETAILED, PRACTICAL, and LOGICAL.
+2. **TIMELINE**: Generate a **1-YEAR roadmap** (11-14 phases). This is a marathon, not a sprint.
+3. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
+4. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map every single topic to a specific phase.
+5. **LAB GUIDANCE**: For every lab mentioned, include "Key Points while solving" - specific pitfalls, mindset tips, or enumeration steps.
+6. **WORKING LINKS**: Use only verified platform URLs.
+   - TryHackMe: https://tryhackme.com/room/[roomname]
+   - HackTheBox: https://app.hackthebox.com/machines/[machinename] or /starting-point
+7. **SKILL TREE**: You MUST generate a comprehensive Neo-Brutalist Skill Tree in the JSON.
+8. **GROUNDING**: Reference the provided MASTER_SKILLS for technical depth.
 
-        const oscpInstructions = `
-IMPORTANT INSTRUCTIONS FOR OSCP MODE:
-- TIMELINE: 6 months - 1 year. Focus on STAGE 3 & 4.
-- INTENSITY: Brutal & Advanced. High focus on manual exploitation.
-- GAPS: Prioritize addressing user weaknesses: ${weaknesses.join(', ')}.
-- STRUCTURE: MUST generate 11-13 Intensive Phases for OSCP preparation.
-- SYLLABUS: Strictly align with PEN-200 syllabus - map each PEN-200 topic to phases.
-- RESOURCE MAPPING: For EACH phase, assign specific:
-  * YouTube channels for advanced techniques (IppSec for specific HTB boxes, etc.)
-  * Specific HTB boxes from TJ Null list for each skill area
-  * Advanced tools with actual command examples
-- LABS: Advanced labs (PG Practice specific boxes, TJ Null List boxes, HTB Medium/Hard).
-- PHASE PROGRESSION: OSCP phases should follow this structure:
-  Phase 1: Foundation Refresh & Gap Filling
-  Phase 2: Advanced Enumeration Mastery
-  Phase 3: Buffer Overflow Mastery
-  Phase 4: Web Exploitation Deep Dive
-  Phase 5: Linux PrivEsc Mastery
-  Phase 6: Windows PrivEsc Mastery
-  Phase 7: Active Directory Attacks
-  Phase 8: Pivoting & Tunneling
-  Phase 9: Manual Exploit Modification
-  Phase 10: Time Management & Exam Strategy
-  Phase 11: Lab Practice (HTB TJ Null list)
-  Phase 12: Proving Grounds Practice
-  Phase 13: Final Exam Preparation`;
+PHASE STRUCTURE (11-14 Phases):
+Phases 1-3: Foundations (Linux, Networking, Windows, Scripting)
+Phases 4-6: Web & Network Enumeration + Initial Access
+Phases 7-9: Privilege Escalation & Active Directory
+Phases 10-12: Advanced Topics (Evasion, Post-Exploitation, Cloud)
+Phases 13-14: Certification Mastery, Reporting, & Mock Exams`;
 
         let certSpecificInstructions = '';
         if (certContent) {
@@ -1064,7 +1096,7 @@ CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
 - YT RESOURCES: ${certContent.youtubeChannels.map(y => `${y.name} (${y.url})`).join(', ')}`;
         }
 
-        return `Create a comprehensive, visually stunning ${cert} learning roadmap.
+        return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap as an AI Mentor.
 
 USER PROFILE:
 - Mode: ${mode.toUpperCase()}
@@ -1072,33 +1104,27 @@ USER PROFILE:
 - Readiness Score: ${assessmentResult.readinessScore || 'N/A'}%
 
 ${universalFoundations}
-${stagesLogic}
 ${masterToolList}
-
-${isOscp ? oscpInstructions : beginnerInstructions}
+${instructions}
 ${certSpecificInstructions}
 
 REQUIREMENTS:
 1. **Gap Analysis**: Detailed missing skills vs requirements.
-2. **Dynamic Phases**: MUST generate exactly 11-14 phases for Beginner mode, 11-13 phases for OSCP mode. Each phase MUST have:
-   - "Why it matters for ${cert}" - explain how this phase aligns with certification syllabus
-   - Specific Learning Outcomes mapped to certification topics
-   - Tools from Master List relevant to THIS phase's topics
-   - Mandatory Labs with WORKING URLs that practice THIS phase's skills
-   - Resources with WORKING URLs - YouTube channels that teach THIS phase's specific topics
-   - Weekly breakdown showing progression within the phase
-   - Completion checklist for verification
-3. **Syllabus-to-Resource Mapping**: For each certification syllabus topic, explicitly map:
-   - Which YouTube channels cover it (with channel URLs)
-   - Which specific labs practice it (with lab URLs and platform)
-   - Which tools are needed (with example commands)
-   - Example: "Buffer Overflow" topic → Phase 3 → YouTube: LiveOverflow, Corelan → Labs: HTB Brainpan → Tools: Immunity Debugger, mona.py, GDB
-4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with actual commands and use cases.
-5. **Special Resource**: END with "Secret Cyber Wisdom" (Rickroll: https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+2. **Dynamic Phases**: MUST generate exactly 11-14 phases. Each phase MUST have:
+   - "Why it matters for ${cert}" - syllabus alignment
+   - Specific Learning Outcomes
+   - Tools needed for THIS phase
+   - Mandatory Labs with WORKING URLs and "Key Points while solving"
+   - Resources (YouTube, Web, Books)
+   - Weekly breakdown
+   - Completion checklist
+3. **Skill Tree**: A structured tree of skills learned, grouped by categories (e.g., Recon, Web, AD).
+4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
+5. **Special Resource**: Rickroll at the end.
 
 STRICT RULES:
-- Structural analysis of ${cert} syllabus is mandatory.
-- Use the following RESOURCES object for verified links: ${JSON.stringify(resources)}
+- Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
+- Use the following RESOURCES for verified links: ${JSON.stringify(resources)}
 - RESPOND WITH PURE JSON ONLY.
 
 JSON FORMAT:
@@ -1116,23 +1142,32 @@ JSON FORMAT:
     {
       "phase": 1,
       "phase_name": "[Name]",
-      "why_it_matters": "[Significance for ${cert}]",
+      "why_it_matters": "[Significance]",
       "duration_weeks": 4,
       "learning_outcomes": [],
       "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
-      "mandatory_labs": [{"name": "Specific lab name", "platform": "HTB|THM|OTW", "url": "working URL", "skills": []}],
-      "resources": [{"type": "YouTube", "channel": "Channel Name", "url": "Channel URL", "recommended": "Specific playlist or video"}],
-      "tools": [{"name": "Tool name", "commands": ["command 1", "command 2"]}],
+      "mandatory_labs": [
+        {
+          "name": "Specific lab name",
+          "platform": "HTB|THM|OTW",
+          "url": "working URL",
+          "key_points": "Mindset and enumeration tips while solving this lab"
+        }
+      ],
+      "resources": [{"type": "YouTube|Web|Book", "name": "Resource Name", "url": "URL", "description": ""}],
+      "tools": [{"name": "Tool name", "commands": ["command 1"]}],
       "completion_checklist": []
     }
   ],
-  "special_resource": {
-    "name": "Secret Cyber Wisdom",
-    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  "skill_tree": {
+    "categories": [
+      {
+        "name": "Category Name",
+        "skills": [{"name": "Skill Name", "level": "Beginner|Intermediate|Advanced", "icon": "emoji"}]
+      }
+    ],
+    "connections": [{"from": "Skill A", "to": "Skill B"}]
   },
-  "prerequisite_certs": [
-    {"cert": "Cert name", "reason": "", "overlap": "", "gap_it_bridges": ""}
-  ],
   "tools_mastery_guide": [
     {
       "category": "Recon|Exploitation|Post-Exploitation",
@@ -1141,8 +1176,7 @@ JSON FORMAT:
       "commands": [{"cmd": "", "purpose": ""}]
     }
   ],
-  "daily_study_schedule": [],
-  "success_metrics": []
+  "special_resource": { "name": "Secret Cyber Wisdom", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
 }`;
     },
 

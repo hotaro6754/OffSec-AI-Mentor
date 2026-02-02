@@ -339,6 +339,7 @@ function init() {
     console.log('🎓 OffSec AI Mentor - Initializing...');
     setupEventListeners();
     setupAuthListeners();
+    setupSkillPanel();
     setupAOS();
     setupLenis();
     setupGSAP();
@@ -356,7 +357,52 @@ function init() {
     if (elements.modeCheckbox) {
         toggleLearningMode();
     }
+
+    // Initial Boot Animation
+    runBootAnimation();
+
     console.log('✅ Initialization complete');
+}
+
+function runBootAnimation() {
+    const bootScreen = document.getElementById('boot-screen');
+    const output = document.getElementById('console-output');
+    if (!bootScreen || !output) return;
+
+    bootScreen.classList.remove('hidden');
+
+    const logs = [
+        { type: 'ok', msg: "Initializing OFFSEC_MENTOR Kernel v3.0..." },
+        { type: 'ok', msg: "Loading AI Mentor Modules..." },
+        { type: 'warn', msg: "Neural Network: Optimizing for OSCP mindset..." },
+        { type: 'ok', msg: "Establishing secure connection to Groq API..." },
+        { type: 'ok', msg: "ACCESS GRANTED. MENTOR ONLINE." }
+    ];
+
+    let delay = 0;
+    logs.forEach((log, index) => {
+        delay += (index === 0) ? 400 : 250;
+        setTimeout(() => {
+            output.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 4px; font-family: 'Space Mono', monospace; font-size: 0.9rem; color: #ccc;">
+                    <span style="color: ${log.type==='ok'?'#00ff00':log.type==='warn'?'#ffff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}
+                </div>`;
+        }, delay);
+    });
+
+    setTimeout(() => {
+        bootScreen.style.transform = 'translateY(-100%)';
+        setTimeout(() => bootScreen.classList.add('hidden'), 600);
+    }, delay + 1000);
+}
+
+function setupSkillPanel() {
+    const closeBtn = document.getElementById('closeSkillPanel');
+    const panel = document.getElementById('skillPanel');
+
+    closeBtn?.addEventListener('click', () => {
+        panel.classList.remove('open');
+    });
 }
 
 async function checkPDFLibraryStatus() {
@@ -2213,13 +2259,21 @@ function getResourcesForCert(certId, level) {
 }
 
 function displayRoadmap(roadmapData) {
-    elements.roadmapContent.innerHTML = '';
+    const roadmapTimelineV2 = document.getElementById('roadmapTimelineV2');
+    const roadmapContentV2 = document.getElementById('roadmapContentV2');
+    const roadmapLegacy = document.getElementById('roadmapContainerLegacy');
+
+    if (!roadmapTimelineV2 || !roadmapContentV2) return;
+
+    roadmapContentV2.innerHTML = '';
     
     let roadmapObj = roadmapData;
     if (typeof roadmapData === 'string') {
         try {
             roadmapObj = JSON.parse(roadmapData);
         } catch (e) {
+            roadmapTimelineV2.classList.add('hidden');
+            roadmapLegacy.classList.remove('hidden');
             displayRoadmapMarkdown(roadmapData);
             return;
         }
@@ -2228,160 +2282,167 @@ function displayRoadmap(roadmapData) {
     if (!roadmapObj) return;
     appState.roadmapJSON = roadmapObj;
     
-    const container = document.createElement('div');
-    container.className = 'roadmap-v3-container';
+    // Switch to V2 containers
+    roadmapTimelineV2.classList.remove('hidden');
+    roadmapLegacy.classList.add('hidden');
 
-    // 1. Header Section
-    const header = document.createElement('div');
-    header.className = 'roadmap-v3-header';
-
-    // Hide Alignment in beginner mode
-    const showAlignment = appState.learningMode === 'oscp';
-
-    header.innerHTML = `
-        <div class="flex items-center gap-4 mb-2">
-            <i data-lucide="map" class="text-primary w-10 h-10"></i>
-            <h1 class="m-0">${roadmapObj.targetCertification || 'Certification Roadmap'}</h1>
-        </div>
-        <div class="roadmap-meta-v3">
-            <span class="meta-item">Level: <strong>${roadmapObj.currentLevel || 'Analyzing'}</strong></span>
-            ${showAlignment ? `<span class="meta-item">OSCP Alignment: <strong>${roadmapObj.gap_analysis?.alignment_percentage || 0}%</strong></span>` : ''}
-        </div>
-    `;
-    container.appendChild(header);
-
-    // 2. Gap Analysis Section (Only show if there are meaningful gaps or in OSCP mode)
-    if (roadmapObj.gap_analysis && (appState.learningMode === 'oscp' || roadmapObj.gap_analysis.missing_skills?.length > 0)) {
-        const gapSection = document.createElement('div');
-        gapSection.className = 'gap-analysis-v3';
-        gapSection.innerHTML = `
-            <div class="section-header-v3">
-                <i data-lucide="alert-circle" class="w-8 h-8"></i>
-                <h2>${appState.learningMode === 'oscp' ? 'Readiness Gap Analysis' : 'Your Learning Focus'}</h2>
-            </div>
-            <div class="gap-grid-v3">
-                <div class="gap-card">
-                    <h4>${appState.learningMode === 'oscp' ? 'Missing Skills' : 'New Concepts to Master'}</h4>
-                    <ul>${(roadmapObj.gap_analysis.missing_skills || []).map(s => `<li>${s}</li>`).join('')}</ul>
-                </div>
-                <div class="gap-card">
-                    <h4>${appState.learningMode === 'oscp' ? 'Weak Areas' : 'Key Growth Areas'}</h4>
-                    <ul>${(roadmapObj.gap_analysis.weak_areas || []).map(s => `<li>${s}</li>`).join('')}</ul>
-                </div>
-            </div>
-        `;
-        container.appendChild(gapSection);
-    }
-    
-    // 3. Phases Timeline
     const phases = roadmapObj.roadmap || [];
-    if (phases.length > 0) {
-        const phaseSectionHeader = document.createElement('div');
-        phaseSectionHeader.className = 'section-header-v3';
-        phaseSectionHeader.innerHTML = `
-            <i data-lucide="layers" class="w-8 h-8"></i>
-            <h2>Dynamic Learning Phases</h2>
+
+    phases.forEach((phase, index) => {
+        const block = document.createElement('div');
+        block.className = 'year-block-v2';
+
+        // Neo-Brutalist Layout
+        block.innerHTML = `
+            <div class="node-v2" style="background: var(--accent-v3)">
+                <i class="fas fa-terminal"></i>
+            </div>
+            <div class="content-card-v2">
+                <span class="year-badge-v2" style="background: var(--secondary-v3)">Phase ${index + 1}</span>
+                <div class="card-title-v2">${phase.phase_name || 'Learning Stage'}</div>
+                <p style="margin-top:5px; font-weight:600; font-size: 0.9rem;">${phase.why_it_matters || ''}</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary btn-sm view-details-btn" data-index="${index}">
+                        View Detailed Mentor Guidance
+                    </button>
+                </div>
+            </div>
         `;
-        container.appendChild(phaseSectionHeader);
 
-        const timeline = document.createElement('div');
-        timeline.className = 'phase-timeline-v3';
+        roadmapContentV2.appendChild(block);
+    });
+
+    // Add event listeners to "View Details" buttons
+    roadmapContentV2.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = btn.getAttribute('data-index');
+            openSkillPanel(phases[idx]);
+        });
+    });
+
+    // Create Skill Tree - Show section FIRST so container has width
+    if (roadmapObj.skill_tree) {
+        const skillTreeSection = document.getElementById('skillTreeSection');
+        skillTreeSection.classList.remove('hidden');
         
-        phases.forEach((phase, idx) => {
-            const card = document.createElement('div');
-            card.className = 'phase-card-v3';
-            
-            const phaseName = phase.phase_name || `Phase ${idx + 1}`;
-            const duration = phase.duration_weeks || '?';
+        // Small delay to ensure DOM is ready and visible
+        setTimeout(() => {
+            createSkillTree(roadmapObj.skill_tree);
+        }, 100);
+    }
 
-            let html = `
-                <div class="flex justify-between items-start flex-wrap gap-2 mb-4">
-                    <div class="phase-badge-v3">PHASE ${idx + 1}: ${phaseName.toUpperCase()}</div>
-                    <div class="phase-meta-tag">⏱️ ${duration} Weeks</div>
+    // Initialize icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    // Scroll to top of roadmap
+    window.scrollTo({ top: elements.roadmapSection.offsetTop - 100, behavior: 'smooth' });
+}
+
+function openSkillPanel(phaseData) {
+    const panel = document.getElementById('skillPanel');
+    if (!panel) return;
+
+    document.getElementById('skillTitle').innerText = phaseData.phase_name;
+    document.getElementById('skillIcon').innerText = '🛡️';
+    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks`;
+    document.getElementById('skillDescription').innerText = phaseData.why_it_matters || 'Advanced mentor guidance for this phase.';
+
+    // Objectives
+    const objectivesList = document.getElementById('skillObjectives');
+    objectivesList.innerHTML = (phaseData.learning_outcomes || [])
+        .map(obj => `<li>${obj}</li>`).join('');
+
+    // Labs with Key Points
+    const labsList = document.getElementById('skillLabs');
+    labsList.innerHTML = (phaseData.mandatory_labs || [])
+        .map(lab => `
+            <li style="margin-bottom: 15px;">
+                <div style="font-weight: 800; color: var(--primary-v3);">${lab.name} (${lab.platform})</div>
+                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 3px solid var(--black-v3); margin-top: 5px;">
+                    <strong>Mentor Key Points:</strong> ${lab.key_points || 'Focus on systematic enumeration and methodology.'}
                 </div>
-                <div class="phase-why-v3 mb-4">
-                    <strong>Why it matters for OSCP:</strong> ${phase.why_it_matters || ''}
-                </div>
+                ${lab.url ? `<a href="${lab.url}" target="_blank" style="display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--secondary-v3); font-weight: 700;">Start Lab →</a>` : ''}
+            </li>
+        `).join('');
+
+    // Tools
+    const toolsContainer = document.getElementById('skillTools');
+    toolsContainer.innerHTML = (phaseData.tools || [])
+        .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); border-style: dashed;">${t.name || t}</span>`).join('');
+
+    panel.classList.add('open');
+}
+
+function createSkillTree(treeData) {
+    const container = document.getElementById('skillNodesContainer');
+    const svg = document.getElementById('tree-svg-v2');
+    if (!container || !svg || !treeData) return;
+
+    container.innerHTML = '';
+    svg.innerHTML = '';
+
+    const width = container.offsetWidth || 800;
+    const height = 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    const categories = treeData.categories || [];
+    const radius = 220;
+
+    categories.forEach((cat, catIdx) => {
+        const angle = (catIdx / categories.length) * 2 * Math.PI - Math.PI / 2;
+
+        cat.skills.forEach((skill, skillIdx) => {
+            const skillRadius = radius + (skillIdx * 40);
+            const x = centerX + skillRadius * Math.cos(angle + (skillIdx * 0.1));
+            const y = centerY + skillRadius * Math.sin(angle + (skillIdx * 0.1));
+
+            // Create node
+            const node = document.createElement('div');
+            node.className = 'skill-node-v2';
+            node.style.left = `${x - 50}px`;
+            node.style.top = `${y - 50}px`;
+            node.innerHTML = `
+                <div class="skill-node-icon-v2">${skill.icon || '🛡️'}</div>
+                <div class="skill-node-label-v2">${skill.name}</div>
             `;
             
-            // Learning Outcomes
-            if (phase.learning_outcomes && Array.isArray(phase.learning_outcomes)) {
-                html += `
-                    <div class="mb-4">
-                        <div class="font-bold mb-2">Outcomes:</div>
-                        <ul class="outcomes-list-v3">
-                            ${phase.learning_outcomes.map(o => `<li>${o}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
+            node.addEventListener('click', () => {
+                showNotification(`Mastered: ${skill.name}`, 'success');
+            });
 
-            // Mandatory Labs
-            if (phase.mandatory_labs && Array.isArray(phase.mandatory_labs)) {
-                html += `
-                    <div class="mb-6">
-                        <div class="font-bold mb-3">Mandatory Hands-on Labs:</div>
-                        <div class="labs-grid-v3">
-                            ${phase.mandatory_labs.map(lab => `
-                                <div class="lab-mini-card">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="lab-platform-tag">${lab.platform}</span>
-                                    </div>
-                                    <div class="font-bold text-sm">${lab.name}</div>
-                                    <div class="text-xs opacity-80 mt-1">${(lab.skills || []).join(', ')}</div>
-                                    ${lab.url ? `<a href="${lab.url}" target="_blank" class="btn btn-resource btn-sm mt-3">Start Lab</a>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
+            container.appendChild(node);
 
-            // Phase Resources
-            if (phase.resources && Array.isArray(phase.resources)) {
-                html += `
-                    <div class="mt-6">
-                        <div class="font-bold mb-3">Study Resources:</div>
-                        <div class="resources-flex-v3">
-                            ${phase.resources.map(res => {
-                                let icon = '📖';
-                                if (res.type === 'YouTube') icon = '📺';
-                                else if (res.type === 'Book') icon = '📘';
-                                else if (res.type === 'Guide') icon = '📝';
-                                else if (res.type === 'Tool') icon = '🛡️';
-                                else if (res.type === 'Platform') icon = '🎮';
-
-                                // Robust name handling to avoid 'undefined'
-                                const name = res.name || res.channel || res.title || 'View Resource';
-
-                                return `
-                                    <a href="${res.url || '#'}" target="_blank" class="btn btn-resource btn-sm">
-                                        ${icon} ${name}
-                                    </a>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Checklist
-            if (phase.completion_checklist && Array.isArray(phase.completion_checklist)) {
-                html += `
-                    <div class="mt-6">
-                        <div class="font-bold mb-2">Phase Completion Checklist:</div>
-                        <ul class="checklist-v3">
-                            ${phase.completion_checklist.map(item => `<li>${item}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
-            
-            card.innerHTML = html;
-            timeline.appendChild(card);
+            // Create line to center
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', centerX);
+            line.setAttribute('y1', centerY);
+            line.setAttribute('x2', x);
+            line.setAttribute('y2', y);
+            line.setAttribute('class', 'connection-line-v2');
+            svg.appendChild(line);
         });
-        container.appendChild(timeline);
-    }
+    });
+
+    // Central Core Node
+    const core = document.createElement('div');
+    core.className = 'skill-node-v2';
+    core.style.width = '120px';
+    core.style.height = '120px';
+    core.style.left = `${centerX - 60}px`;
+    core.style.top = `${centerY - 60}px`;
+    core.style.background = 'var(--primary-v3)';
+    core.style.color = 'white';
+    core.innerHTML = `
+        <div class="skill-node-icon-v2">🎯</div>
+        <div class="skill-node-label-v2" style="color: white;">CERTIFIED</div>
+    `;
+    container.appendChild(core);
+}
 
     // 4. Pre-OSCP Alignment
     if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
