@@ -200,7 +200,7 @@ const CERTIFICATION_CONTENT = {
         prerequisites: ['Basic computer literacy', 'Understanding of how the internet works'],
         examFormat: 'Practical path completion (no proctored exam)',
         syllabus: [
-            'Linux Fundamentals: terminal commands, file permissions, users management, process control',
+            'Linux Fundamentals: terminal commands, file permissions, user management, process control',
             'Windows Fundamentals: CMD, PowerShell, services, registry basics',
             'Networking Basics: TCP/IP, ports, protocols, subnetting fundamentals',
             'Reconnaissance: WHOIS lookups, DNS enumeration, subdomain discovery',
@@ -219,7 +219,7 @@ const CERTIFICATION_CONTENT = {
             { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', why: 'Tool tutorials and beginner methodology' }
         ],
         specificLabs: [
-            { name: 'Pre Security Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/presecurity', duration: '40 hours', skills: ['Foundations'] },
+            { name: 'Pre Security Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/presecurity', duration: '40 hours', skills: ['Linux & Windows Fundamentals', 'Networking Basics'] },
             { name: 'Jr Penetration Tester Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/jrpenetrationtester', duration: '56 hours', skills: ['Full Pentest Workflow'] },
             { name: 'Linux Fundamentals', platform: 'THM', url: 'https://tryhackme.com/room/linux1', skills: ['Terminal', 'Permissions'] },
             { name: 'Nmap', platform: 'THM', url: 'https://tryhackme.com/room/furthernmap', skills: ['Scanning', 'Enumeration'] },
@@ -412,7 +412,7 @@ const CERTIFICATION_CONTENT = {
             { name: 'Pivoting, Tunneling & Port Forwarding', platform: 'HTB Academy', skills: ['Advanced pivoting'] },
             { name: 'Active Directory Enumeration & Attacks', platform: 'HTB Academy', skills: ['Complete AD'] }
         ],
-        coreTools: ['Everything from OSCP', 'Empire', 'Sliver', 'Covenant', 'Chisel', 'Ligolo-NG', 'BloodHound', 'CrackMapExec', 'Impacket'],
+        coreTools: ['Nmap', 'Netcat', 'Gobuster', 'FFUF', 'Empire', 'Sliver', 'Covenant', 'Chisel', 'Ligolo-NG', 'BloodHound', 'CrackMapExec', 'Impacket'],
         keySkills: ['Advanced pivoting', 'Complex web exploitation', 'Enterprise AD attacks', 'Exhaustive reporting', 'Cloud security']
     },
     'osep': {
