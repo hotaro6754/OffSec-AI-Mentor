@@ -2336,8 +2336,79 @@ function displayRoadmap(roadmapData) {
         lucide.createIcons();
     }
 
+    // Final Outcome & Special Resource
+    renderFinalOutcome(roadmapObj);
+
     // Scroll to top of roadmap
     window.scrollTo({ top: elements.roadmapSection.offsetTop - 100, behavior: 'smooth' });
+}
+
+function renderFinalOutcome(roadmapObj) {
+    const section = document.getElementById('roadmapSection');
+    if (!section) return;
+    const roadmapContainer = section.querySelector('.container') || section;
+
+    // Remove existing if any
+    const existing = document.getElementById('finalOutcomeCard');
+    if (existing) existing.remove();
+
+    const outcome = roadmapObj.final_outcome;
+    const secret = roadmapObj.special_resource;
+
+    if (!outcome) return;
+
+    const outcomeCard = document.createElement('div');
+    outcomeCard.id = 'finalOutcomeCard';
+    outcomeCard.className = 'neo-card-v3 animate__animated animate__fadeInUp';
+    outcomeCard.style.marginTop = '40px';
+    outcomeCard.style.border = '4px solid black';
+    outcomeCard.style.boxShadow = '10px 10px 0 var(--primary-v3)';
+
+    outcomeCard.innerHTML = `
+        <div class="card-header-v3" style="background: var(--primary-v3); color: white; border-bottom: 4px solid black;">
+            <h3>🎓 THE PATH TO MASTERY: ENDGAME</h3>
+            <p>What you will achieve after following this 1-year mentor path</p>
+        </div>
+        <div class="card-body-v3" style="padding: 30px; background: white;">
+            <div style="margin-bottom: 25px;">
+                <h4 style="text-transform: uppercase; font-weight: 900; font-size: 1.2rem; color: var(--primary-v3); margin-bottom: 10px;">Mastery Level Achieved</h4>
+                <p style="font-weight: 700; font-size: 1.1rem; line-height: 1.4;">${outcome.mastery_level}</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <div>
+                    <h4 style="text-transform: uppercase; font-weight: 900; margin-bottom: 15px; border-bottom: 2px solid black;">Core Achievements</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${(outcome.achievements || []).map(a => `
+                            <li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;">
+                                <span style="background: var(--secondary-v3); border: 2px solid black; padding: 0 5px; font-weight: 900;">✓</span>
+                                <span style="font-weight: 600;">${a}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="text-transform: uppercase; font-weight: 900; margin-bottom: 15px; border-bottom: 2px solid black;">Career Readiness</h4>
+                    <div style="background: var(--bg-v3); border: 2px solid black; padding: 15px; font-weight: 700;">
+                        ${outcome.career_readiness}
+                    </div>
+                </div>
+            </div>
+
+            ${secret ? `
+                <div style="border: 4px dashed black; padding: 25px; text-align: center; background: var(--secondary-v3);">
+                    <h3 style="margin-bottom: 15px; font-weight: 900;">🎁 MENTOR'S FINAL GIFT</h3>
+                    <p style="margin-bottom: 20px; font-weight: 600;">"Knowledge is power, but wisdom is eternal." - Your AI Mentor</p>
+                    <button class="btn btn-primary" onclick="revealSecret('roadmap-secret-content')" style="width: auto; padding: 15px 30px;">
+                        ${secret.name}
+                    </button>
+                    <div id="roadmap-secret-content" class="hidden" style="margin-top: 20px;"></div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    roadmapContainer.appendChild(outcomeCard);
 }
 
 function openSkillPanel(phaseData) {
@@ -2588,12 +2659,18 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    showNotification('Generating DETAILED PDF via iLovePDF...', 'info');
-    
-    const isDarkMode = document.body.classList.contains('mode-oscp');
-    const roadmap = appState.roadmapJSON;
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const originalText = downloadPdfBtn.innerHTML;
     
     try {
+        // Loading state
+        downloadPdfBtn.disabled = true;
+        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Generating PDF...';
+        showNotification('Generating DETAILED PDF via iLovePDF...', 'info');
+
+        const isDarkMode = document.body.classList.contains('mode-oscp');
+        const roadmap = appState.roadmapJSON;
+
         // Step 1: Build comprehensive print-safe HTML from JSON (not just cloning DOM)
         let detailedHtml = '';
         
@@ -2684,6 +2761,48 @@ async function downloadRoadmapPDF() {
             `;
         }
 
+        // Final Outcome
+        if (roadmap.final_outcome) {
+            const outcome = roadmap.final_outcome;
+            detailedHtml += `
+                <div style="page-break-before: always; border: 4px solid #000; padding: 40px; background: white; box-shadow: 8px 8px 0px #ff3e00;">
+                    <div style="background: #ff3e00; color: white; padding: 15px; border-bottom: 4px solid #000; margin: -40px -40px 40px -40px; text-align: center;">
+                        <h2 style="margin: 0; text-transform: uppercase; font-size: 28px;">🎓 THE PATH TO MASTERY: ENDGAME</h2>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="text-transform: uppercase; font-weight: 900; color: #ff3e00; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 15px;">Mastery Level Achieved</h3>
+                        <p style="font-weight: 700; font-size: 18px;">${outcome.mastery_level}</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+                        <div>
+                            <h3 style="text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 15px;">Core Achievements</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                ${(outcome.achievements || []).map(a => `
+                                    <li style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px;">
+                                        <span style="background: #ffff00; border: 1px solid #000; padding: 0 5px; font-weight: 900;">✓</span>
+                                        <span style="font-weight: 600;">${a}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 style="text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 15px;">Career Readiness</h3>
+                            <div style="background: #f0f0f0; border: 2px solid #000; padding: 20px; font-weight: 700; line-height: 1.4;">
+                                ${outcome.career_readiness}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="border: 4px dashed #000; padding: 30px; text-align: center; background: #ffff00;">
+                        <h3 style="margin: 0 0 10px 0; font-weight: 900; text-transform: uppercase;">A Message from your Mentor</h3>
+                        <p style="font-weight: 600; font-style: italic; font-size: 14px;">"Knowledge is power, but wisdom is eternal. You have the tools, now use them responsibly."</p>
+                    </div>
+                </div>
+            `;
+        }
+
         // Footer
         detailedHtml += `
             <div style="margin-top: 60px; padding-top: 20px; border-top: 4px solid #000; text-align: center; font-family: 'Space Mono', monospace;">
@@ -2705,7 +2824,7 @@ async function downloadRoadmapPDF() {
         // Create complete HTML document
         const htmlContent = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>OffSec Roadmap - ${roadmap.targetCertification}</title>
@@ -2718,7 +2837,7 @@ async function downloadRoadmapPDF() {
 </html>
         `.trim();
         
-        const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const filename = `OffSec-Roadmap-${appState.selectedCert || 'Learning'}-${new Date().toISOString().split('T')[0]}.pdf`;
         
         // Prepare headers with custom keys if available
         const headers = {
@@ -2762,17 +2881,14 @@ async function downloadRoadmapPDF() {
         
     } catch (error) {
         console.error('❌ PDF generation error:', error);
-        console.info('📋 Troubleshooting:');
-        console.info('   • Check your internet connection');
-        console.info('   • Verify the backend server is running');
-        console.info('   • Check if iLovePDF API is configured');
-        console.info('💡 Alternative: Use "Export as JSON" button - no API needed!');
-        
         showError(`PDF generation failed: ${error.message}. Please use "Export as JSON" instead.`);
+    } finally {
+        downloadPdfBtn.disabled = false;
+        downloadPdfBtn.innerHTML = originalText;
     }
 }
 
-// ============================================================================
+
 // SECTION 4: GUIDED MENTOR CHAT
 // ============================================================================
 

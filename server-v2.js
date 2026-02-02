@@ -22,6 +22,7 @@ const cors = require('cors');
 const path = require('path');
 const db = require('./database');
 const fs = require('fs');
+const os = require('os');
 const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
 const ILovePDFFile = require('@ilovepdf/ilovepdf-nodejs/ILovePDFFile');
 
@@ -1196,7 +1197,7 @@ YOU ARE OFFSEC AI MENTOR - AN ELITE RED-TEAM TRAINER.
 Your purpose is to generate an EXTREMELY DETAILED, 1-YEAR ROADMAP for ${cert}.
 
 CORE GUIDELINES:
-1. **ROLE**: Act as a senior OSCP/OSEP/OSWE mentor. Do NOT generate generic to-do lists.
+1. **ROLE**: Act as a senior OSCP/OSEP/OSWE mentor. Do NOT generate generic to-do lists. Provide EXTREME DETAIL in every section.
 2. **TIMELINE**: Strictly 1-YEAR duration with EXACTLY 11-14 phases.
 3. **SOURCE MATERIAL**: Use the provided MASTER_SKILLS and RESOURCES as your absolute source of truth.
 4. **CERTIFICATION FOCUS**:
@@ -1285,6 +1286,11 @@ JSON FORMAT:
       "commands": [{"cmd": "nmap -sC -sV", "purpose": "Default scripts and versioning"}]
     }
   ],
+  "final_outcome": {
+    "mastery_level": "Elite Pentester / Active Directory Expert",
+    "achievements": ["Can exploit complex AD forests", "Fluent in C2 operations", "Zero-day mindset developed"],
+    "career_readiness": "Ready for Senior Red Team roles"
+  },
   "special_resource": { "name": "Secret Cyber Wisdom", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
 }`;
     },
@@ -2013,10 +2019,9 @@ app.get('/api/health', (req, res) => {
 // PDF Generation endpoint using iLovePDF
 app.post('/api/generate-pdf', async (req, res) => {
     let tempHtmlPath = null;
-    let tempPdfPath = null;
 
     try {
-        const { html, filename } = req.body;
+        let { html, filename } = req.body;
         
         if (!html) {
             return res.status(400).json({ error: 'HTML content is required' });
@@ -2032,20 +2037,36 @@ app.post('/api/generate-pdf', async (req, res) => {
             });
         }
 
+        // High-fidelity rendering: Inject local style.css content directly into HTML
+        try {
+            const cssPath = path.join(__dirname, 'style.css');
+            if (fs.existsSync(cssPath)) {
+                const cssContent = fs.readFileSync(cssPath, 'utf8');
+                const styleTag = `\n<style>\n${cssContent}\n</style>\n`;
+
+                // Inject style tag into head or at the beginning of body
+                if (html.includes('</head>')) {
+                    html = html.replace('</head>', `${styleTag}</head>`);
+                } else if (html.includes('<body>')) {
+                    html = html.replace('<body>', `<body>${styleTag}`);
+                } else {
+                    html = styleTag + html;
+                }
+                console.log('✅ Injected style.css into PDF HTML payload');
+            }
+        } catch (cssError) {
+            console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
+        }
+
         console.log('📄 Generating PDF via iLovePDF API...');
 
         // Initialize iLovePDF API
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        // Create a temporary HTML file
-        const tempDir = path.join(__dirname, 'temp');
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir);
-        }
-        
+        // Use system temp directory (standard for Render and Cloud environments)
+        const tempDir = os.tmpdir();
         const timestamp = Date.now();
-        tempHtmlPath = path.join(tempDir, `roadmap-${timestamp}.html`);
-        tempPdfPath = path.join(tempDir, `roadmap-${timestamp}.pdf`);
+        tempHtmlPath = path.join(tempDir, `offsec-roadmap-${timestamp}.html`);
         
         // Write HTML to temporary file
         fs.writeFileSync(tempHtmlPath, html, 'utf8');
@@ -2058,8 +2079,15 @@ app.post('/api/generate-pdf', async (req, res) => {
         const file = new ILovePDFFile(tempHtmlPath);
         await task.addFile(file);
         
-        // Process the conversion
-        await task.process();
+        // Process the conversion with optimized parameters for Neo-Brutalist design
+        await task.process({
+            view_width: 1024,    // Wide enough for timeline layout
+            delay: 1500,         // Wait for fonts and CSS animations to settle
+            single_page: false,  // Standard multi-page output
+            page_size: 'A4',
+            page_orientation: 'portrait',
+            page_margin: 10      // Small margin
+        });
         
         // Download the generated PDF buffer
         const pdfBuffer = await task.download();
@@ -2080,10 +2108,11 @@ app.post('/api/generate-pdf', async (req, res) => {
     } finally {
         // Clean up temporary files
         try {
-            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
-            if (tempPdfPath && fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+            if (tempHtmlPath && fs.existsSync(tempHtmlPath)) {
+                fs.unlinkSync(tempHtmlPath);
+            }
         } catch (cleanupError) {
-            console.warn('⚠️  Temporary file cleanup failed:', cleanupError.message);
+            console.warn('⚠️ Temporary file cleanup failed:', cleanupError.message);
         }
     }
 });
