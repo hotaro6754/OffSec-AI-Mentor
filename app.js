@@ -2331,6 +2331,84 @@ function displayRoadmap(roadmapData) {
         }, 100);
     }
 
+    // 4. Pre-OSCP Alignment
+    if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
+        const alignHeader = document.createElement('div');
+        alignHeader.className = 'section-header-v3';
+        alignHeader.innerHTML = `
+            <i data-lucide="award" class="w-8 h-8"></i>
+            <h2>Pre-OSCP Alignment</h2>
+        `;
+        roadmapContentV2.appendChild(alignHeader);
+
+        const alignGrid = document.createElement('div');
+        alignGrid.className = 'align-grid-v3';
+        alignGrid.innerHTML = roadmapObj.pre_oscp_alignment.map(a => `
+            <div class="align-card-v3">
+                <h4>${a.cert}</h4>
+                <p><strong>Reason:</strong> ${a.reason}</p>
+                <p><strong>Bridges Gap:</strong> ${a.gap_it_bridges}</p>
+                <div class="overlap-v3">Overlap with OSCP: ${a.overlap_with_oscp}</div>
+            </div>
+        `).join('');
+        roadmapContentV2.appendChild(alignGrid);
+    }
+
+    // 5. Tools Mastery Guide
+    if (roadmapObj.tools_mastery_guide && Array.isArray(roadmapObj.tools_mastery_guide)) {
+        const guideHeader = document.createElement('div');
+        guideHeader.className = 'section-header-v3';
+        guideHeader.innerHTML = `
+            <i data-lucide="wrench" class="w-8 h-8"></i>
+            <h2>Tools Mastery Guide</h2>
+        `;
+        roadmapContentV2.appendChild(guideHeader);
+
+        const guideGrid = document.createElement('div');
+        guideGrid.className = 'tools-mastery-grid-v3';
+        guideGrid.innerHTML = roadmapObj.tools_mastery_guide.map(tool => `
+            <div class="tool-mastery-card-v3">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="lab-platform-tag">${tool.category || 'Tool'}</span>
+                    <span class="phase-meta-tag">${tool.skill_level || 'General'}</span>
+                </div>
+                <h4>${tool.tool}</h4>
+                <div class="commands-v3">
+                    ${(tool.commands || []).map(c => `
+                        <div class="command-item">
+                            <code>${c.cmd}</code>
+                            <span>${c.purpose}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+        roadmapContentV2.appendChild(guideGrid);
+    }
+
+    // 6. Special Resource (Rickroll Easter Egg)
+    if (roadmapObj.special_resource) {
+        const randomQuote = getRandomQuote();
+
+        const motivationalSection = document.createElement('div');
+        motivationalSection.className = 'motivational-section';
+        motivationalSection.innerHTML = `
+            <blockquote class="cyber-quote">
+                "${randomQuote}"
+            </blockquote>
+            <div class="secret-wisdom-container">
+                <p class="wisdom-prompt">🎯 Completed your roadmap? Here's a special gift...</p>
+                <button class="btn-reveal-secret" onclick="revealSecret('secret-content-roadmap')">
+                    🎁 Reveal Cyber Wisdom
+                </button>
+                <div id="secret-content-roadmap" class="hidden">
+                    <!-- QR Code and link will be generated here -->
+                </div>
+            </div>
+        `;
+        roadmapContentV2.appendChild(motivationalSection);
+    }
+
     // Initialize icons
     if (window.lucide) {
         lucide.createIcons();
@@ -2442,92 +2520,6 @@ function createSkillTree(treeData) {
         <div class="skill-node-label-v2" style="color: white;">CERTIFIED</div>
     `;
     container.appendChild(core);
-}
-
-    // 4. Pre-OSCP Alignment
-    if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
-        const alignHeader = document.createElement('div');
-        alignHeader.className = 'section-header-v3';
-        alignHeader.innerHTML = `
-            <i data-lucide="award" class="w-8 h-8"></i>
-            <h2>Pre-OSCP Alignment</h2>
-        `;
-        container.appendChild(alignHeader);
-
-        const alignGrid = document.createElement('div');
-        alignGrid.className = 'align-grid-v3';
-        alignGrid.innerHTML = roadmapObj.pre_oscp_alignment.map(a => `
-            <div class="align-card-v3">
-                <h4>${a.cert}</h4>
-                <p><strong>Reason:</strong> ${a.reason}</p>
-                <p><strong>Bridges Gap:</strong> ${a.gap_it_bridges}</p>
-                <div class="overlap-v3">Overlap with OSCP: ${a.overlap_with_oscp}</div>
-            </div>
-        `).join('');
-        container.appendChild(alignGrid);
-    }
-
-    // 5. Tools Mastery Guide
-    if (roadmapObj.tools_mastery_guide && Array.isArray(roadmapObj.tools_mastery_guide)) {
-        const guideHeader = document.createElement('div');
-        guideHeader.className = 'section-header-v3';
-        guideHeader.innerHTML = `
-            <i data-lucide="wrench" class="w-8 h-8"></i>
-            <h2>Tools Mastery Guide</h2>
-        `;
-        container.appendChild(guideHeader);
-
-        const guideGrid = document.createElement('div');
-        guideGrid.className = 'tools-mastery-grid-v3';
-        guideGrid.innerHTML = roadmapObj.tools_mastery_guide.map(tool => `
-            <div class="tool-mastery-card-v3">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="lab-platform-tag">${tool.category || 'Tool'}</span>
-                    <span class="phase-meta-tag">${tool.skill_level || 'General'}</span>
-                </div>
-                <h4>${tool.tool}</h4>
-                <div class="commands-v3">
-                    ${(tool.commands || []).map(c => `
-                        <div class="command-item">
-                            <code>${c.cmd}</code>
-                            <span>${c.purpose}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-        container.appendChild(guideGrid);
-    }
-
-    // 6. Special Resource (Rickroll Easter Egg)
-    if (roadmapObj.special_resource) {
-        const randomQuote = getRandomQuote();
-        
-        const motivationalSection = document.createElement('div');
-        motivationalSection.className = 'motivational-section';
-        motivationalSection.innerHTML = `
-            <blockquote class="cyber-quote">
-                "${randomQuote}"
-            </blockquote>
-            <div class="secret-wisdom-container">
-                <p class="wisdom-prompt">🎯 Completed your roadmap? Here's a special gift...</p>
-                <button class="btn-reveal-secret" onclick="revealSecret('secret-content-roadmap')">
-                    🎁 Reveal Cyber Wisdom
-                </button>
-                <div id="secret-content-roadmap" class="hidden">
-                    <!-- QR Code and link will be generated here -->
-                </div>
-            </div>
-        `;
-        container.appendChild(motivationalSection);
-    }
-
-    elements.roadmapContent.appendChild(container);
-
-    // Initialize icons
-    if (window.lucide) {
-        lucide.createIcons();
-    }
 }
 
 // displayRoadmapMarkdown - handles markdown content when JSON parsing fails
