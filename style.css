@@ -758,6 +758,19 @@ body.mode-oscp .navbar {
 .btn-lg { padding: 14px 28px; font-size: 15px; }
 .btn-full { width: 100%; justify-content: center; }
 
+/* Disabled button state */
+.btn-disabled,
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.5);
+}
+.btn-disabled:hover,
+.btn:disabled:hover {
+    transform: none;
+}
+
 body.mode-oscp .btn { background: #21262d; color: #c9d1d9; border-color: #30363d; }
 body.mode-oscp .btn-primary { background: var(--primary); color: #fff; }
 body.mode-oscp .btn-outline { border-color: #30363d; }

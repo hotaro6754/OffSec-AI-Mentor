@@ -2500,17 +2500,28 @@ async function downloadRoadmapPDF() {
         return;
     }
     
-    // Check if jsPDF is loaded
+    // Simple check if jsPDF is loaded
     if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
-        showError('PDF library not loaded. Please refresh and try again.');
+        showError('PDF library not loaded. Please refresh the page and try again.');
         return;
     }
     
-    showNotification('Generating text-based PDF...', 'info');
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    if (loadingOverlay && loadingText) {
+        loadingText.textContent = 'Generating PDF with neo-brutalist styling...';
+        loadingOverlay.classList.remove('hidden');
+    }
     
     const isDarkMode = document.body.classList.contains('mode-oscp');
+    const primaryColor = isDarkMode ? '#ff4d00' : '#ff3e00';
+    const bgColor = isDarkMode ? '#121212' : '#ffffff';
+    const textColor = isDarkMode ? '#e6edf3' : '#000000';
+    const borderColor = isDarkMode ? '#ffffff' : '#000000';
+    const shadowColor = isDarkMode ? 'rgba(255, 77, 0, 0.3)' : 'rgba(0, 0, 0, 0.3)';
     
-    // Step 1: Create print-safe container
+    // Step 1: Create print-safe container with neo-brutalist styling
     const pdfRoot = document.createElement('div');
     pdfRoot.id = 'pdf-root';
     pdfRoot.style.cssText = `
@@ -2519,8 +2530,8 @@ async function downloadRoadmapPDF() {
         top: 0;
         width: 800px;
         display: block;
-        background: ${isDarkMode ? '#121212' : '#ffffff'};
-        color: ${isDarkMode ? '#e6edf3' : '#000000'};
+        background: ${bgColor};
+        color: ${textColor};
         font-family: 'IBM Plex Mono', monospace;
         font-size: 12px;
         line-height: 1.6;
@@ -2542,6 +2553,37 @@ async function downloadRoadmapPDF() {
         if (el.style.display === 'grid' || el.style.display === 'flex') {
             el.style.display = 'block';
         }
+        
+        // Apply neo-brutalist styling to phase cards
+        if (el.classList.contains('phase-card-v3')) {
+            el.style.border = `3px solid ${borderColor}`;
+            el.style.padding = '15px';
+            el.style.marginBottom = '20px';
+            el.style.background = isDarkMode ? '#1e1e1e' : '#f0f0f0';
+            el.style.pageBreakInside = 'avoid';
+            // Add shadow effect (simulated with border for PDF)
+            el.style.borderBottom = `6px solid ${borderColor}`;
+            el.style.borderRight = `6px solid ${borderColor}`;
+        }
+        
+        // Style phase headers
+        if (el.classList.contains('roadmap-v3-header') || el.tagName === 'H2') {
+            el.style.background = primaryColor;
+            el.style.color = '#ffffff';
+            el.style.padding = '15px';
+            el.style.border = `3px solid ${borderColor}`;
+            el.style.marginBottom = '15px';
+            el.style.fontWeight = 'bold';
+        }
+        
+        // Style task items
+        if (el.classList.contains('task-v3-item') || (el.tagName === 'LI' && el.parentElement?.tagName === 'UL')) {
+            el.style.border = `2px solid ${borderColor}`;
+            el.style.padding = '8px';
+            el.style.marginBottom = '8px';
+            el.style.background = bgColor;
+        }
+        
         // Ensure readable colors
         const computedStyle = window.getComputedStyle(el);
         if (isDarkMode) {
@@ -2553,50 +2595,52 @@ async function downloadRoadmapPDF() {
                 el.style.color = '#000000';
             }
         }
-        // Add page-break hints
-        if (el.classList.contains('phase-card-v3')) {
-            el.style.pageBreakInside = 'avoid';
-        }
     });
     
     // Remove interactive elements
     contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
     
-    // Add header
+    // Add header with neo-brutalist styling
     const header = document.createElement('div');
     header.style.cssText = `
         text-align: center;
         margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid ${isDarkMode ? '#ff4d00' : '#ff3e00'};
+        padding: 20px;
+        background: ${primaryColor};
+        color: #ffffff;
+        border: 3px solid ${borderColor};
+        border-bottom: 6px solid ${borderColor};
+        border-right: 6px solid ${borderColor};
     `;
     header.innerHTML = `
-        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: ${isDarkMode ? '#ff4d00' : '#ff3e00'};">
+        <h1 style="font-size: 28px; margin: 0 0 10px 0; color: #ffffff; font-weight: bold; text-transform: uppercase;">
             OffSec Learning Roadmap
         </h1>
-        <p style="margin: 5px 0; font-size: 16px;">
-            <strong>Certification:</strong> ${appState.selectedCert}
+        <p style="margin: 5px 0; font-size: 16px; font-weight: bold;">
+            📋 Certification: ${appState.selectedCert}
         </p>
-        <p style="margin: 5px 0; font-size: 14px; color: ${isDarkMode ? '#8b949e' : '#666'};">
-            Generated: ${new Date().toLocaleDateString()} | 
-            Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
+        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">
+            📅 Generated: ${new Date().toLocaleDateString()} | 
+            🎯 Mode: ${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}
         </p>
     `;
     
     pdfRoot.appendChild(header);
     pdfRoot.appendChild(contentClone);
     
-    // Add footer
+    // Add footer with neo-brutalist styling
     const footer = document.createElement('div');
     footer.style.cssText = `
         margin-top: 40px;
-        padding-top: 20px;
+        padding: 15px;
         text-align: center;
         font-size: 10px;
-        color: ${isDarkMode ? '#6e7681' : '#999'};
-        border-top: 2px solid ${isDarkMode ? '#30363d' : '#e0e0e0'};
+        color: ${textColor};
+        border: 3px solid ${borderColor};
+        border-top: 6px solid ${borderColor};
+        background: ${isDarkMode ? '#1e1e1e' : '#f0f0f0'};
     `;
-    footer.textContent = 'Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
+    footer.textContent = '⚡ Created with OffSec AI Mentor | github.com/hotaro6754/OffSec-AI-Mentor';
     pdfRoot.appendChild(footer);
     
     document.body.appendChild(pdfRoot);
@@ -2607,38 +2651,48 @@ async function downloadRoadmapPDF() {
     // Verify content rendered
     if (pdfRoot.offsetHeight < 100) {
         document.body.removeChild(pdfRoot);
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
         showError('PDF content failed to render. Try regenerating roadmap.');
         return;
     }
     
-    // Step 4: Generate text-based PDF
+    // Step 4: Generate PDF with neo-brutalist styling
     try {
         const doc = new jspdf.jsPDF('p', 'mm', 'a4');
         
         await doc.html(pdfRoot, {
             callback: function(doc) {
                 doc.save(`OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`);
+                
+                // Hide loading overlay on success
+                if (loadingOverlay) loadingOverlay.classList.add('hidden');
+                showSuccess('✅ PDF generated with neo-brutalist styling!');
             },
             autoPaging: 'text',
             margin: [10, 10, 10, 10],
             width: 190,
             windowWidth: 800,
             html2canvas: {
-                scale: 1,
-                logging: false
+                scale: 1.5,
+                logging: false,
+                backgroundColor: bgColor
             }
         });
         
-        // Step 5: Cleanup
+        // Cleanup
         document.body.removeChild(pdfRoot);
-        showSuccess('PDF generated with selectable text!');
         
     } catch (error) {
-        console.error('PDF generation error:', error);
+        console.error('❌ PDF generation error:', error);
+        
         if (document.body.contains(pdfRoot)) {
             document.body.removeChild(pdfRoot);
         }
-        showError('PDF generation failed. Try exporting as JSON instead.');
+        
+        // Hide loading overlay on error
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
+        
+        showError('PDF generation failed. Please try again or use JSON export instead.');
     }
 }
 
