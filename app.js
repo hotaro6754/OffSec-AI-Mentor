@@ -2775,8 +2775,8 @@ function exportRoadmap() {
 }
 
 async function downloadRoadmapPDF() {
-    if (!appState.roadmapJSON) {
-        showError('No roadmap data available. Generate a roadmap first.');
+    if (!appState.roadmapJSON || !appState.roadmapJSON.roadmap) {
+        showError('No valid roadmap data available. Please generate a roadmap first.');
         return;
     }
     
@@ -2809,8 +2809,8 @@ async function downloadRoadmapPDF() {
         // Clone roadmap content
         const contentClone = elements.roadmapContent.cloneNode(true);
         
-        // Strip interactive elements but keep layout
-        contentClone.querySelectorAll('button, input, select, .btn-reveal-secret, .hidden').forEach(el => el.remove());
+        // Strip interactive elements and scripts but keep layout
+        contentClone.querySelectorAll('button, input, select, script, .btn-reveal-secret, .hidden').forEach(el => el.remove());
         
         // Ensure all links are absolute and styled
         contentClone.querySelectorAll('a').forEach(link => {

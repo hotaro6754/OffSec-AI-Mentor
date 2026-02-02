@@ -84,11 +84,12 @@ if (ILOVEPDF_PUBLIC_KEY && ILOVEPDF_SECRET_KEY) {
 app.use(cors({
     origin: true, // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Groq-API-Key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Groq-API-Key', 'X-ILovePDF-Public-Key', 'X-ILovePDF-Secret-Key'],
     credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logging
 app.use((req, res, next) => {
@@ -2001,9 +2002,21 @@ app.post('/api/generate-pdf', async (req, res) => {
         
     } catch (error) {
         console.error('❌ PDF generation error:', error);
+
+        // Extract detailed error information if available (e.g. from iLovePDF API response)
+        let detailedError = error.message;
+        if (error.response && error.response.data) {
+            console.error('📦 Detailed error response:', JSON.stringify(error.response.data));
+            if (error.response.data.error && error.response.data.error.message) {
+                detailedError = `${error.message}: ${error.response.data.error.message}`;
+            } else {
+                detailedError = `${error.message}: ${JSON.stringify(error.response.data)}`;
+            }
+        }
+
         res.status(500).json({ 
             error: 'Failed to generate PDF. Please try again or use the JSON export option.',
-            details: error.message 
+            details: detailedError
         });
     } finally {
         // Clean up temporary files
