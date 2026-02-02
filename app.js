@@ -2543,12 +2543,13 @@ async function downloadRoadmapPDF() {
             el.style.display = 'block';
         }
         // Ensure readable colors
+        const computedStyle = window.getComputedStyle(el);
         if (isDarkMode) {
-            if (window.getComputedStyle(el).color === 'rgb(255, 255, 255)') {
+            if (computedStyle.color === 'rgb(255, 255, 255)') {
                 el.style.color = '#e6edf3';
             }
         } else {
-            if (window.getComputedStyle(el).color === 'rgb(0, 0, 0)') {
+            if (computedStyle.color === 'rgb(0, 0, 0)') {
                 el.style.color = '#000000';
             }
         }
@@ -2600,7 +2601,7 @@ async function downloadRoadmapPDF() {
     
     document.body.appendChild(pdfRoot);
     
-    // Step 3: Wait for DOM paint
+    // Step 3: Wait for DOM paint (500ms minimum to ensure rendering completes)
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Verify content rendered
@@ -2628,7 +2629,7 @@ async function downloadRoadmapPDF() {
             }
         });
         
-        // Step 6: Cleanup
+        // Step 5: Cleanup
         document.body.removeChild(pdfRoot);
         showSuccess('PDF generated with selectable text!');
         
