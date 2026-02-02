@@ -139,10 +139,7 @@ const RESOURCES = {
             { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, Wireless security' },
             { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security, Blue team' },
             { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' },
-            { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' },
-            { name: 'Null Byte', url: 'https://www.youtube.com/@NullByteWHT', focus: 'Practical hacking techniques and tools' },
-            { name: 'Seytonic', url: 'https://www.youtube.com/@Seytonic', focus: 'Cybersecurity news and hardware projects' },
-            { name: 'Mental Outlaw', url: 'https://www.youtube.com/@MentalOutlaw', focus: 'Privacy, Linux, and tech culture' }
+            { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
         ]
     },
     platforms: {
@@ -214,219 +211,75 @@ const MASTER_SKILLS = [
     { id: 0, name: "Linux Fundamentals", category: "Core Foundations", estimatedTime: "3-4 weeks",
       description: "Master the essential Linux operating system concepts, command-line interface, file system navigation, permissions, and shell scripting basics.",
       objectives: ["Navigate the Linux file system with confidence", "Understand user permissions and file ownership", "Execute basic to intermediate bash commands", "Manage processes, services, and system resources", "Configure networking on Linux systems"],
-      resources: [{ type: "Platform", text: "TryHackMe: Linux Fundamentals (Parts 1-3)", url: "https://tryhackme.com/module/linux-fundamentals" }, { type: "Wargame", text: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/" }, { type: "Website", text: "Linux Journey", url: "https://linuxjourney.com" }, { type: "Book", text: "The Linux Command Line", url: "https://linuxcommand.org/tlcl.php" }],
-      tools: ["Bash/Zsh", "Vim/Nano", "SSH", "Systemctl", "Grep/Sed/Awk"], labs: ["TryHackMe: Linux Fundamentals Rooms", "HackTheBox: Easy Linux machines", "PentesterLab: Linux exercises"],
+      resources: [{ type: "Platform", text: "TryHackMe: Linux Fundamentals (Parts 1-3)", url: "https://tryhackme.com/module/linux-fundamentals" }, { type: "Wargame", text: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/" }, { type: "Website", text: "Linux Journey", url: "https://linuxjourney.com" }],
+      tools: ["Bash/Zsh", "Vim/Nano", "SSH", "Systemctl", "Grep/Sed/Awk"], labs: ["TryHackMe: Linux Fundamentals Rooms", "HackTheBox: Easy Linux machines"],
       prerequisites: "None", nextSkills: "Bash Scripting, Reconnaissance Methodology" },
     { id: 1, name: "Bash Scripting", category: "Automation", estimatedTime: "2-3 weeks",
       description: "Learn to write efficient bash scripts for automation, reconnaissance, and task management in penetration testing workflows.",
       objectives: ["Write loops, conditionals, and functions in bash", "Automate reconnaissance and enumeration tasks", "Parse command output and process files", "Handle errors and implement logging"],
-      resources: [{ type: "Website", text: "Bash Academy", url: "https://guide.bash.academy" }, { type: "Platform", text: "TryHackMe: Bash Scripting", url: "https://tryhackme.com" }],
-      tools: ["Bash", "AWK", "Sed", "Cron", "Shellcheck"], labs: ["Create automated Nmap scanner", "Build subdomain enumeration tool", "Write log parser for Apache logs"],
+      resources: [{ type: "Website", text: "Bash Academy", url: "https://guide.bash.academy" }],
+      tools: ["Bash", "AWK", "Sed", "Cron"], labs: ["Create automated Nmap scanner", "Build subdomain enumeration tool"],
       prerequisites: "Linux Fundamentals", nextSkills: "Python Fundamentals" },
     { id: 2, name: "Networking Fundamentals", category: "Core Foundations", estimatedTime: "4-5 weeks",
       description: "Understand TCP/IP, DNS, HTTP, network protocols, packet structure, and how data flows across networks.",
       objectives: ["Explain OSI and TCP/IP models", "Understand IP addressing and subnetting", "Analyze common protocols (HTTP, DNS, FTP, SMB)", "Capture and interpret network packets"],
-      resources: [{ type: "Platform", text: "TryHackMe: Network Fundamentals", url: "https://tryhackme.com" }, { type: "Website", text: "Practical Networking", url: "https://www.practicalnetworking.net" }, { type: "Book", text: "TCP/IP Illustrated", url: "#" }],
-      tools: ["Wireshark", "tcpdump", "Nmap", "Netcat", "dig/nslookup"], labs: ["TryHackMe: Wireshark 101", "Capture and analyze HTTP traffic", "Perform DNS enumeration"],
+      resources: [{ type: "Platform", text: "TryHackMe: Network Fundamentals", url: "https://tryhackme.com" }, { type: "Website", text: "Practical Networking", url: "https://www.practicalnetworking.net" }],
+      tools: ["Wireshark", "tcpdump", "Nmap", "Netcat"], labs: ["TryHackMe: Wireshark 101", "Perform DNS enumeration"],
       prerequisites: "Basic computer knowledge", nextSkills: "Packet Analysis" },
     { id: 3, name: "Windows Basics", category: "Core Foundations", estimatedTime: "2-3 weeks",
       description: "Gain foundational knowledge of Windows operating systems, PowerShell, file system, services, and basic administration.",
-      objectives: ["Navigate Windows file system and registry", "Use PowerShell for system administration", "Understand Windows services and processes", "Manage users and permissions"],
-      resources: [{ type: "Platform", text: "TryHackMe: Windows Fundamentals", url: "https://tryhackme.com" }, { type: "Website", text: "Microsoft Learn: PowerShell", url: "https://learn.microsoft.com/powershell/" }],
-      tools: ["PowerShell", "CMD", "Task Manager", "Event Viewer"], labs: ["TryHackMe: Windows Fundamentals Rooms", "PowerShell scripting challenges"],
+      objectives: ["Navigate Windows file system and registry", "Use PowerShell for system administration", "Understand Windows services and processes"],
+      resources: [{ type: "Platform", text: "TryHackMe: Windows Fundamentals", url: "https://tryhackme.com" }],
+      tools: ["PowerShell", "CMD", "Task Manager"], labs: ["TryHackMe: Windows Fundamentals Rooms"],
       prerequisites: "Basic OS knowledge", nextSkills: "Windows Privilege Escalation" },
-    { id: 4, name: "Virtualization", category: "Lab Setup", estimatedTime: "1-2 weeks",
-      description: "Set up and manage virtual machines using VMware and VirtualBox to create isolated penetration testing labs.",
-      objectives: ["Install and configure VirtualBox/VMware", "Create and manage VMs", "Configure virtual networking", "Set up Kali Linux attack machine"],
-      resources: [{ type: "Website", text: "VirtualBox Documentation", url: "https://www.virtualbox.org/manual/" }],
-      tools: ["VirtualBox", "VMware Workstation", "Vagrant", "Kali Linux"], labs: ["Build Kali + Metasploitable lab", "Configure NAT and Host-Only networks"],
-      prerequisites: "None", nextSkills: "Any practical labs requiring VM setup" },
-    { id: 5, name: "Python Fundamentals", category: "Programming", estimatedTime: "4-5 weeks",
-      description: "Learn Python programming for scripting, automation, and tool development in cybersecurity contexts.",
-      objectives: ["Understand Python syntax and data structures", "Work with files, APIs, and network sockets", "Write scripts for automation"],
-      resources: [{ type: "Website", text: "Automate the Boring Stuff", url: "https://automatetheboringstuff.com" }, { type: "Book", text: "Black Hat Python", url: "#" }],
-      tools: ["Python 3", "Requests", "Socket", "Scapy"], labs: ["Build port scanner", "Create HTTP client", "Write password brute-forcer"],
-      prerequisites: "Basic programming logic", nextSkills: "Exploitation Framework Usage" },
-    { id: 6, name: "Web Basics", category: "Web Foundations", estimatedTime: "2-3 weeks",
-      description: "Understand HTTP protocol, cookies, sessions, authentication mechanisms, and how web applications work.",
-      objectives: ["Explain HTTP request/response structure", "Understand cookies and session management", "Identify authentication methods"],
-      resources: [{ type: "Platform", text: "PortSwigger Academy: HTTP Basics", url: "https://portswigger.net/web-security" }, { type: "Platform", text: "TryHackMe: Web Fundamentals", url: "https://tryhackme.com" }],
-      tools: ["Burp Suite", "OWASP ZAP", "Browser DevTools", "Curl"], labs: ["Analyze HTTP traffic with Burp", "Manipulate cookies and sessions"],
-      prerequisites: "Networking Fundamentals", nextSkills: "Web Application Penetration Testing" },
     { id: 7, name: "Reconnaissance Methodology", category: "Methodology", estimatedTime: "3-4 weeks",
       description: "Master passive and active reconnaissance techniques to gather information about targets before exploitation.",
-      objectives: ["Perform OSINT and passive reconnaissance", "Conduct active scanning with Nmap", "Enumerate subdomains and DNS records", "Map attack surface"],
+      objectives: ["Perform OSINT and passive reconnaissance", "Conduct active scanning with Nmap", "Enumerate subdomains and DNS records"],
       resources: [{ type: "Platform", text: "TryHackMe: Recon", url: "https://tryhackme.com" }, { type: "Website", text: "OSINT Framework", url: "https://osintframework.com" }],
-      tools: ["Nmap", "Gobuster", "ffuf", "Sublist3r", "theHarvester", "Shodan"], labs: ["Enumerate HTB machines", "Perform OSINT on public targets", "Directory brute-forcing practice"],
+      tools: ["Nmap", "Gobuster", "ffuf", "theHarvester", "Shodan"], labs: ["Enumerate HTB machines", "Directory brute-forcing practice"],
       prerequisites: "Networking Fundamentals, Linux Fundamentals", nextSkills: "Enumeration Methodology" },
-    { id: 8, name: "Packet Analysis", category: "Network Analysis", estimatedTime: "2-3 weeks",
-      description: "Analyze network packets to identify protocols, extract data, detect anomalies, and troubleshoot network issues.",
-      objectives: ["Capture packets with Wireshark and tcpdump", "Filter and analyze protocol traffic", "Identify malicious network activity"],
-      resources: [{ type: "Platform", text: "TryHackMe: Wireshark", url: "https://tryhackme.com" }],
-      tools: ["Wireshark", "tcpdump", "tshark", "NetworkMiner"], labs: ["Analyze PCAP files for CTF challenges", "Detect port scans in captures"],
-      prerequisites: "Networking Fundamentals", nextSkills: "Network Penetration Testing" },
-    { id: 9, name: "Enumeration Methodology", category: "Methodology", estimatedTime: "3-4 weeks",
-      description: "Systematically enumerate services, users, shares, and configurations to identify potential attack vectors.",
-      objectives: ["Enumerate SMB, FTP, SSH, and other services", "Identify service versions and vulnerabilities", "Extract usernames and shares"],
-      resources: [{ type: "Platform", text: "HTB Academy: Enumeration", url: "https://academy.hackthebox.com" }],
-      tools: ["Nmap", "enum4linux", "smbclient", "ldapsearch", "Nikto"], labs: ["Enumerate HTB machines", "Practice on VulnHub VMs"],
-      prerequisites: "Reconnaissance Methodology", nextSkills: "Network Penetration Testing" },
     { id: 10, name: "Web Application Penetration Testing", category: "Web Security", estimatedTime: "6-8 weeks",
       description: "Identify and exploit web application vulnerabilities including injection flaws, authentication bypasses, and business logic errors.",
       objectives: ["Test for common web vulnerabilities", "Exploit SQL injection manually and with tools", "Bypass authentication and authorization", "Identify XSS and CSRF vulnerabilities"],
       resources: [{ type: "Platform", text: "PortSwigger Academy (All Labs)", url: "https://portswigger.net/web-security" }, { type: "Website", text: "OWASP Juice Shop", url: "https://owasp.org/www-project-juice-shop/" }],
-      tools: ["Burp Suite Pro", "SQLMap", "XSStrike", "Commix", "WPScan"], labs: ["Complete PortSwigger all labs", "Pentest Juice Shop", "HTB Web challenges"],
+      tools: ["Burp Suite Pro", "SQLMap", "XSStrike", "Commix", "WPScan"], labs: ["Complete PortSwigger all labs", "Pentest Juice Shop"],
       prerequisites: "Web Basics, Enumeration Methodology", nextSkills: "OWASP Top 10 Exploitation" },
-    { id: 11, name: "OWASP Top 10 Exploitation", category: "Web Security", estimatedTime: "4-6 weeks",
-      description: "Deep dive into exploiting OWASP Top 10 vulnerabilities including injection, broken authentication, and sensitive data exposure.",
-      objectives: ["Exploit SQL, command, and LDAP injection", "Bypass authentication and session management", "Exploit XXE and deserialization flaws"],
-      resources: [{ type: "Platform", text: "PortSwigger OWASP Top 10", url: "https://portswigger.net/web-security/all-topics" }],
-      tools: ["Burp Suite", "SQLMap", "XXEinjector", "ysoserial"], labs: ["PortSwigger labs for each OWASP category", "DVWA challenges"],
-      prerequisites: "Web Application Penetration Testing", nextSkills: "Report Writing" },
     { id: 12, name: "Network Penetration Testing", category: "Network Security", estimatedTime: "4-5 weeks",
       description: "Conduct comprehensive network penetration tests, exploiting misconfigurations and vulnerable services to gain access.",
-      objectives: ["Perform network vulnerability assessments", "Exploit vulnerable network services", "Pivot through networks", "Perform MITM attacks"],
+      objectives: ["Perform network vulnerability assessments", "Exploit vulnerable network services", "Pivot through networks"],
       resources: [{ type: "Platform", text: "TryHackMe: Network Security", url: "https://tryhackme.com" }],
       tools: ["Nmap", "Metasploit", "Responder", "Impacket", "CrackMapExec"], labs: ["HTB Pro Labs", "TryHackMe Network Security rooms"],
       prerequisites: "Enumeration Methodology, Networking Fundamentals", nextSkills: "Lateral Movement" },
     { id: 13, name: "Linux Privilege Escalation", category: "Post-Exploitation", estimatedTime: "3-4 weeks",
       description: "Escalate privileges on Linux systems by exploiting misconfigurations, SUID binaries, kernel exploits, and more.",
-      objectives: ["Identify privilege escalation vectors", "Exploit SUID/SGID binaries", "Abuse sudo misconfigurations", "Leverage kernel exploits"],
-      resources: [{ type: "Platform", text: "TryHackMe: Linux PrivEsc", url: "https://tryhackme.com/room/linuxprivesc" }, { type: "Website", text: "GTFOBins", url: "https://gtfobins.github.io" }, { type: "Guide", text: "PayloadsAllTheThings", url: "https://github.com/swisskyrepo/PayloadsAllTheThings" }],
-      tools: ["LinPEAS", "LinEnum", "pspy", "GTFOBins"], labs: ["TryHackMe Linux PrivEsc rooms", "HTB Easy/Medium Linux machines"],
+      objectives: ["Identify privilege escalation vectors", "Exploit SUID/SGID binaries", "Abuse sudo misconfigurations"],
+      resources: [{ type: "Platform", text: "TryHackMe: Linux PrivEsc", url: "https://tryhackme.com/room/linuxprivesc" }, { type: "Website", text: "GTFOBins", url: "https://gtfobins.github.io" }],
+      tools: ["LinPEAS", "LinEnum", "pspy"], labs: ["TryHackMe Linux PrivEsc rooms", "HTB Easy/Medium Linux machines"],
       prerequisites: "Linux Fundamentals", nextSkills: "Post-Exploitation Techniques" },
     { id: 14, name: "Windows Privilege Escalation", category: "Post-Exploitation", estimatedTime: "3-4 weeks",
       description: "Escalate privileges on Windows systems through token manipulation, service exploits, registry abuse, and more.",
-      objectives: ["Enumerate Windows privilege escalation vectors", "Exploit unquoted service paths", "Abuse Windows tokens and privileges", "Leverage registry and DLL hijacking"],
-      resources: [{ type: "Platform", text: "TryHackMe: Windows PrivEsc", url: "https://tryhackme.com/room/windowsprivesc20" }, { type: "Guide", text: "PayloadsAllTheThings", url: "https://github.com/swisskyrepo/PayloadsAllTheThings" }],
-      tools: ["WinPEAS", "PowerUp", "Seatbelt", "Mimikatz"], labs: ["TryHackMe Windows PrivEsc rooms", "HTB Windows machines"],
+      objectives: ["Enumerate Windows privilege escalation vectors", "Exploit unquoted service paths", "Abuse Windows tokens and privileges"],
+      resources: [{ type: "Platform", text: "TryHackMe: Windows PrivEsc", url: "https://tryhackme.com/room/windowsprivesc20" }],
+      tools: ["WinPEAS", "PowerUp", "Mimikatz"], labs: ["TryHackMe Windows PrivEsc rooms", "HTB Windows machines"],
       prerequisites: "Windows Basics", nextSkills: "Active Directory Privilege Escalation" },
-    { id: 15, name: "Password Cracking", category: "Credential Access", estimatedTime: "2-3 weeks",
-      description: "Crack password hashes using various attack methods including dictionary, brute-force, and rule-based attacks.",
-      objectives: ["Identify hash types", "Perform dictionary and brute-force attacks", "Use wordlists and rule sets"],
-      resources: [{ type: "Platform", text: "TryHackMe: Password Cracking", url: "https://tryhackme.com" }, { type: "Website", text: "Hashcat Wiki", url: "https://hashcat.net/wiki/" }],
-      tools: ["Hashcat", "John the Ripper", "CeWL", "Hydra", "SecLists"], labs: ["Crack hashes from HTB machines", "Practice on hash challenges"],
-      prerequisites: "Linux Fundamentals", nextSkills: "Credential Dumping" },
-    { id: 16, name: "Exploitation Framework Usage", category: "Exploitation", estimatedTime: "3-4 weeks",
-      description: "Master Metasploit Framework for exploitation, payload generation, post-exploitation, and pivoting.",
-      objectives: ["Navigate Metasploit Framework", "Search and use exploit modules", "Generate and deliver payloads"],
-      resources: [{ type: "Platform", text: "TryHackMe: Metasploit", url: "https://tryhackme.com/module/metasploit" }, { type: "Website", text: "Metasploit Unleashed", url: "https://www.offensive-security.com/metasploit-unleashed/" }],
-      tools: ["Metasploit Framework", "Msfvenom", "Meterpreter"], labs: ["Exploit HTB machines with Metasploit", "TryHackMe Metasploit rooms"],
-      prerequisites: "Linux Fundamentals, Python Fundamentals", nextSkills: "Post-Exploitation Techniques" },
-    { id: 17, name: "Report Writing", category: "Professional Skills", estimatedTime: "2-3 weeks",
-      description: "Write professional penetration testing reports with clear findings, risk ratings, and remediation recommendations.",
-      objectives: ["Structure professional pentest reports", "Document findings with evidence", "Rate vulnerabilities by severity"],
-      resources: [{ type: "Guide", text: "TCM Security Report Writing", url: "https://tcm-sec.com/report-writing-for-penetration-testers/" }, { type: "Platform", text: "HTB Academy: Report Writing", url: "https://academy.hackthebox.com/module/details/161" }],
-      tools: ["Markdown", "LaTeX", "Dradis", "PlexTrac"], labs: ["Write reports for HTB retired machines", "Practice on lab findings"],
-      prerequisites: "Web/Network Penetration Testing", nextSkills: "Red Team Operations" },
     { id: 18, name: "Active Directory Architecture", category: "Active Directory", estimatedTime: "3-4 weeks",
       description: "Understand Active Directory structure, forests, domains, trusts, GPOs, and authentication mechanisms.",
-      objectives: ["Explain AD forest and domain structure", "Understand domain trusts", "Analyze Group Policy Objects", "Map AD attack surface"],
-      resources: [{ type: "Platform", text: "TryHackMe: Active Directory Basics", url: "https://tryhackme.com" }, { type: "Platform", text: "HackTheBox Academy: Active Directory", url: "https://academy.hackthebox.com" }],
-      tools: ["BloodHound", "PowerView", "ADExplorer", "ldapsearch"], labs: ["Build AD home lab", "TryHackMe AD rooms"],
+      objectives: ["Explain AD forest and domain structure", "Understand domain trusts", "Analyze Group Policy Objects"],
+      resources: [{ type: "Platform", text: "TryHackMe: Active Directory Basics", url: "https://tryhackme.com" }, { type: "Platform", text: "HackTheBox Academy", url: "https://academy.hackthebox.com" }],
+      tools: ["BloodHound", "PowerView", "ADExplorer"], labs: ["Build AD home lab", "TryHackMe AD rooms"],
       prerequisites: "Windows Basics", nextSkills: "Kerberos Authentication Attacks" },
     { id: 19, name: "Kerberos Authentication Attacks", category: "Active Directory", estimatedTime: "3-4 weeks",
       description: "Exploit Kerberos protocol weaknesses including Kerberoasting, AS-REP Roasting, and Golden/Silver Ticket attacks.",
       objectives: ["Understand Kerberos authentication flow", "Perform Kerberoasting attacks", "Execute AS-REP Roasting", "Generate Golden and Silver Tickets"],
-      resources: [{ type: "Platform", text: "TryHackMe: Kerberos", url: "https://tryhackme.com" }, { type: "Guide", text: "ired.team: Kerberos Attacks", url: "https://www.ired.team" }],
-      tools: ["Rubeus", "Impacket", "Mimikatz", "BloodHound"], labs: ["Practice Kerberoasting in lab", "HTB Active Directory machines"],
+      resources: [{ type: "Guide", text: "ired.team: Kerberos Attacks", url: "https://www.ired.team" }],
+      tools: ["Rubeus", "Impacket", "Mimikatz", "BloodHound"], labs: ["HTB Active Directory machines"],
       prerequisites: "Active Directory Architecture", nextSkills: "Lateral Movement" },
-    { id: 20, name: "Credential Dumping", category: "Credential Access", estimatedTime: "2-3 weeks",
-      description: "Extract credentials from memory, registries, and files using tools like Mimikatz and Impacket.",
-      objectives: ["Dump LSASS memory", "Extract credentials from SAM/NTDS.dit", "Perform DCSync attacks"],
-      resources: [{ type: "Platform", text: "TryHackMe: Credential Dumping", url: "https://tryhackme.com" }, { type: "Guide", text: "ired.team: Credential Access", url: "https://www.ired.team" }],
-      tools: ["Mimikatz", "Impacket-secretsdump", "LaZagne", "ProcDump"], labs: ["Dump credentials in AD lab", "HTB Pro Labs"],
-      prerequisites: "Windows Privilege Escalation, AD Architecture", nextSkills: "Lateral Movement" },
-    { id: 21, name: "Lateral Movement", category: "Movement", estimatedTime: "3-4 weeks",
-      description: "Move laterally through networks using Pass-the-Hash, Pass-the-Ticket, WMI, PSExec, and other techniques.",
-      objectives: ["Execute Pass-the-Hash attacks", "Perform Pass-the-Ticket", "Use PSExec and WMI for lateral movement"],
-      resources: [{ type: "Platform", text: "HTB Academy: Lateral Movement", url: "https://academy.hackthebox.com" }, { type: "Guide", text: "ired.team: Lateral Movement", url: "https://www.ired.team" }],
-      tools: ["Impacket", "CrackMapExec", "Evil-WinRM", "WMIExec"], labs: ["Practice lateral movement in AD lab", "HTB Pro Labs"],
-      prerequisites: "Credential Dumping", nextSkills: "Red Team Attack Chaining" },
-    { id: 22, name: "AD Privilege Escalation", category: "Active Directory", estimatedTime: "3-4 weeks",
-      description: "Escalate privileges in Active Directory by exploiting misconfigurations, ACLs, delegation, and trust relationships.",
-      objectives: ["Identify AD privilege escalation paths", "Abuse ACLs and permissions", "Exploit delegation", "Leverage BloodHound"],
-      resources: [{ type: "Platform", text: "TryHackMe: AD PrivEsc", url: "https://tryhackme.com" }, { type: "Guide", text: "SpecterOps: AD Attack Paths", url: "https://posts.specterops.io" }],
-      tools: ["BloodHound", "PowerView", "Rubeus", "Impacket"], labs: ["Follow BloodHound attack paths", "HTB AD machines"],
-      prerequisites: "AD Architecture, Kerberos Attacks", nextSkills: "Domain Persistence" },
-    { id: 23, name: "Domain Persistence Techniques", category: "Persistence", estimatedTime: "2-3 weeks",
-      description: "Establish and maintain persistent access in Active Directory environments using backdoors and stealthy techniques.",
-      objectives: ["Create Golden Tickets for persistence", "Implement Skeleton Key attacks", "Abuse AdminSDHolder"],
-      resources: [{ type: "Guide", text: "ired.team: Persistence", url: "https://www.ired.team" }, { type: "Platform", text: "TryHackMe: AD Persistence", url: "https://tryhackme.com" }],
-      tools: ["Mimikatz", "PowerShell Empire", "DSInternals"], labs: ["Practice persistence in AD lab", "Red Team exercises"],
-      prerequisites: "AD Privilege Escalation", nextSkills: "Red Team Operations" },
-    { id: 24, name: "Windows Internals", category: "Advanced Windows", estimatedTime: "4-5 weeks",
-      description: "Deep dive into Windows internals including processes, threads, tokens, security contexts, and API calls.",
-      objectives: ["Understand Windows process architecture", "Analyze security tokens", "Explore Windows API for security"],
-      resources: [{ type: "Book", text: "Windows Internals", url: "#" }, { type: "Platform", text: "HTB Academy: Windows Internals", url: "https://academy.hackthebox.com" }],
-      tools: ["Process Hacker", "WinDbg", "API Monitor", "Sysinternals Suite"], labs: ["Analyze malware samples", "Debug Windows processes"],
-      prerequisites: "Windows Basics, Windows PrivEsc", nextSkills: "AV/EDR Evasion" },
-    { id: 25, name: "Red Team Attack Chaining", category: "Red Team", estimatedTime: "4-5 weeks",
-      description: "Chain multiple attack techniques together to achieve complex objectives in realistic red team engagements.",
-      objectives: ["Plan multi-stage attack campaigns", "Chain recon, exploitation, and post-exploitation", "Maintain OPSEC"],
-      resources: [{ type: "Platform", text: "HTB Pro Labs", url: "https://www.hackthebox.com" }, { type: "Platform", text: "TryHackMe: Red Team Path", url: "https://tryhackme.com" }],
-      tools: ["Full pentesting toolkit", "C2 Frameworks", "BloodHound"], labs: ["HTB Pro Labs (Rastalabs, APTLabs)", "TryHackMe Red Team challenges"],
-      prerequisites: "All Year 2-3 skills", nextSkills: "Red Team Operations" },
-    { id: 26, name: "MITRE ATT&CK Mapping", category: "Methodology", estimatedTime: "2-3 weeks",
-      description: "Map attack techniques to the MITRE ATT&CK framework for structured reporting and detection analysis.",
-      objectives: ["Understand MITRE ATT&CK framework", "Map techniques to tactics", "Document attacks using ATT&CK"],
-      resources: [{ type: "Website", text: "MITRE ATT&CK Navigator", url: "https://mitre-attack.github.io/attack-navigator/" }],
-      tools: ["ATT&CK Navigator", "Atomic Red Team"], labs: ["Map HTB machine attacks to ATT&CK", "Create attack matrices"],
-      prerequisites: "Red Team fundamentals", nextSkills: "Red Team Operations" },
     { id: 27, name: "Red Team Operations", category: "Red Team", estimatedTime: "6-8 weeks",
       description: "Plan and execute end-to-end red team operations simulating advanced persistent threats against organizations.",
       objectives: ["Plan red team campaigns", "Simulate APT tactics", "Evade blue team detection"],
-      resources: [{ type: "Book", text: "Red Team Development and Operations", author: "Joe Vest", url: "#" }, { type: "Platform", text: "TryHackMe: Red Team Path", url: "https://tryhackme.com" }],
-      tools: ["C2 Frameworks", "OPSEC tools", "Full attack toolkit"], labs: ["HTB Pro Labs", "Custom red team exercises"],
-      prerequisites: "All Year 3 skills", nextSkills: "C2 Operations" },
-    { id: 28, name: "Command & Control Operations", category: "C2", estimatedTime: "4-5 weeks",
-      description: "Deploy and operate command and control infrastructure using frameworks like Cobalt Strike, Sliver, and custom C2.",
-      objectives: ["Set up C2 infrastructure", "Generate and deploy implants", "Manage beacons and agents"],
-      resources: [{ type: "Platform", text: "TryHackMe: C2", url: "https://tryhackme.com" }, { type: "Website", text: "Sliver Wiki", url: "https://github.com/BishopFox/sliver/wiki" }],
-      tools: ["Cobalt Strike", "Sliver", "Covenant", "Mythic"], labs: ["Deploy Sliver C2 in lab", "Customize malleable profiles"],
-      prerequisites: "Red Team Operations", nextSkills: "AV/EDR Evasion" },
-    { id: 29, name: "OPSEC Fundamentals", category: "Operational Security", estimatedTime: "3-4 weeks",
-      description: "Maintain operational security during red team engagements to avoid detection and attribution.",
-      objectives: ["Understand OPSEC principles", "Avoid common detection mistakes", "Anonymize infrastructure"],
-      resources: [{ type: "Platform", text: "TryHackMe: OPSEC", url: "https://tryhackme.com" }],
-      tools: ["ProxyChains", "Tor", "VPNs", "Domain Fronting"], labs: ["Practice OPSEC-aware attacks", "Analyze OPSEC failures"],
-      prerequisites: "Red Team Operations", nextSkills: "Detection-Aware Attacks" },
-    { id: 30, name: "AV/EDR Evasion Basics", category: "Evasion", estimatedTime: "4-5 weeks",
-      description: "Bypass antivirus and endpoint detection/response solutions using obfuscation, encryption, and process injection.",
-      objectives: ["Understand AV/EDR detection mechanisms", "Obfuscate payloads", "Perform process injection", "Bypass AMSI and ETW"],
-      resources: [{ type: "Platform", text: "TryHackMe: AV Evasion", url: "https://tryhackme.com" }, { type: "Website", text: "Red Team Notes", url: "https://www.ired.team" }],
-      tools: ["Veil", "Shellter", "Donut", "ScareCrow"], labs: ["Evade Windows Defender", "Bypass common EDR solutions"],
-      prerequisites: "Windows Internals, Exploitation Frameworks", nextSkills: "Post-Exploitation Techniques" },
-    { id: 31, name: "Post-Exploitation Techniques", category: "Post-Exploitation", estimatedTime: "3-4 weeks",
-      description: "Advanced post-exploitation including data exfiltration, living-off-the-land techniques, and covert operations.",
-      objectives: ["Perform stealthy data exfiltration", "Use LOLBins", "Execute fileless attacks"],
-      resources: [{ type: "Website", text: "LOLBAS Project", url: "https://lolbas-project.github.io" }, { type: "Platform", text: "HTB Academy: Post-Exploitation", url: "https://academy.hackthebox.com" }],
-      tools: ["PowerShell", "WMI", "LOLBins", "C2 frameworks"], labs: ["Practice fileless execution", "Exfiltrate data covertly"],
-      prerequisites: "Windows Internals, AV/EDR Evasion", nextSkills: "Red Team Operations" },
-    { id: 32, name: "Azure Active Directory Attacks", category: "Cloud Security", estimatedTime: "3-4 weeks",
-      description: "Attack Azure AD environments including authentication bypasses, token theft, and privilege escalation in the cloud.",
-      objectives: ["Understand Azure AD architecture", "Perform password spraying on Azure", "Steal and replay Azure tokens"],
-      resources: [{ type: "Platform", text: "TryHackMe: Azure", url: "https://tryhackme.com" }],
-      tools: ["AADInternals", "ROADtools", "AzureHound", "PowerZure"], labs: ["Attack Azure AD lab environment", "Cloud pentesting exercises"],
-      prerequisites: "AD Architecture", nextSkills: "Cloud Red Teaming" },
-    { id: 33, name: "AWS IAM Attacks", category: "Cloud Security", estimatedTime: "3-4 weeks",
-      description: "Exploit AWS IAM misconfigurations, escalate privileges, and move laterally across AWS services.",
-      objectives: ["Understand AWS IAM architecture", "Enumerate AWS environments", "Escalate IAM privileges"],
-      resources: [{ type: "Platform", text: "TryHackMe: AWS", url: "https://tryhackme.com" }, { type: "Tool", text: "Pacu", url: "https://github.com/RhinoSecurityLabs/pacu" }],
-      tools: ["Pacu", "ScoutSuite", "Prowler", "AWS CLI"], labs: ["Practice with flAWS challenges", "Pacu exploitation scenarios"],
-      prerequisites: "Cloud fundamentals", nextSkills: "Cloud Red Teaming" },
-    { id: 34, name: "Detection-Aware Attacks", category: "Advanced Red Team", estimatedTime: "3-4 weeks",
-      description: "Understand blue team detection methods and adapt red team tactics to evade SIEM, IDS/IPS, and threat hunting.",
-      objectives: ["Understand detection engineering", "Identify telemetry sources", "Modify TTPs to evade detection"],
-      resources: [{ type: "Platform", text: "TryHackMe: Detection Engineering", url: "https://tryhackme.com" }],
-      tools: ["Splunk", "Elastic SIEM", "Sysmon"], labs: ["Red vs Blue exercises", "Test attacks against SIEM"],
-      prerequisites: "Red Team Operations, MITRE ATT&CK", nextSkills: "Cloud Red Teaming" },
-    { id: 35, name: "Cloud Red Teaming", category: "Cloud Security", estimatedTime: "5-6 weeks",
-      description: "Execute comprehensive red team operations across cloud environments (AWS, Azure, GCP) with cloud-specific TTPs.",
-      objectives: ["Perform cloud reconnaissance", "Exploit cloud misconfigurations", "Move laterally across cloud resources"],
-      resources: [{ type: "Platform", text: "HackTheBox: Cloud Labs", url: "https://www.hackthebox.com" }],
-      tools: ["Pacu", "ScoutSuite", "AADInternals", "CloudFox"], labs: ["HTB Cloud Pro Labs", "Custom cloud red team scenarios"],
-      prerequisites: "Azure/AWS Attacks, Red Team Operations", nextSkills: "Professional cloud security certifications" }
+      resources: [{ type: "Platform", text: "TryHackMe: Red Team Path", url: "https://tryhackme.com" }],
+      tools: ["C2 Frameworks", "OPSEC tools"], labs: ["HTB Pro Labs", "Custom red team exercises"],
+      prerequisites: "All Year 3 skills", nextSkills: "C2 Operations" }
 ];
 
 // ============================================================================
@@ -1192,105 +1045,138 @@ Be appropriate to the selected mode. Output ONLY valid JSON.`,
         
         const certContent = certKey ? CERTIFICATION_CONTENT[certKey] : null;
 
+        const universalFoundations = `
+UNIVERSAL FOUNDATION (Required for all certs):
+- Core: Linux basics, Windows basics, Networking fundamentals (OSI, TCP/IP, IP/ARP/ICMP, DNS, DHCP, NAT/VPN)
+- Programming: Bash basics, Python basics
+- Web: HTTP/HTTPS deep understanding
+- Tools: Git & Markdown, Virtualization (VMware/VirtualBox)
+- Ethics: Cybersecurity ethics & legal boundaries`;
+
+        const masterToolList = `
+MASTER TOOL LIST (Select relevant tools based on cert and phase):
+- Recon: Nmap, Masscan, RustScan, Enum4linux, Amass, Subfinder
+- Passwords: Hashcat, John, Hydra, SecLists
+- Web: Burp Suite, OWASP ZAP, Gobuster, FFUF, SQLmap
+- Exploitation: Metasploit, Searchsploit, Impacket, Responder
+- PrivEsc: LinPEAS, WinPEAS, PowerUp, pspy
+- AD: BloodHound, Mimikatz, Rubeus, Evil-WinRM
+- Red Team: Sliver, Empire, Donut, LolBins
+- Pivoting: Chisel, Ligolo-NG, ProxyChains
+- Wireless: Aircrack-ng suite, Bettercap`;
+
         const instructions = `
-YOU ARE OFFSEC AI MENTOR - AN ELITE RED-TEAM TRAINER.
-Your purpose is to generate an EXTREMELY DETAILED, 1-YEAR ROADMAP for ${cert}.
-
-CORE GUIDELINES:
-1. **ROLE**: Act as a senior OSCP/OSEP/OSWE mentor. Do NOT generate generic to-do lists. Provide EXTREME DETAIL in every section.
-2. **TIMELINE**: Strictly 1-YEAR duration with EXACTLY 11-14 phases.
-3. **SOURCE MATERIAL**: Use the provided MASTER_SKILLS and RESOURCES as your absolute source of truth.
-4. **CERTIFICATION FOCUS**:
-   - Analyze the ${cert} syllabus logically.
-   - Each certification roadmap must be UNIQUE (different tools, different mindset, different lab focus).
-   - CEH focuses on tools/theory; OSCP focuses on manual exploitation/enumeration; OSEP focuses on evasion.
-5. **MENTOR GUIDANCE**:
-   - For every lab, provide "Mentor Key Points": explain common mistakes, how to think while solving, and red-team mindset tips.
-   - Use stable, working URLs from the provided resources.
-6. **WORKING LINKS ONLY**:
+CRITICAL INSTRUCTIONS FOR AI MENTOR:
+1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be DETAILED, PRACTICAL, and LOGICAL.
+2. **TIMELINE**: Generate a **1-YEAR roadmap** (11-14 phases). This is a marathon, not a sprint.
+3. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
+4. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map every single topic to a specific phase.
+5. **LAB GUIDANCE**: For every lab mentioned, include "Key Points while solving" - specific pitfalls, mindset tips, or enumeration steps.
+6. **WORKING LINKS**: Use only verified platform URLs.
    - TryHackMe: https://tryhackme.com/room/[roomname]
-   - HackTheBox: https://app.hackthebox.com/machines/[machinename]
-   - No fake or broken links. Use links from the provided RESOURCES object.
-7. **SKILL TREE**: Generate a FULL skill tree representing EVERY skill in the roadmap, not just 2-3.
-8. **TAILORING**: Address these user weaknesses: ${weaknesses.join(', ')}.
+   - HackTheBox: https://app.hackthebox.com/machines/[machinename] or /starting-point
+7. **SKILL TREE**: You MUST generate a comprehensive Neo-Brutalist Skill Tree in the JSON.
+8. **GROUNDING**: Reference the provided MASTER_SKILLS for technical depth.
 
-PHASE STRUCTURE:
-- Phases 1-3: Foundations (Networking, Linux/Windows Internals, Scripting)
-- Phases 4-6: Enumeration Mastery & Initial Access
-- Phases 7-9: Privilege Escalation & Active Directory (Vary depth based on cert)
-- Phases 10-12: Advanced Topics (Evasion, Post-Exploitation, Cloud, etc.)
-- Phases 13-14: Reporting & Mock Exam Simulations`;
+PHASE STRUCTURE (11-14 Phases):
+Phases 1-3: Foundations (Linux, Networking, Windows, Scripting)
+Phases 4-6: Web & Network Enumeration + Initial Access
+Phases 7-9: Privilege Escalation & Active Directory
+Phases 10-12: Advanced Topics (Evasion, Post-Exploitation, Cloud)
+Phases 13-14: Certification Mastery, Reporting, & Mock Exams`;
 
-        return `Create a comprehensive, 1-YEAR ${cert} learning roadmap as an Elite AI Mentor.
+        let certSpecificInstructions = '';
+        if (certContent) {
+            certSpecificInstructions = `
+CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
+- Focus: ${certContent.focus}
+- Exam: ${certContent.examFormat}
+- Syllabus to cover: ${certContent.syllabus?.join(', ') || 'N/A'}
+- MUST USE THESE LABS: ${(certContent.specificLabs || []).filter(l => l && l.name).map(l => l.name).join(', ') || 'N/A'}
+- MUST USE THESE TOOLS: ${(certContent.coreTools || []).filter(Boolean).join(', ') || 'N/A'}
+- YT RESOURCES: ${(certContent.youtubeChannels || []).filter(y => y && y.name && y.url).map(y => `${y.name} (${y.url})`).join(', ') || 'N/A'}`;
+        }
+
+        return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap as an AI Mentor.
 
 USER PROFILE:
-- Level: ${level}
 - Mode: ${mode.toUpperCase()}
-- Readiness: ${assessmentResult.readinessScore || 'N/A'}%
+- Current Level: ${level}
+- Readiness Score: ${assessmentResult.readinessScore || 'N/A'}%
 
+${universalFoundations}
+${masterToolList}
 ${instructions}
+${certSpecificInstructions}
 
 REQUIREMENTS:
-1. **Gap Analysis**: Detailed analysis of missing skills vs ${cert} requirements.
-2. **11-14 Dynamic Phases**: Each MUST include:
-   - "why_it_matters": Syllabus alignment for ${cert}.
-   - "mentor_notes": Critical mindset tips and common pitfalls for this phase.
-   - "mandatory_labs": WORKING URLs and "key_points" (mindset/enumeration tips).
-   - "tools": Why & how to use specific flags/features.
-   - "resources": YouTube, Web, and Book recommendations.
-   - "completion_checklist": Measurable goals.
-3. **Skill Tree**: Radial structure with categories (Foundation, Enumeration, Exploitation, Post-Exploitation, Exam Strategy).
-4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with specific commands.
+1. **Gap Analysis**: Detailed missing skills vs requirements.
+2. **Dynamic Phases**: MUST generate exactly 11-14 phases. Each phase MUST have:
+   - "Why it matters for ${cert}" - syllabus alignment
+   - Specific Learning Outcomes
+   - Tools needed for THIS phase
+   - Mandatory Labs with WORKING URLs and "Key Points while solving"
+   - Resources (YouTube, Web, Books)
+   - Weekly breakdown
+   - Completion checklist
+3. **Skill Tree**: A structured tree of skills learned, grouped by categories (e.g., Recon, Web, AD).
+4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
 5. **Special Resource**: Rickroll at the end.
 
 STRICT RULES:
-- Ground all technical content in these skills: ${JSON.stringify(MASTER_SKILLS)}
-- Use these verified resources: ${JSON.stringify(resources.youtube.channels)}
+- Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
+- Use the following RESOURCES for verified links: ${JSON.stringify(resources)}
 - RESPOND WITH PURE JSON ONLY.
 
 JSON FORMAT:
 {
   "targetCertification": "${cert}",
+  "currentLevel": "${level}",
+  "certificationFocus": "${certContent ? certContent.focus : 'General pentesting skills'}",
+  "examFormat": "${certContent ? certContent.examFormat : 'See certification details'}",
+  "gap_analysis": {
+    "missing_skills": [],
+    "weak_areas": [],
+    "alignment_percentage": 0
+  },
   "roadmap": [
     {
       "phase": 1,
       "phase_name": "[Name]",
-      "why_it_matters": "[Alignment]",
-      "mentor_notes": "[Red-team mindset tips]",
+      "why_it_matters": "[Significance]",
       "duration_weeks": 4,
-      "learning_outcomes": ["Specific outcome 1", "Specific outcome 2"],
+      "learning_outcomes": [],
+      "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
       "mandatory_labs": [
         {
-          "name": "Lab Name",
-          "platform": "HTB|THM|PortSwigger",
-          "url": "WORKING URL",
-          "key_points": "Enumeration steps and pitfalls"
+          "name": "Specific lab name",
+          "platform": "HTB|THM|OTW",
+          "url": "working URL",
+          "key_points": "Mindset and enumeration tips while solving this lab"
         }
       ],
-      "tools": [{"name": "Tool", "how_to_use": "Why and specific flags"}],
-      "resources": [{"type": "YouTube|Web|Book", "name": "Name", "url": "URL", "description": "Why this resource"}],
-      "completion_checklist": ["Goal 1", "Goal 2"]
+      "resources": [{"type": "YouTube|Web|Book", "name": "Resource Name", "url": "URL", "description": ""}],
+      "tools": [{"name": "Tool name", "commands": ["command 1"]}],
+      "completion_checklist": []
     }
   ],
   "skill_tree": {
     "categories": [
       {
-        "name": "Category",
-        "skills": [{"name": "Skill", "level": "Beginner|Intermediate|Advanced", "icon": "emoji"}]
+        "name": "Category Name",
+        "skills": [{"name": "Skill Name", "level": "Beginner|Intermediate|Advanced", "icon": "emoji"}]
       }
-    ]
+    ],
+    "connections": [{"from": "Skill A", "to": "Skill B"}]
   },
   "tools_mastery_guide": [
     {
-      "tool": "Tool Name",
-      "commands": [{"cmd": "nmap -sC -sV", "purpose": "Default scripts and versioning"}]
+      "category": "Recon|Exploitation|Post-Exploitation",
+      "tool": "",
+      "skill_level": "Beginner|Intermediate|Advanced",
+      "commands": [{"cmd": "", "purpose": ""}]
     }
   ],
-  "final_outcome": {
-    "mastery_level": "Elite Pentester / Active Directory Expert",
-    "achievements": ["Can exploit complex AD forests", "Fluent in C2 operations", "Zero-day mindset developed"],
-    "career_readiness": "Ready for Senior Red Team roles"
-  },
   "special_resource": { "name": "Secret Cyber Wisdom", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
 }`;
     },
