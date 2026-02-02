@@ -2495,104 +2495,104 @@ function exportRoadmap() {
 }
 
 function downloadRoadmapPDF() {
-    // PDF generation constants
-    const MIN_ROADMAP_CONTENT_LENGTH = 100;
-    const MIN_PDF_CONTAINER_HEIGHT = 100;
-    const PDF_HEIGHT_BUFFER = 150;
-    
     if (!appState.roadmapJSON) {
         showError('No roadmap data available. Generate a roadmap first.');
         return;
     }
     
-    const filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
+    // Check if html2pdf is loaded
     if (typeof html2pdf === 'undefined') {
-        showError('PDF library not loaded. Please try exporting as JSON instead.');
+        showError('PDF library not loaded. Please refresh the page and try again.');
         return;
     }
     
-    showNotification('Preparing high-quality PDF... This may take a moment.', 'info');
-
-    // Create a temporary visible container off-screen to ensure full rendering
+    showNotification('Preparing PDF... This may take a moment.', 'info');
+    
+    // Create a temporary container with proper styling
     const tempContainer = document.createElement('div');
-    tempContainer.id = 'pdf-render-container';
-    tempContainer.style.position = 'fixed';
-    tempContainer.style.left = '-10000px';
-    tempContainer.style.top = '0';
-    tempContainer.style.width = '850px';
-    tempContainer.style.height = 'auto';
-    tempContainer.style.overflow = 'visible';
-    tempContainer.style.zIndex = '99999';
-    tempContainer.style.visibility = 'visible';
-    tempContainer.style.backgroundColor = document.body.classList.contains('mode-oscp') ? '#121212' : '#faf8f5';
+    tempContainer.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 210mm;
+        padding: 20px;
+        background: white;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #333;
+    `;
     
-    // Add theme class to temp container
-    if (document.body.classList.contains('mode-oscp')) {
-        tempContainer.className = 'mode-oscp';
-    }
-    
-    // Clone roadmap content
+    // Clone the roadmap content
     const contentClone = elements.roadmapContent.cloneNode(true);
     
-    // Validate content has substance
-    if (!contentClone || contentClone.children.length === 0 || contentClone.textContent.trim().length < MIN_ROADMAP_CONTENT_LENGTH) {
-        showError('Roadmap content is empty or incomplete. Try regenerating the roadmap.');
-        return;
-    }
+    // Remove interactive elements (buttons, etc.)
+    contentClone.querySelectorAll('button, input, select').forEach(el => el.remove());
     
+    // Ensure all text is black for PDF
+    contentClone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#333';
+    });
+    
+    // Add header
+    const header = document.createElement('div');
+    header.style.cssText = 'text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;';
+    header.innerHTML = `
+        <h1 style="margin: 0; font-size: 24px;">OffSec Learning Roadmap</h1>
+        <p style="margin: 5px 0; font-size: 14px;">Certification: ${appState.selectedCert}</p>
+        <p style="margin: 5px 0; font-size: 12px; color: #666;">Generated: ${new Date().toLocaleDateString()}</p>
+    `;
+    
+    tempContainer.appendChild(header);
     tempContainer.appendChild(contentClone);
+    
+    // Add footer
+    const footer = document.createElement('div');
+    footer.style.cssText = 'margin-top: 30px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ccc; padding-top: 10px;';
+    footer.textContent = 'Created with OffSec AI Mentor | hotaro6754/OffSec-AI-Mentor';
+    tempContainer.appendChild(footer);
+    
     document.body.appendChild(tempContainer);
-
-    // Re-initialize Lucide icons in the clone
-    if (window.lucide) {
-        lucide.createIcons({
-            root: contentClone
-        });
-    }
-
-    // Increased delay to ensure all dynamic elements and styles are applied
+    
+    // Wait for any dynamic content to load (icons, etc.)
     setTimeout(() => {
-        const tempHeight = tempContainer.offsetHeight;
-        if (tempHeight < MIN_PDF_CONTAINER_HEIGHT) {
-            console.warn('Warning: PDF container height is very small:', tempHeight);
-            document.body.removeChild(tempContainer);
-            showError('PDF content validation failed. The roadmap may not be fully rendered.');
-            return;
-        }
-        
         const opt = {
-            margin: [10, 10, 10, 10],
-            filename: filename,
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: {
+            margin: [15, 15, 15, 15],
+            filename: `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                letterRendering: true,
-                scrollY: 0,
-                scrollX: 0,
-                windowWidth: 850,
-                windowHeight: tempHeight + PDF_HEIGHT_BUFFER,
-                backgroundColor: document.body.classList.contains('mode-oscp') ? '#121212' : '#faf8f5'
+                backgroundColor: '#ffffff'
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-
-        html2pdf().set(opt).from(tempContainer).toPdf().get('pdf').then((pdf) => {
-            // Success
-        }).save().then(() => {
-            document.body.removeChild(tempContainer);
-            showSuccess('Roadmap downloaded as PDF!');
-        }).catch(err => {
-            console.error('PDF generation failed:', err);
-            if (tempContainer.parentNode) {
-                document.body.removeChild(tempContainer);
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait'
+            },
+            pagebreak: { 
+                mode: ['avoid-all', 'css', 'legacy'],
+                before: '.phase-card-v3'
             }
-            showError('PDF generation failed. Try exporting as JSON instead.');
-        });
-    }, 1500);
+        };
+        
+        html2pdf()
+            .set(opt)
+            .from(tempContainer)
+            .save()
+            .then(() => {
+                document.body.removeChild(tempContainer);
+                showSuccess('Roadmap downloaded as PDF!');
+            })
+            .catch(err => {
+                console.error('PDF generation failed:', err);
+                if (document.body.contains(tempContainer)) {
+                    document.body.removeChild(tempContainer);
+                }
+                showError('PDF generation failed. Try exporting as JSON instead.');
+            });
+    }, 2000); // Increased delay to ensure full rendering
 }
 
 // ============================================================================
