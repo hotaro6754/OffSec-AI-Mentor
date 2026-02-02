@@ -1067,23 +1067,21 @@ MASTER TOOL LIST (Select relevant tools based on cert and phase):
 
         const instructions = `
 CRITICAL INSTRUCTIONS FOR AI MENTOR:
-1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be DETAILED, PRACTICAL, and LOGICAL.
-2. **TIMELINE**: Generate a **1-YEAR roadmap** (11-14 phases). This is a marathon, not a sprint.
+1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be CONCISE, PRACTICAL, and HIGH-IMPACT.
+2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (8-10 phases). Focus on quality over quantity.
 3. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
-4. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map every single topic to a specific phase.
-5. **LAB GUIDANCE**: For every lab mentioned, include "Key Points while solving" - specific pitfalls, mindset tips, or enumeration steps.
-6. **WORKING LINKS**: Use only verified platform URLs.
-   - TryHackMe: https://tryhackme.com/room/[roomname]
-   - HackTheBox: https://app.hackthebox.com/machines/[machinename] or /starting-point
-7. **SKILL TREE**: You MUST generate a comprehensive Neo-Brutalist Skill Tree in the JSON.
-8. **GROUNDING**: Reference the provided MASTER_SKILLS for technical depth.
+4. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
+5. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
+6. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
+7. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
+8. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
 
-PHASE STRUCTURE (11-14 Phases):
-Phases 1-3: Foundations (Linux, Networking, Windows, Scripting)
-Phases 4-6: Web & Network Enumeration + Initial Access
-Phases 7-9: Privilege Escalation & Active Directory
-Phases 10-12: Advanced Topics (Evasion, Post-Exploitation, Cloud)
-Phases 13-14: Certification Mastery, Reporting, & Mock Exams`;
+PHASE STRUCTURE (8-10 Phases):
+Phases 1-2: Foundations (Linux, Networking, Windows, Scripting)
+Phases 3-4: Web & Network Enumeration + Initial Access
+Phases 5-6: Privilege Escalation & Active Directory
+Phases 7-8: Advanced Topics (Evasion, Post-Exploitation, Cloud)
+Phases 9-10: Certification Mastery, Reporting, & Mock Exams`;
 
         let certSpecificInstructions = '';
         if (certContent) {
@@ -1111,15 +1109,13 @@ ${certSpecificInstructions}
 
 REQUIREMENTS:
 1. **Gap Analysis**: Detailed missing skills vs requirements.
-2. **Dynamic Phases**: MUST generate exactly 11-14 phases. Each phase MUST have:
+2. **Dynamic Phases**: MUST generate exactly 8-10 phases. Each phase MUST have:
    - "Why it matters for ${cert}" - syllabus alignment
    - Specific Learning Outcomes
    - Tools needed for THIS phase
-   - Mandatory Labs with WORKING URLs and "Key Points while solving"
+   - Mandatory Labs with WORKING URLs and brief "Mentor Key Points"
    - Resources (YouTube, Web, Books)
-   - Weekly breakdown
-   - Completion checklist
-3. **Skill Tree**: A structured tree of skills learned, grouped by categories (e.g., Recon, Web, AD).
+3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
 4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
 5. **Special Resource**: Rickroll at the end.
 
@@ -1146,18 +1142,16 @@ JSON FORMAT:
       "why_it_matters": "[Significance]",
       "duration_weeks": 4,
       "learning_outcomes": [],
-      "weekly_breakdown": [{"week": 1, "topics": [], "labs": [], "checkpoint": ""}],
       "mandatory_labs": [
         {
           "name": "Specific lab name",
           "platform": "HTB|THM|OTW",
           "url": "working URL",
-          "key_points": "Mindset and enumeration tips while solving this lab"
+          "key_points": "Mindset and enumeration tips"
         }
       ],
-      "resources": [{"type": "YouTube|Web|Book", "name": "Resource Name", "url": "URL", "description": ""}],
-      "tools": [{"name": "Tool name", "commands": ["command 1"]}],
-      "completion_checklist": []
+      "resources": [{"type": "YouTube|Web|Book", "name": "Name", "url": "URL"}],
+      "tools": ["Tool1", "Tool2"]
     }
   ],
   "skill_tree": {
