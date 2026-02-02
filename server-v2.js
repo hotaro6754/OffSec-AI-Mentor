@@ -138,7 +138,7 @@ const RESOURCES = {
             { name: 'TCM Security Official', url: 'https://www.youtube.com/@TCMSecurity', focus: 'Official certification training' },
             { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, Wireless security' },
             { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security, Blue team' },
-            { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' },
+            { name: 'Special Link', url: '/assets/videos/never-gonna-give-you-up.mp4', focus: 'Secret Cyber Security Wisdom' },
             { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
         ]
     },
@@ -1133,7 +1133,7 @@ REQUIREMENTS:
    - Resources (YouTube, Web, Books) with CLICKABLE LINKS
 3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
 4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
-5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (/assets/videos/never-gonna-give-you-up.mp4).
 
 STRICT RULES:
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
@@ -1187,7 +1187,7 @@ JSON FORMAT:
       "commands": [{"cmd": "", "purpose": ""}]
     }
   ],
-  "special_resource": { "name": "Secret Cyber Wisdom", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }
+  "special_resource": { "name": "Secret Cyber Wisdom", "url": "/assets/videos/never-gonna-give-you-up.mp4" }
 }`;
     },
 

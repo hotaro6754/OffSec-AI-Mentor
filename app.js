@@ -3206,10 +3206,10 @@ function revealSecret(containerId) {
                 <p style="margin-top: 12px; color: #000; font-weight: 700; text-transform: uppercase; font-size: 12px;">Scan for Wisdom</p>
             </div>
             <p class="or-text">OR</p>
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+            <a href="/assets/videos/never-gonna-give-you-up.mp4"
                target="_blank" 
                class="btn btn-wisdom">
-                🎵 Click for Knowledge
+                🎵 Play Local Wisdom
             </a>
         </div>
     `;
@@ -3223,7 +3223,7 @@ function revealSecret(containerId) {
             try {
                 qrElement.innerHTML = ''; // Clear any existing
                 new QRCode(qrElement, {
-                    text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    text: window.location.origin + "/assets/videos/never-gonna-give-you-up.mp4",
                     width: 180,
                     height: 180,
                     colorDark: "#000000",
