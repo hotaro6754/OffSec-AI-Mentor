@@ -2260,13 +2260,19 @@ function getResourcesForCert(certId, level) {
 
 function displayRoadmap(roadmapData) {
     const roadmapTimelineV2 = document.getElementById('roadmapTimelineV2');
-    const roadmapContentV2 = document.getElementById('roadmapContentV2');
     const roadmapLegacy = document.getElementById('roadmapContainerLegacy');
+    const roadmapContent = document.getElementById('roadmapContent');
+    const skillTreeSection = document.getElementById('skillTreeSection');
+    const roadmapSection = document.getElementById('roadmapSection');
 
-    if (!roadmapTimelineV2 || !roadmapContentV2) return;
+    if (!roadmapTimelineV2 || !roadmapLegacy || !roadmapContent) return;
 
-    roadmapContentV2.innerHTML = '';
-    
+    // Move skillTreeSection back to its original parent before clearing roadmapContent
+    // to prevent it from being destroyed during innerHTML = ''
+    if (skillTreeSection && roadmapSection && skillTreeSection.parentElement !== roadmapSection) {
+        roadmapSection.appendChild(skillTreeSection);
+    }
+
     let roadmapObj = roadmapData;
     if (typeof roadmapData === 'string') {
         try {
@@ -2282,56 +2288,104 @@ function displayRoadmap(roadmapData) {
     if (!roadmapObj) return;
     appState.roadmapJSON = roadmapObj;
     
-    // Switch to V2 containers
-    roadmapTimelineV2.classList.remove('hidden');
-    roadmapLegacy.classList.add('hidden');
+    // Switch to V3 Structured layout
+    roadmapTimelineV2.classList.add('hidden');
+    roadmapLegacy.classList.remove('hidden');
+    roadmapContent.innerHTML = '';
 
-    const phases = roadmapObj.roadmap || [];
+    const container = document.createElement('div');
+    container.className = 'roadmap-v3-container';
 
-    phases.forEach((phase, index) => {
-        const block = document.createElement('div');
-        block.className = 'year-block-v2';
+    // 1. Header
+    const header = document.createElement('div');
+    header.className = 'roadmap-v3-header';
+    header.innerHTML = `
+        <h1>${roadmapObj.targetCertification || 'Your Learning Roadmap'}</h1>
+        <div class="roadmap-meta-v3">
+            <div class="meta-item">Level: <strong>${roadmapObj.currentLevel || 'Beginner'}</strong></div>
+            <div class="meta-item">Duration: <strong>12 Months</strong></div>
+            <div class="meta-item">Phases: <strong>${roadmapObj.roadmap?.length || 0}</strong></div>
+        </div>
+        ${roadmapObj.certificationFocus ? `<p style="margin-top:15px; font-weight:600; opacity:0.9;">Focus: ${roadmapObj.certificationFocus}</p>` : ''}
+    `;
+    container.appendChild(header);
 
-        // Neo-Brutalist Layout
-        block.innerHTML = `
-            <div class="node-v2" style="background: var(--accent-v3)">
-                <i class="fas fa-terminal"></i>
+    // 2. Gap Analysis
+    if (roadmapObj.gap_analysis) {
+        const gapHeader = document.createElement('div');
+        gapHeader.className = 'section-header-v3';
+        gapHeader.innerHTML = `<h2>Gap Analysis</h2>`;
+        container.appendChild(gapHeader);
+
+        const gapGrid = document.createElement('div');
+        gapGrid.className = 'gap-grid-v3';
+        gapGrid.innerHTML = `
+            <div class="gap-card">
+                <h4>Missing Skills</h4>
+                <ul>${(roadmapObj.gap_analysis.missing_skills || []).map(s => `<li>${s}</li>`).join('')}</ul>
             </div>
-            <div class="content-card-v2">
-                <span class="year-badge-v2" style="background: var(--secondary-v3)">Phase ${index + 1}</span>
-                <div class="card-title-v2">${phase.phase_name || 'Learning Stage'}</div>
-                <p style="margin-top:5px; font-weight:600; font-size: 0.9rem;">${phase.why_it_matters || ''}</p>
-                <div style="margin-top: 15px;">
-                    <button class="btn btn-primary btn-sm view-details-btn" data-index="${index}">
-                        View Detailed Mentor Guidance
-                    </button>
-                </div>
+            <div class="gap-card">
+                <h4>Weak Areas</h4>
+                <ul>${(roadmapObj.gap_analysis.weak_areas || []).map(s => `<li>${s}</li>`).join('')}</ul>
             </div>
         `;
-
-        roadmapContentV2.appendChild(block);
-    });
-
-    // Add event listeners to "View Details" buttons
-    roadmapContentV2.querySelectorAll('.view-details-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = btn.getAttribute('data-index');
-            openSkillPanel(phases[idx]);
-        });
-    });
-
-    // Create Skill Tree - Show section FIRST so container has width
-    if (roadmapObj.skill_tree) {
-        const skillTreeSection = document.getElementById('skillTreeSection');
-        skillTreeSection.classList.remove('hidden');
-        
-        // Small delay to ensure DOM is ready and visible
-        setTimeout(() => {
-            createSkillTree(roadmapObj.skill_tree);
-        }, 100);
+        container.appendChild(gapGrid);
     }
 
-    // 4. Pre-OSCP Alignment
+    // 3. Phases
+    const phaseHeader = document.createElement('div');
+    phaseHeader.className = 'section-header-v3';
+    phaseHeader.innerHTML = `<h2>Learning Phases</h2>`;
+    container.appendChild(phaseHeader);
+
+    const phaseTimeline = document.createElement('div');
+    phaseTimeline.className = 'phase-timeline-v3';
+
+    const phases = roadmapObj.roadmap || [];
+    phases.forEach((phase, index) => {
+        const card = document.createElement('div');
+        card.className = 'phase-card-v3';
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-4">
+                <span class="phase-badge-v3">PHASE ${index + 1}</span>
+                <span class="phase-meta-tag">${phase.duration_weeks || 4} WEEKS</span>
+            </div>
+            <h3 class="card-title-v2">${phase.phase_name}</h3>
+            <p class="phase-why-v3">${phase.why_it_matters}</p>
+
+            <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                <h3>Learning Outcomes</h3>
+            </div>
+            <ul class="outcomes-list-v3">
+                ${(phase.learning_outcomes || []).map(o => `<li>${o}</li>`).join('')}
+            </ul>
+
+            <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                <h3>Mandatory Labs</h3>
+            </div>
+            <div class="labs-grid-v3">
+                ${(phase.mandatory_labs || []).map(lab => `
+                    <div class="lab-mini-card">
+                        <span class="lab-platform-tag">${lab.platform}</span>
+                        <div style="font-weight:800; margin: 10px 0;">${lab.name}</div>
+                        <div style="font-size: 11px; opacity:0.8; margin-bottom: 10px;">${lab.key_points}</div>
+                        ${lab.url ? `<a href="${lab.url}" target="_blank" class="lab-link-v3">Start Lab →</a>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                <h3>Tools to Master</h3>
+            </div>
+            <div class="resources-flex-v3">
+                ${(phase.tools || []).map(t => `<span class="phase-meta-tag" style="background:var(--accent-v3); color:black;">${t}</span>`).join('')}
+            </div>
+        `;
+        phaseTimeline.appendChild(card);
+    });
+    container.appendChild(phaseTimeline);
+
+    // 5. Pre-OSCP Alignment
     if (roadmapObj.pre_oscp_alignment && Array.isArray(roadmapObj.pre_oscp_alignment)) {
         const alignHeader = document.createElement('div');
         alignHeader.className = 'section-header-v3';
@@ -2339,7 +2393,7 @@ function displayRoadmap(roadmapData) {
             <i data-lucide="award" class="w-8 h-8"></i>
             <h2>Pre-OSCP Alignment</h2>
         `;
-        roadmapContentV2.appendChild(alignHeader);
+        container.appendChild(alignHeader);
 
         const alignGrid = document.createElement('div');
         alignGrid.className = 'align-grid-v3';
@@ -2351,10 +2405,10 @@ function displayRoadmap(roadmapData) {
                 <div class="overlap-v3">Overlap with OSCP: ${a.overlap_with_oscp}</div>
             </div>
         `).join('');
-        roadmapContentV2.appendChild(alignGrid);
+        container.appendChild(alignGrid);
     }
 
-    // 5. Tools Mastery Guide
+    // 6. Tools Mastery Guide
     if (roadmapObj.tools_mastery_guide && Array.isArray(roadmapObj.tools_mastery_guide)) {
         const guideHeader = document.createElement('div');
         guideHeader.className = 'section-header-v3';
@@ -2362,7 +2416,7 @@ function displayRoadmap(roadmapData) {
             <i data-lucide="wrench" class="w-8 h-8"></i>
             <h2>Tools Mastery Guide</h2>
         `;
-        roadmapContentV2.appendChild(guideHeader);
+        container.appendChild(guideHeader);
 
         const guideGrid = document.createElement('div');
         guideGrid.className = 'tools-mastery-grid-v3';
@@ -2383,10 +2437,10 @@ function displayRoadmap(roadmapData) {
                 </div>
             </div>
         `).join('');
-        roadmapContentV2.appendChild(guideGrid);
+        container.appendChild(guideGrid);
     }
 
-    // 6. Special Resource (Rickroll Easter Egg)
+    // 7. Special Resource (Rickroll Easter Egg)
     if (roadmapObj.special_resource) {
         const randomQuote = getRandomQuote();
 
@@ -2406,8 +2460,22 @@ function displayRoadmap(roadmapData) {
                 </div>
             </div>
         `;
-        roadmapContentV2.appendChild(motivationalSection);
+        container.appendChild(motivationalSection);
     }
+
+    // 8. Create Skill Tree (Relocated to end)
+    if (roadmapObj.skill_tree) {
+        const skillTreeSection = document.getElementById('skillTreeSection');
+        if (skillTreeSection) {
+            skillTreeSection.classList.remove('hidden');
+            // Move skillTreeSection inside container for better layout/PDF export
+            container.appendChild(skillTreeSection);
+            setTimeout(() => createSkillTree(roadmapObj.skill_tree), 100);
+        }
+    }
+
+    // Append everything to the main container
+    roadmapContent.appendChild(container);
 
     // Initialize icons
     if (window.lucide) {
@@ -2614,6 +2682,7 @@ async function downloadRoadmapPDF() {
 
         // Step 1: Create print-safe HTML content
         const pdfRoot = document.createElement('div');
+        pdfRoot.id = 'pdf-root';
         pdfRoot.className = 'roadmap-v3-container';
         // Apply critical styles directly to ensure they are captured by outerHTML
         pdfRoot.style.cssText = `
