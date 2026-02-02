@@ -365,9 +365,9 @@ const CERTIFICATION_CONTENT = {
             'Tools: Sliver, Covenant, SharpSploit, Donut, Custom C# tooling'
         ],
         youtubeChannels: [
-            { name: 'Ired.team', url: 'https://www.ired.team/', why: 'Excellent red teaming resource' },
+            { name: 'Ired.team', url: 'https://www.youtube.com/@rastamouse', why: 'Excellent red teaming resource' },
             { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'Malware analysis and evasion' },
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', why: 'Red team training experts' }
+            { name: 'ZeroPoint Security', url: 'https://www.youtube.com/@ZeroPointSecurity', why: 'Red team training experts' }
         ],
         specificLabs: [
             { name: 'PEN-300 Course Labs', platform: 'OffSec', url: 'https://www.offensive-security.com/pen300-osep/' },
@@ -463,12 +463,12 @@ const CERTIFICATION_CONTENT = {
             'Assembly: x86 assembly, register manipulation',
             'Overflows: Stack overflows, SEH, ROP chains',
             'Tools: WinDbg, IDA Pro, Ghidra, mona.py',
-            'Bypass:DEP and ASLR bypass techniques'
+            'Bypass: DEP and ASLR bypass techniques'
         ],
         youtubeChannels: [
             { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', why: 'Binary exploitation deep dives' },
             { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', why: 'Reverse engineering and malware analysis' },
-            { name: 'FuzzySecurity', url: 'http://www.fuzzysecurity.com/', why: 'Classic exploit development guides' }
+            { name: 'FuzzySecurity', url: 'https://www.youtube.com/@FuzzySec', why: 'Classic exploit development guides' }
         ],
         specificLabs: [
             { name: 'Phoenix', platform: 'Exploit Education', url: 'https://exploit.education/phoenix/' },
@@ -492,7 +492,7 @@ const CERTIFICATION_CONTENT = {
         ],
         youtubeChannels: [
             { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', why: 'Advanced exploitation techniques' },
-            { name: 'Saumil Shah', url: 'https://twitter.com/saumilshah', why: 'Browser and advanced exploitation' }
+            { name: 'Saumil Shah', url: 'https://www.youtube.com/@therealsaumilshah', why: 'Browser and advanced exploitation' }
         ],
         specificLabs: [
             { name: 'Custom Kernel Labs', platform: 'Self-Hosted' },
@@ -514,8 +514,8 @@ const CERTIFICATION_CONTENT = {
             'Tools: Hopper, LLDB, Frida, class-dump'
         ],
         youtubeChannels: [
-            { name: 'Patrick Wardle', url: 'https://objective-see.org/', why: 'The leading macOS security researcher' },
-            { name: 'BlackHat macOS Talks', platform: 'YouTube', why: 'State-of-the-art macOS research' }
+            { name: 'Patrick Wardle', url: 'https://www.youtube.com/@ObjectiveSee', why: 'The leading macOS security researcher' },
+            { name: 'BlackHat macOS Talks', url: 'YouTube', why: 'State-of-the-art macOS research' }
         ],
         specificLabs: [
             { name: 'Objective-See Tools', platform: 'Personal Lab' },

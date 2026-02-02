@@ -2580,9 +2580,7 @@ function downloadRoadmapPDF() {
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        html2pdf().set(opt).from(tempContainer).toPdf().get('pdf').then((pdf) => {
-            // Success
-        }).save().then(() => {
+        html2pdf().set(opt).from(tempContainer).save().then(() => {
             document.body.removeChild(tempContainer);
             showSuccess('Roadmap downloaded as PDF!');
         }).catch(err => {
