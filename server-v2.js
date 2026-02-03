@@ -701,10 +701,14 @@ const CERTIFICATION_CONTENT = {
             { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'Malware analysis and evasion techniques' }
         ],
         specificLabs: [
-            { name: 'PEN-300 Course Labs', platform: 'OffSec', url: 'https://www.offensive-security.com/pen300-osep/', skills: ['Official OSEP prep'] },
-            { name: 'RastaLabs', platform: 'HTB Pro Lab', url: 'https://app.hackthebox.com/prolabs', skills: ['Enterprise red teaming'] },
-            { name: 'Red Teaming Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/redteaming', skills: ['Red team techniques'] },
-            { name: 'Custom AD Lab', platform: 'Self-Hosted', skills: ['AD attack practice'] }
+            { name: 'PEN-300 Course Labs', platform: 'OffSec', url: 'https://www.offensive-security.com/pen300-osep/', skills: ['Official OSEP prep', 'Evasion techniques', 'C# payloads'] },
+            { name: 'RastaLabs Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Enterprise red teaming', 'AD evasion'] },
+            { name: 'Offshore Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Advanced pivoting', 'EDR bypass'] },
+            { name: 'Cybernetics Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Active Directory exploitation'] },
+            { name: 'Red Teaming Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/redteaming', skills: ['Red team TTPs', 'Evasion'] },
+            { name: 'Holo (Wreath)', platform: 'THM', url: 'https://tryhackme.com/room/wreath', skills: ['Red team simulation', 'AV evasion'] },
+            { name: 'Sektor7 RTO Course', platform: 'Sektor7', url: 'https://institute.sektor7.net/rto-maldev-beginner', skills: ['Malware development', 'C/C++'] },
+            { name: 'ZeroPoint CRTO', platform: 'ZeroPoint Security', url: 'https://training.zeropointsecurity.co.uk/courses/red-team-ops', skills: ['C2 operations', 'Cobalt Strike'] }
         ],
         coreTools: ['Sliver', 'Mythic', 'Empire', 'Covenant', 'Donut', 'SharpSploit', 'ScareCrow', 'Mimikatz', 'BloodHound', 'Custom C# tools'],
         keySkills: ['AV/EDR evasion', 'Custom payload development', 'Advanced AD persistence', 'Lateral movement', 'C# development']
@@ -736,10 +740,15 @@ const CERTIFICATION_CONTENT = {
             { name: 'OWASP', url: 'https://www.youtube.com/@OWASPGLOBAL', why: 'Web security standards and research' }
         ],
         specificLabs: [
-            { name: 'WEB-300 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/awae-oswe/', skills: ['Official OSWE prep'] },
-            { name: 'PortSwigger Web Security Academy', platform: 'PortSwigger', url: 'https://portswigger.net/web-security', skills: ['Advanced web exploits'] },
-            { name: 'Web Exploitation Advanced', platform: 'HTB Academy', url: 'https://academy.hackthebox.com/', skills: ['Advanced web techniques'] },
-            { name: 'HackerOne CTFs', platform: 'HackerOne', url: 'https://www.hackerone.com/for-hackers/hacker-101', skills: ['Real-world web vulns'] }
+            { name: 'WEB-300 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/awae-oswe/', skills: ['Official OSWE prep', 'Source code review'] },
+            { name: 'PortSwigger Web Security Academy - All Labs', platform: 'PortSwigger', url: 'https://portswigger.net/web-security/all-labs', skills: ['SQLi', 'XSS', 'XXE', 'SSRF', 'Deserialization', 'SSTI'] },
+            { name: 'PortSwigger - Deserialization Labs', platform: 'PortSwigger', url: 'https://portswigger.net/web-security/deserialization', skills: ['Java/PHP/Python deserialization'] },
+            { name: 'PortSwigger - SSRF Labs', platform: 'PortSwigger', url: 'https://portswigger.net/web-security/ssrf', skills: ['Server-Side Request Forgery'] },
+            { name: 'PortSwigger - XXE Labs', platform: 'PortSwigger', url: 'https://portswigger.net/web-security/xxe', skills: ['XML External Entity'] },
+            { name: 'PortSwigger - SSTI Labs', platform: 'PortSwigger', url: 'https://portswigger.net/web-security/server-side-template-injection', skills: ['Template injection'] },
+            { name: 'Web Exploitation Advanced', platform: 'HTB Academy', url: 'https://academy.hackthebox.com/', skills: ['Advanced web techniques', 'Code review'] },
+            { name: 'HackerOne CTFs', platform: 'HackerOne', url: 'https://www.hackerone.com/for-hackers/hacker-101', skills: ['Real-world web vulns'] },
+            { name: 'OWASP Juice Shop', platform: 'Self-Hosted', url: 'https://owasp.org/www-project-juice-shop/', skills: ['Complex web application testing'] }
         ],
         coreTools: ['Burp Suite Professional', 'Python', 'Custom scripts', 'Debuggers (gdb, node inspector)', 'Source code analyzers', 'curl', 'jq'],
         keySkills: ['Source code analysis', 'Exploit development (Python)', 'Complex vulnerability chaining', 'Auth bypass', 'Deserialization']
@@ -769,10 +778,12 @@ const CERTIFICATION_CONTENT = {
         ],
         specificLabs: [
             { name: 'SOC-200 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/soc200-osda/', skills: ['Official OSDA prep'] },
-            { name: 'SOC Level 1 Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/soclevel1', skills: ['SOC analyst fundamentals'] },
-            { name: 'Sherlock Challenges', platform: 'HTB', url: 'https://app.hackthebox.com/sherlocks', skills: ['Incident investigation'] },
-            { name: 'Splunk Boss of the SOC', platform: 'Splunk', url: 'https://www.splunk.com/en_us/blog/conference/boss-of-the-soc.html', skills: ['SIEM challenges'] },
-            { name: 'Security Onion', platform: 'Self-Hosted', url: 'https://securityonionsolutions.com/', skills: ['Full SOC stack'] }
+            { name: 'SOC Level 1 Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/soclevel1', skills: ['SOC analyst fundamentals', 'Alert triage'] },
+            { name: 'Cyber Defense Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/cyberdefense', skills: ['Threat detection', 'Incident response'] },
+            { name: 'Sherlock Challenges', platform: 'HTB', url: 'https://app.hackthebox.com/sherlocks', skills: ['Incident investigation', 'Forensics'] },
+            { name: 'Splunk Boss of the SOC (BOTS)', platform: 'Splunk', url: 'https://www.splunk.com/en_us/blog/conference/boss-of-the-soc.html', skills: ['SIEM challenges', 'Log analysis'] },
+            { name: 'Security Onion', platform: 'Self-Hosted', url: 'https://securityonionsolutions.com/', skills: ['Full SOC stack', 'ELK/Suricata/Zeek'] },
+            { name: 'SANS SEC401 Course', platform: 'SANS', url: 'https://www.sans.org/cyber-security-courses/security-essentials-network-endpoint-cloud/', skills: ['Defensive fundamentals'] }
         ],
         coreTools: ['Splunk', 'Elastic Stack (ELK)', 'Sysmon', 'Sigma Rules', 'YARA', 'Wireshark', 'Zeek', 'Suricata'],
         keySkills: ['SIEM mastery', 'Log analysis', 'Incident Response', 'Threat hunting', 'Detection engineering']
@@ -784,15 +795,16 @@ const CERTIFICATION_CONTENT = {
         prerequisites: ['Networking fundamentals', 'Linux proficiency'],
         examFormat: '3 hours 45 minutes practical exam',
         syllabus: [
-            '802.11 Wireless Theory: 802.11 a/b/g/n/ac/ax standards, frame structures, channel management',
-            'WPA/WPA2 Attacks: 4-way handshake capture, dictionary attacks, PMKID attacks',
+            '802.11 Wireless Theory: 802.11 a/b/g/n/ac/ax standards, frame structures, channel management, CSMA/CA',
+            'WPA/WPA2/WPA3 Attacks: 4-way handshake capture, dictionary attacks, PMKID attacks, WPA3 SAE attacks',
             'Deauthentication Attacks: forcing client disconnection for handshake capture',
-            'Evil Twin Attacks: rogue access point deployment, credential harvesting',
-            'WPS Attacks: PIN brute-forcing, Pixie Dust attacks',
-            'MAC Filtering Bypass: spoofing allowed MAC addresses',
-            'Hidden SSID Discovery: identifying and connecting to hidden networks',
-            'Wireless Packet Analysis: analyzing 802.11 frames with Wireshark',
-            'Hardware Requirements: wireless adapters with monitor mode and packet injection'
+            'Evil Twin Attacks: rogue access point deployment, credential harvesting, captive portals',
+            'WPS Attacks: PIN brute-forcing, Pixie Dust attacks, WPS vulnerabilities',
+            'MAC Filtering Bypass: spoofing allowed MAC addresses, client impersonation',
+            'Hidden SSID Discovery: identifying and connecting to hidden networks, probe request analysis',
+            'Wireless Packet Analysis: analyzing 802.11 frames with Wireshark, management/control/data frames',
+            'Hardware Requirements: wireless adapters with monitor mode and packet injection (Alfa AWUS036 series, TP-Link TL-WN722N)',
+            'Cracking Techniques: GPU acceleration with Hashcat, wordlist optimization, rule-based attacks'
         ],
         youtubeChannels: [
             { name: 'Hak5', url: 'https://www.youtube.com/@hak5', why: 'Wireless hacking hardware (WiFi Pineapple) and techniques' },
@@ -801,9 +813,11 @@ const CERTIFICATION_CONTENT = {
             { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@securitytube', why: 'WiFu wireless security training' }
         ],
         specificLabs: [
-            { name: 'PEN-210 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/pen210-oswp/', skills: ['Official OSWP prep'] },
+            { name: 'PEN-210 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/pen210-oswp/', skills: ['Official OSWP prep', '802.11 fundamentals'] },
             { name: 'Wireless Hacking 101', platform: 'THM', url: 'https://tryhackme.com/room/wifihacking101', skills: ['WPA2 cracking basics'] },
-            { name: 'Real Hardware Testing', platform: 'Home Lab', skills: ['Aircrack-ng with Alfa adapters', 'Hands-on practice'] }
+            { name: 'WiFu Course', platform: 'SecurityTube', url: 'https://www.securitytube-training.com/online-courses/securitytube-wifu-wifi-security-course/', skills: ['Wireless security fundamentals'] },
+            { name: 'Real Hardware Testing', platform: 'Home Lab', skills: ['Aircrack-ng with Alfa AWUS036 adapters', 'WPA2/WPA3 cracking', 'Evil twin deployment'] },
+            { name: 'WiFi Pineapple Practice', platform: 'Home Lab', url: 'https://shop.hak5.org/products/wifi-pineapple', skills: ['Automated attacks', 'MITM'] }
         ],
         coreTools: ['Aircrack-ng', 'Airmon-ng', 'Airodump-ng', 'Aireplay-ng', 'Bettercap', 'Wifite', 'Reaver', 'Kismet'],
         keySkills: ['Packet capture/analysis', 'Cracking handshakes', 'Deploying rogue APs', 'WPS attacks', '802.11 protocol knowledge']
@@ -896,9 +910,11 @@ const CERTIFICATION_CONTENT = {
             { name: 'macOS Security Conference', url: 'https://www.youtube.com/@ObjectivebytheSea', why: 'Objective by the Sea conference talks' }
         ],
         specificLabs: [
-            { name: 'EXP-312 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/exp312-osmr/', skills: ['Official OSMR prep'] },
-            { name: 'Objective-See Tools', platform: 'Personal Lab', url: 'https://objective-see.org/tools.html', skills: ['macOS security tools'] },
-            { name: 'macOS Internals Labs', platform: 'Self-Hosted', skills: ['XNU kernel debugging'] }
+            { name: 'EXP-312 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/exp312-osmr/', skills: ['Official OSMR prep', 'XNU kernel'] },
+            { name: 'Objective-See Tools', platform: 'Personal Lab', url: 'https://objective-see.org/tools.html', skills: ['macOS security tools', 'malware analysis'] },
+            { name: 'macOS Internals Labs', platform: 'Self-Hosted', skills: ['XNU kernel debugging', 'kext development'] },
+            { name: 'Objective by the Sea CTF', platform: 'Conference', url: 'https://objectivebythesea.org/', skills: ['macOS exploitation challenges'] },
+            { name: 'macOS Red Team', platform: 'Personal Lab', skills: ['TCC bypass', 'Sandbox escape', 'SIP bypass'] }
         ],
         coreTools: ['Hopper Disassembler', 'LLDB', 'Frida', 'Xcode', 'class-dump', 'otool', 'MachOView', 'dtrace'],
         keySkills: ['macOS kernel research', 'Objective-C reversing', 'XPC security analysis', 'Sandbox escapes', 'SIP bypass']
