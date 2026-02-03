@@ -2761,7 +2761,9 @@ function initMentorChat() {
     
     const welcomeMsg = {
         role: 'mentor',
-        text: `Welcome! I'm your OffSec mentor. I can help you discuss your learning goals, choose between certifications, overcome challenges, and develop the right study mindset. What's on your mind?`
+        text: `Hi! I'm KaliGuru — your ethical hacking mentor for authorized labs only.
+Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.
+Which lab, machine, or topic are you working on right now? 😎`
     };
     
     appState.mentorChat.push(welcomeMsg);
@@ -2771,10 +2773,10 @@ function initMentorChat() {
 function selectMentorIntent(button) {
     const intent = button.getAttribute('data-intent');
     const intentTexts = {
-        'goals': 'I want to discuss my career goals in cybersecurity',
-        'choose': 'Can you help me decide between certifications?',
-        'stuck': 'I feel stuck in my learning. What should I focus on?',
-        'time': 'How should I study effectively with limited time?'
+        'tool': 'Can you explain how to use a specific Kali Linux tool?',
+        'lab': 'I am stuck in a lab. Can you help me with the next step or enumeration strategy?',
+        'mitre': 'How does this technique map to the MITRE ATT&CK framework?',
+        'tips': 'Do you have any tips for my upcoming OffSec certification exam?'
     };
     
     const text = intentTexts[intent];
