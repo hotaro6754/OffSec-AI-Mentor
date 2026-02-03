@@ -3971,3 +3971,150 @@ body.mode-oscp .transition-container-v3 {
     border-color: var(--primary-v3);
     box-shadow: 6px 6px 0px var(--secondary-v3);
 }
+
+/* ============================================================
+   Beginner Mode Mentor UI - "Screen and Search" Aesthetic
+   ============================================================ */
+
+.mentor-container.beginner-mode-ui {
+    background: #2d3436;
+    border: 10px solid #636e72;
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 0 0 5px #b2bec3, 20px 20px 0px var(--black-v3);
+    overflow: hidden;
+}
+
+.mentor-container.beginner-mode-ui::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.beginner-mode-ui .chat-history {
+    background: #000;
+    border: 4px solid #00cec9;
+    height: 250px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 20px #00cec9;
+    padding: 20px;
+}
+
+.beginner-mode-ui .chat-bubble.mentor {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #00ff00 !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 1.1rem !important;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.beginner-mode-ui .chat-bubble-header {
+    display: none;
+}
+
+.beginner-mode-ui .chat-input-section {
+    background: #1e272e;
+    padding: 20px;
+    border: 3px solid #00cec9;
+}
+
+.beginner-mode-ui .chat-input-area {
+    background: #000;
+    border: 4px solid #00cec9;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border-radius: 50px;
+    box-shadow: 0 0 15px rgba(0, 206, 201, 0.3);
+}
+
+.beginner-mode-ui .mentor-input {
+    background: transparent !important;
+    color: #00cec9 !important;
+    border: none !important;
+    font-size: 1.2rem !important;
+    font-family: 'Space Mono', monospace !important;
+    flex: 1;
+}
+
+.beginner-mode-ui .mentor-input::placeholder {
+    color: rgba(0, 206, 201, 0.5);
+}
+
+.beginner-mode-ui .mentor-intent-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.beginner-mode-ui .btn-intent {
+    background: #fdcb6e !important;
+    color: #2d3436 !important;
+    border-radius: 10px !important;
+    padding: 8px 15px !important;
+    font-size: 0.8rem !important;
+    border: 3px solid #2d3436 !important;
+    box-shadow: 4px 4px 0px #2d3436 !important;
+    text-transform: uppercase;
+    font-weight: 900;
+    transition: all 0.1s ease;
+}
+
+.beginner-mode-ui .btn-intent:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #2d3436 !important;
+}
+
+.beginner-mode-ui .btn-intent:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #2d3436 !important;
+}
+
+/* Specific "Small Bubbles" inside search area effect */
+.beginner-mode-ui .recommendation-bubbles-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 15px 5px;
+    scrollbar-width: none;
+    justify-content: center;
+}
+
+.beginner-mode-ui .recommendation-bubble {
+    background: #55efc4;
+    color: #2d3436;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    white-space: nowrap;
+    border: 3px solid #2d3436;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px #2d3436;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: bubbleFloat 3s ease-in-out infinite;
+    animation-delay: calc(var(--bubble-index, 0) * 0.2s);
+}
+
+@keyframes bubbleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.beginner-mode-ui .recommendation-bubble:hover {
+    background: #00b894;
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 6px 6px 0px #2d3436;
+}
