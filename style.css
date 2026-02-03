@@ -1997,6 +1997,23 @@ body.mode-oscp .evaluation-card { background: #161b22; border-color: #30363d; }
 .status-almost-ready { background: var(--accent); color: black; }
 .status-not-ready { background: var(--error); color: white; }
 
+.level-badge-sm {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 6px 12px;
+    background: var(--secondary);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    border: var(--border);
+    box-shadow: 3px 3px 0 var(--black);
+}
+body.mode-oscp .level-badge-sm {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
 .oscp-alignment {
     font-size: 13px;
     font-style: italic;

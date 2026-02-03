@@ -1501,31 +1501,49 @@ async function proceedToEvaluation() {
 function showEvaluation() {
     const assessment = appState.assessment;
     
-    // Toggle visibility based on mode
+    // Re-fetch elements because the container was restored, creating new DOM nodes
     const readinessCard = document.querySelector('.readiness-card');
     const gapsCard = document.querySelector('.gaps-card');
+    const readinessScore = document.getElementById('readinessScore');
+    const readinessStatus = document.getElementById('readinessStatus');
+    const oscpAlignment = document.getElementById('oscpAlignment');
+    const skillBreakdown = document.getElementById('skillBreakdown');
+    const strengthsList = document.getElementById('strengthsList');
+    const weaknessesList = document.getElementById('weaknessesList');
+    const confidenceGapsList = document.getElementById('confidenceGapsList');
+    const focusSuggestion = document.getElementById('focusSuggestion');
+    const currentLevel = document.getElementById('currentLevel');
+
+    const readinessCardTitle = readinessCard ? readinessCard.querySelector('.card-title') : null;
 
     if (appState.learningMode === 'beginner') {
-        if (readinessCard) readinessCard.classList.add('hidden');
+        if (readinessCard) {
+            readinessCard.classList.remove('hidden');
+            if (readinessCardTitle) readinessCardTitle.textContent = 'Assessment Score';
+        }
         if (gapsCard) gapsCard.classList.add('hidden');
     } else {
-        if (readinessCard) readinessCard.classList.remove('hidden');
+        if (readinessCard) {
+            readinessCard.classList.remove('hidden');
+            if (readinessCardTitle) readinessCardTitle.textContent = 'OSCP Readiness';
+        }
         if (gapsCard) gapsCard.classList.remove('hidden');
     }
 
-    if (elements.readinessScore) {
-        elements.readinessScore.textContent = `${assessment.readinessScore || 0}%`;
+    if (readinessScore) {
+        const scoreToShow = appState.learningMode === 'oscp' ? (assessment.readinessScore || 0) : (assessment.score || 0);
+        readinessScore.textContent = `${scoreToShow}%`;
     }
-    if (elements.readinessStatus) {
-        elements.readinessStatus.textContent = assessment.readinessStatus || 'Analyzing...';
-        elements.readinessStatus.className = `readiness-status status-${(assessment.readinessStatus || '').toLowerCase().replace(/\s/g, '-')}`;
+    if (readinessStatus) {
+        readinessStatus.textContent = assessment.readinessStatus || 'Analyzing...';
+        readinessStatus.className = `readiness-status status-${(assessment.readinessStatus || '').toLowerCase().replace(/\s/g, '-')}`;
     }
-    if (elements.oscpAlignment) {
-        elements.oscpAlignment.textContent = assessment.oscpAlignment || '';
+    if (oscpAlignment) {
+        oscpAlignment.textContent = assessment.oscpAlignment || '';
     }
     
-    if (elements.skillBreakdown && assessment.skillBreakdown) {
-        elements.skillBreakdown.innerHTML = Object.entries(assessment.skillBreakdown)
+    if (skillBreakdown && assessment.skillBreakdown) {
+        skillBreakdown.innerHTML = Object.entries(assessment.skillBreakdown)
             .map(([skill, score]) => `
                 <div class="skill-item">
                     <div class="skill-label">
@@ -1539,26 +1557,31 @@ function showEvaluation() {
             `).join('');
     }
     
-    if (elements.strengthsList) {
-        elements.strengthsList.innerHTML = (assessment.strengths || [])
+    if (strengthsList) {
+        strengthsList.innerHTML = (assessment.strengths || [])
             .map(s => `<li>${s}</li>`)
             .join('');
     }
     
-    if (elements.weaknessesList) {
-        elements.weaknessesList.innerHTML = (assessment.weaknesses || [])
+    if (weaknessesList) {
+        weaknessesList.innerHTML = (assessment.weaknesses || [])
             .map(w => `<li>${w}</li>`)
             .join('');
     }
 
-    if (elements.confidenceGapsList) {
-        elements.confidenceGapsList.innerHTML = (assessment.confidenceGaps || [])
+    if (confidenceGapsList) {
+        confidenceGapsList.innerHTML = (assessment.confidenceGaps || [])
             .map(g => `<li>${g}</li>`)
             .join('');
     }
 
-    if (elements.focusSuggestion) {
-        elements.focusSuggestion.textContent = assessment.focusSuggestion || 'Focus on your growth areas.';
+    if (focusSuggestion) {
+        focusSuggestion.textContent = assessment.focusSuggestion || 'Focus on your growth areas.';
+    }
+
+    if (currentLevel) {
+        currentLevel.textContent = `Assessed Level: ${assessment.level || 'Beginner'}`;
+        currentLevel.classList.remove('hidden');
     }
 }
 
