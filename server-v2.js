@@ -162,24 +162,17 @@ const RESOURCES = {
             { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'AD machines, Kerberos attacks, pivoting' },
             { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'AD attack demonstrations' },
             { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'PNPT prep, AD methodology' },
-            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Malware development, evasion for AD' },
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Red team training, CRTO' },
             { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademy', focus: 'AD security, CRTP/CRTE prep' }
         ],
         redTeamEvasion: [
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Red team operations, C2, CRTO' },
-            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Malware development, AV/EDR evasion' },
             { name: 'Red Team Village', url: 'https://www.youtube.com/@RedTeamVillage', focus: 'Community red teaming, DEF CON content' },
-            { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', focus: 'Red team TTPs, Webcasts' },
-            { name: 'Ired.team', url: 'https://www.ired.team/', focus: 'Red team technique blog and talks' }
+            { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', focus: 'Red team TTPs, Webcasts' }
         ],
         exploitDevelopment: [
             { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, Reverse Engineering, CTFs - essential for OSED/OSEE' },
-            { name: 'Corelan Team', url: 'https://www.corelan.be/', focus: 'Classic exploit development tutorials' },
-            { name: 'OpenSecurityTraining', url: 'https://opensecuritytraining.info/', focus: 'Free exploit dev courses, x86 assembly' },
-            { name: 'OpenSecurityTraining2', url: 'https://p.ost2.fyi/', focus: 'Advanced security architecture courses' },
-            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', focus: 'Reverse engineering, malware analysis' },
-            { name: 'FuzzySecurity', url: 'http://www.fuzzysecurity.com/', focus: 'Exploit development tutorials, Windows' }
+            { name: 'OpenSecurityTraining', url: 'https://www.youtube.com/@OpenSecurityTraining', focus: 'Free exploit dev courses, x86 assembly' },
+            { name: 'OpenSecurityTraining2', url: 'https://www.youtube.com/@opensecuritytraining2', focus: 'Advanced security architecture courses' },
+            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', focus: 'Reverse engineering, malware analysis' }
         ],
         wireless: [
             { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, WiFi Pineapple, wireless security' },
@@ -204,7 +197,6 @@ const RESOURCES = {
             { name: 'DEF CON Conference', url: 'https://www.youtube.com/@DEFCONConference', focus: 'Cutting-edge security research' },
             { name: 'Black Hat', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Advanced security research' },
             { name: 'OffensiveCon', url: 'https://www.youtube.com/@OffensiveCon', focus: 'Offensive security research' },
-            { name: 'BlueHat', url: 'https://www.microsoft.com/en-us/security/blog/bluehat/', focus: 'Microsoft security conference' },
             { name: 'Virus Bulletin', url: 'https://www.youtube.com/@virusbtn', focus: 'Malware research, antivirus' }
         ],
         // Legacy flat list for backward compatibility
@@ -341,14 +333,17 @@ const RESOURCES = {
             { name: 'HackTricks', url: 'https://book.hacktricks.xyz/', focus: 'Pentesting techniques encyclopedia' },
             { name: 'GTFOBins', url: 'https://gtfobins.github.io/', focus: 'Unix binaries for privilege escalation' },
             { name: 'LOLBAS', url: 'https://lolbas-project.github.io/', focus: 'Living Off The Land Binaries (Windows)' },
-            { name: 'Red Canary Atomic Red Team', url: 'https://github.com/redcanaryco/atomic-red-team', focus: 'Adversary emulation tests mapped to MITRE ATT&CK' }
+            { name: 'Red Canary Atomic Red Team', url: 'https://github.com/redcanaryco/atomic-red-team', focus: 'Adversary emulation tests mapped to MITRE ATT&CK' },
+            { name: 'Ired.team', url: 'https://www.ired.team/', focus: 'Red team technique blog and research' }
         ],
         exploitDevReverseEngineering: [
             { name: 'Corelan Team Blog', url: 'https://www.corelan.be/', focus: 'Exploit development tutorials' },
             { name: 'OpenSecurityTraining.info', url: 'https://opensecuritytraining.info/', focus: 'Free exploit dev courses' },
+            { name: 'OpenSecurityTraining2', url: 'https://p.ost2.fyi/', focus: 'Advanced security architecture courses' },
             { name: 'Azeria Labs', url: 'https://azeria-labs.com/', focus: 'ARM exploitation tutorials' },
             { name: 'Malware Unicorn RE101', url: 'https://malwareunicorn.org/#/workshops', focus: 'Reverse engineering 101' },
-            { name: 'Nightmares.re', url: 'https://guyinatuxedo.github.io/', focus: 'Binary exploitation course' }
+            { name: 'Nightmares.re', url: 'https://guyinatuxedo.github.io/', focus: 'Binary exploitation course' },
+            { name: 'FuzzySecurity', url: 'http://www.fuzzysecurity.com/', focus: 'Exploit development tutorials, Windows' }
         ],
         defensiveDetection: [
             { name: 'SigmaHQ', url: 'https://github.com/SigmaHQ/sigma', focus: 'Generic signature format for SIEM systems' },
@@ -362,7 +357,12 @@ const RESOURCES = {
             { name: 'Google Cloud Security', url: 'https://cloud.google.com/security', focus: 'GCP security best practices' },
             { name: 'Azure Security Documentation', url: 'https://docs.microsoft.com/en-us/azure/security/', focus: 'Azure security features' },
             { name: 'Wiz Research Blog', url: 'https://www.wiz.io/blog', focus: 'Cloud security research' },
-            { name: 'Rhino Security Labs', url: 'https://rhinosecuritylabs.com/blog/', focus: 'Cloud penetration testing' }
+            { name: 'Rhino Security Labs', url: 'https://rhinosecuritylabs.com/blog/', focus: 'Cloud penetration testing' },
+            { name: 'BlueHat Conference', url: 'https://www.microsoft.com/en-us/security/blog/bluehat/', focus: 'Microsoft security conference talks' }
+        ],
+        redTeamResources: [
+            { name: 'Sektor7 Institute', url: 'https://institute.sektor7.net/', focus: 'Malware development and evasion courses' },
+            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Red team training, C2 operations, CRTO' }
         ]
     },
     reporting: {
