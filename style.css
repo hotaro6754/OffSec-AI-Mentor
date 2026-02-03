@@ -2577,10 +2577,12 @@ body.mode-oscp .chat-bubble.mentor {
     box-shadow: 4px 4px 0px var(--primary-v3);
 }
 .chat-bubble.user { 
-    background: var(--primary); 
-    color: #fff; 
+    background: var(--white-v3);
+    color: var(--black-v3);
     margin-left: auto;
     transform: rotate(0.5deg);
+    border: 3px solid var(--primary-v3);
+    box-shadow: -4px 4px 0px var(--primary-v3);
 }
 .chat-input-area {
     display: flex;
