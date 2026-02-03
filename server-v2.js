@@ -1082,8 +1082,12 @@ MASTER TOOL LIST (Include ALL relevant tools for ${cert}):
 
         let modeSpecificInstructions = '';
         
+        // Determine if this is OSCP certification
+        const isOscpCert = cert.toLowerCase().includes('oscp - offensive security certified professional') || 
+                           cert.toLowerCase().startsWith('oscp');
+        
         // OSCP Mode: Weakness-focused, exam-ready training
-        if (isOscp && cert.includes('OSCP')) {
+        if (isOscp && isOscpCert) {
             modeSpecificInstructions = `
 🎯 **OSCP MODE - EXAM PREPARATION (Brutal & Focused)**
 This user has selected OSCP Mode - they want EXAM-READY training, not beginner content.
@@ -1100,7 +1104,7 @@ This user has selected OSCP Mode - they want EXAM-READY training, not beginner c
 - Exam simulation and reporting practice
 - Each phase should be 3-5 weeks of intensive, focused study
 `;
-        } else if (mode === 'beginner' && cert.includes('OSCP')) {
+        } else if (mode === 'beginner' && isOscpCert) {
             // Beginner Mode selecting OSCP: Ground-up learning path
             const readinessScore = assessmentResult.readinessScore || 0;
             const needsPrep = readinessScore < 60;
@@ -1120,11 +1124,15 @@ ${needsPrep ? '- CRITICAL: Current readiness score < 60%. STRONGLY recommend com
 - Build confidence with achievable milestones in early phases
 `;
         }
+        
+        // Determine phase count based on mode and certification
+        const phaseCount = (isOscp && isOscpCert) ? '8-10' : 
+                          (mode === 'beginner' && isOscpCert) ? '12-14' : '8-10';
 
         const instructions = `
 CRITICAL INSTRUCTIONS FOR AI MENTOR:
 1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be CONCISE, PRACTICAL, and HIGH-IMPACT.
-2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${isOscp && cert.includes('OSCP') ? '8-10' : mode === 'beginner' && cert.includes('OSCP') ? '12-14' : '8-10'} phases). Focus on quality over quantity.
+2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${phaseCount} phases). Focus on quality over quantity.
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
 5. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
@@ -1134,7 +1142,7 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 9. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
 10. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
 11. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
-${modeSpecificInstructions ? `\n${modeSpecificInstructions}` : ''}
+${modeSpecificInstructions}
 
 ${!modeSpecificInstructions ? `PHASE STRUCTURE (8-10 Phases):
 Phases 1-2: Foundations (Linux, Networking, Windows, Scripting)
@@ -1157,7 +1165,7 @@ CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
         
         // Add preparation recommendations for beginner mode
         let prepRecommendations = '';
-        if (mode === 'beginner' && cert.includes('OSCP')) {
+        if (mode === 'beginner' && isOscpCert) {
             prepRecommendations = `
 📚 **PREPARATION CERTIFICATIONS (Include as recommendations in early phases)**:
 For users with low readiness (<60%), mention these as optional preparatory certifications:
@@ -1186,7 +1194,7 @@ ${prepRecommendations}
 
 REQUIREMENTS:
 1. **Gap Analysis**: Detailed missing skills vs requirements.
-2. **Dynamic Phases**: MUST generate exactly ${isOscp && cert.includes('OSCP') ? '8-10' : mode === 'beginner' && cert.includes('OSCP') ? '12-14' : '8-10'} phases. Each phase MUST have:
+2. **Dynamic Phases**: MUST generate exactly ${phaseCount} phases. Each phase MUST have:
    - "Why it matters for ${cert}" - syllabus alignment
    - Specific Learning Outcomes
    - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
@@ -1998,10 +2006,14 @@ app.post('/api/generate-pdf', async (req, res) => {
             console.warn('⚠️ Missing DOCTYPE declaration - adding it');
             html = '<!DOCTYPE html>\n' + html;
         }
-        if (!html.includes('<html')) {
+        
+        // Check for html opening tag more robustly
+        const hasHtmlTag = /<html[\s>]/i.test(html);
+        if (!hasHtmlTag) {
             console.error('❌ Invalid HTML: Missing <html> tag');
             return res.status(400).json({ error: 'Invalid HTML structure: Missing <html> tag' });
         }
+        
         if (!html.includes('<head>')) {
             console.warn('⚠️ Missing <head> section - may cause rendering issues');
         }

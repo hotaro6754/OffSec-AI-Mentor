@@ -2483,7 +2483,7 @@ function displayRoadmap(roadmapData) {
         <div class="neo-qr-title">
             🎯 SCAN FOR BONUS MENTOR WISDOM
         </div>
-        <img src="qr-code.svg" alt="Bonus Mentor Content QR Code" class="neo-qr-image" />
+        <img src="qr-code.svg" alt="QR code linking to exclusive cybersecurity insights and advanced tips" class="neo-qr-image" />
         <div class="neo-qr-subtitle">
             Unlock exclusive cybersecurity insights and advanced tips!
         </div>
