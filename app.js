@@ -230,6 +230,8 @@ const elements = {
     chatHistory: document.getElementById('chatHistory'),
     mentorInput: document.getElementById('mentorInput'),
     mentorIntentButtons: document.getElementById('mentorIntentButtons'),
+    beginnerRecommendations: document.getElementById('beginnerRecommendations'),
+    mentorContainer: document.querySelector('.mentor-container'),
 
     // Mode UI
     heroSubtitle: document.getElementById('heroSubtitle'),
@@ -2759,13 +2761,61 @@ function initMentorChat() {
     elements.chatHistory.innerHTML = '';
     appState.mentorChat = [];
     
+    // Check for Beginner Mode
+    const isBeginner = appState.learningMode === 'beginner';
+
+    if (elements.mentorContainer) {
+        elements.mentorContainer.classList.toggle('beginner-mode-ui', isBeginner);
+    }
+
+    if (elements.beginnerRecommendations) {
+        elements.beginnerRecommendations.classList.toggle('hidden', !isBeginner);
+        if (isBeginner) {
+            renderRecommendationBubbles();
+        }
+    }
+
+    let welcomeText = `Hi! I’m KaliGuru — your ethical hacking mentor for authorized labs only. Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self‑owned labs, etc. Which lab, machine, or topic are you working on right now? 😎`;
+
+    if (isBeginner) {
+        welcomeText = `Welcome! I am KaliGuru, your Offensive Security Mentor. I'm not just an AI assistant; I'm here to coach you through the mindset of a professional pentester.
+
+I'll help you understand the 'WHY' behind every tool and technique. We focus strictly on authorized labs like TryHackMe or HTB.
+
+What are you curious about today? You can search for a topic or pick a recommendation below!`;
+    }
+
     const welcomeMsg = {
         role: 'mentor',
-        text: `Hi! I’m KaliGuru — your ethical hacking mentor for authorized labs only. Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self‑owned labs, etc. Which lab, machine, or topic are you working on right now? 😎`
+        text: welcomeText
     };
     
     appState.mentorChat.push(welcomeMsg);
     addChatMessage(welcomeMsg);
+}
+
+function renderRecommendationBubbles() {
+    if (!elements.beginnerRecommendations) return;
+
+    const recommendations = [
+        "What is OSCP?",
+        "How to start with Nmap",
+        "Linux basics for hackers",
+        "Web app security 101",
+        "Explain MITRE ATT&CK",
+        "Metasploit vs Manual"
+    ];
+
+    elements.beginnerRecommendations.innerHTML = recommendations.map((rec, i) => `
+        <div class="recommendation-bubble" style="--bubble-index: ${i}">${rec}</div>
+    `).join('');
+
+    // Add click handlers
+    elements.beginnerRecommendations.querySelectorAll('.recommendation-bubble').forEach(bubble => {
+        bubble.addEventListener('click', () => {
+            sendMentorMessage(bubble.textContent);
+        });
+    });
 }
 
 function selectMentorIntent(button) {
