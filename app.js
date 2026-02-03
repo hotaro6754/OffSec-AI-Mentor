@@ -232,6 +232,7 @@ const elements = {
     mentorIntentButtons: document.getElementById('mentorIntentButtons'),
     beginnerRecommendations: document.getElementById('beginnerRecommendations'),
     mentorContainer: document.querySelector('.mentor-container'),
+    fullscreenChatBtn: document.getElementById('fullscreenChatBtn'),
 
     // Mode UI
     heroSubtitle: document.getElementById('heroSubtitle'),
@@ -395,6 +396,16 @@ function setupEventListeners() {
     elements.retakeBtn?.addEventListener('click', resetAndRetake);
     elements.sendMentorBtn?.addEventListener('click', sendMentorMessage);
     
+    elements.fullscreenChatBtn?.addEventListener('click', () => {
+        elements.mentorContainer?.classList.toggle('fullscreen');
+        if (elements.mentorContainer?.classList.contains('fullscreen')) {
+            elements.fullscreenChatBtn.textContent = 'Exit Fullscreen';
+            document.body.style.overflow = 'hidden';
+        } else {
+            elements.fullscreenChatBtn.textContent = 'Fullscreen Toggle';
+            document.body.style.overflow = '';
+        }
+    });
     
     // Main Generate Roadmap Button (after evaluation)
     const generateRoadmapMainBtn = document.getElementById('generateRoadmapMainBtn');
@@ -1482,8 +1493,7 @@ function showEvaluation() {
 
     if (appState.learningMode === 'beginner') {
         if (readinessCard) {
-            readinessCard.classList.remove('hidden');
-            if (readinessCardTitle) readinessCardTitle.textContent = 'Assessment Score';
+            readinessCard.classList.add('hidden');
         }
         if (gapsCard) gapsCard.classList.add('hidden');
     } else {
