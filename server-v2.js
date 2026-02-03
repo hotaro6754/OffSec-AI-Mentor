@@ -51,8 +51,7 @@ if (GROQ_API_KEY) {
 } else {
     AI_PROVIDER = 'none'; // Set to none if no system key, but defaults are still set for BYOK
     console.warn('⚠️  WARNING: No Groq API key found!');
-    console.warn('   Assessment will use fallback questions only.');
-    console.warn('   Roadmap generation will NOT be available.');
+    console.warn('   AI services will NOT be available without a custom key.');
     console.warn('');
     console.warn('   💡 TIP: Get a FREE Groq API key:');
     console.warn('      1. Go to https://console.groq.com');
@@ -640,191 +639,6 @@ const CERTIFICATION_CONTENT = {
     }
 };
 
-// ============================================================================
-// FALLBACK QUESTIONS (used when AI APIs are unavailable)
-// ============================================================================
-
-const FALLBACK_QUESTIONS = {
-    beginner: [
-        {
-            type: "multiple-choice",
-            question: "What does the 'ls' command do in Linux?",
-            options: ["Lists files and directories", "Links systems", "Loads software", "Lists servers"],
-            correctAnswer: "Lists files and directories",
-            explanation: "The 'ls' command lists the contents of a directory in Linux.",
-            hint: "Think about viewing directory contents",
-            topic: "linux"
-        },
-        {
-            type: "multiple-choice",
-            question: "What is the purpose of DNS?",
-            options: ["Translates domain names to IP addresses", "Encrypts network traffic", "Stores user passwords", "Scans networks for vulnerabilities"],
-            correctAnswer: "Translates domain names to IP addresses",
-            explanation: "DNS (Domain Name System) translates human-readable domain names to IP addresses.",
-            hint: "It helps you access websites by name",
-            topic: "networking"
-        },
-        {
-            type: "multiple-choice",
-            question: "Which HTTP method is typically used to retrieve data from a server?",
-            options: ["GET", "POST", "DELETE", "PUT"],
-            correctAnswer: "GET",
-            explanation: "GET is used to request data from a server without modifying it.",
-            hint: "Think about reading or fetching data",
-            topic: "web security"
-        },
-        {
-            type: "multiple-choice",
-            question: "What does SSH stand for?",
-            options: ["Secure Shell", "Secure Service Host", "System Secure Host", "Secure System Hardware"],
-            correctAnswer: "Secure Shell",
-            explanation: "SSH (Secure Shell) is a cryptographic network protocol for secure remote login.",
-            hint: "It provides secure remote access",
-            topic: "networking"
-        },
-        {
-            type: "multiple-choice",
-            question: "What is the primary purpose of a firewall?",
-            options: ["To filter and monitor network traffic", "To provide internet connection", "To increase internet speed", "To store sensitive data"],
-            correctAnswer: "To filter and monitor network traffic",
-            explanation: "A firewall controls incoming and outgoing traffic based on security rules.",
-            hint: "Think about network security and traffic control",
-            topic: "networking"
-        },
-        {
-            type: "multiple-choice",
-            question: "In Linux, what does the 'chmod' command do?",
-            options: ["Changes file permissions", "Changes file ownership", "Changes file modification time", "Changes file content"],
-            correctAnswer: "Changes file permissions",
-            explanation: "chmod modifies read, write, and execute permissions on files and directories.",
-            hint: "It controls who can read, write, or execute files",
-            topic: "linux"
-        },
-        {
-            type: "short-answer",
-            question: "What are the three components of the CIA triad in information security?",
-            expectedKeywords: ["confidentiality", "integrity", "availability"],
-            explanation: "CIA stands for Confidentiality, Integrity, and Availability - the three core principles of information security.",
-            hint: "Think about protecting data, keeping it accurate, and ensuring access",
-            topic: "security concepts"
-        },
-        {
-            type: "multiple-choice",
-            question: "Which port is commonly used for HTTP web traffic?",
-            options: ["80", "443", "22", "3389"],
-            correctAnswer: "80",
-            explanation: "Port 80 is the default port for unencrypted HTTP web traffic, while 443 is used for HTTPS.",
-            hint: "Think about standard web browsing",
-            topic: "networking"
-        },
-        {
-            type: "short-answer",
-            question: "What type of attack involves manipulating database queries through user input?",
-            expectedKeywords: ["sql injection", "sqli", "sql"],
-            explanation: "SQL Injection is an attack where malicious SQL code is inserted into application queries.",
-            hint: "It targets database queries through untrusted input",
-            topic: "web security"
-        },
-        {
-            type: "multiple-choice",
-            question: "What does XSS stand for in web security?",
-            options: ["Cross-Site Scripting", "External Security System", "Cross-Server Scripting", "Extended Security Service"],
-            correctAnswer: "Cross-Site Scripting",
-            explanation: "XSS (Cross-Site Scripting) is a vulnerability that allows attackers to inject malicious scripts into web pages.",
-            hint: "It involves injecting scripts across websites",
-            topic: "web security"
-        }
-    ],
-    oscp: [
-        {
-            type: "multiple-choice",
-            question: "During a penetration test, you discover a web application vulnerable to LFI. Which file would be MOST useful for privilege escalation information on a Linux target?",
-            options: ["/etc/passwd", "/var/www/html/index.php", "/etc/hostname", "/var/log/syslog"],
-            correctAnswer: "/etc/passwd",
-            explanation: "/etc/passwd contains user account information and can reveal valid usernames for further attacks.",
-            hint: "Think about user enumeration",
-            topic: "web exploitation"
-        },
-        {
-            type: "short-answer",
-            question: "You've gained a foothold on a Windows machine. What command would you run first to enumerate the current user's privileges?",
-            expectedKeywords: ["whoami /priv", "whoami", "privileges"],
-            explanation: "'whoami /priv' displays current user privileges and can reveal if tokens like SeImpersonatePrivilege are enabled.",
-            hint: "Focus on checking what permissions your current account has",
-            topic: "privilege escalation"
-        },
-        {
-            type: "multiple-choice",
-            question: "Which Kerberos attack allows you to request service tickets for any SPN without needing admin privileges?",
-            options: ["Kerberoasting", "Pass-the-Hash", "Golden Ticket", "Silver Ticket"],
-            correctAnswer: "Kerberoasting",
-            explanation: "Kerberoasting requests TGS tickets for SPNs and cracks them offline to obtain service account passwords.",
-            hint: "This attack targets service accounts with SPNs",
-            topic: "active directory"
-        },
-        {
-            type: "multiple-choice",
-            question: "What privilege escalation technique involves exploiting a file with the SUID bit set?",
-            options: ["Binary exploitation with elevated permissions", "Kernel module injection", "Service misconfiguration", "DLL hijacking"],
-            correctAnswer: "Binary exploitation with elevated permissions",
-            explanation: "SUID binaries run with the permissions of the file owner (often root), creating privilege escalation opportunities.",
-            hint: "SUID allows programs to run as the file owner",
-            topic: "privilege escalation"
-        },
-        {
-            type: "short-answer",
-            question: "What tool is commonly used to visualize Active Directory relationships and identify attack paths?",
-            expectedKeywords: ["bloodhound", "blood hound"],
-            explanation: "BloodHound maps Active Directory relationships and highlights paths for privilege escalation and lateral movement.",
-            hint: "It creates a graph database of AD relationships",
-            topic: "active directory"
-        },
-        {
-            type: "multiple-choice",
-            question: "You need to pivot through a compromised host to access an internal network. Which technique would establish a SOCKS proxy?",
-            options: ["SSH dynamic port forwarding (-D)", "Port forwarding (-L)", "Remote port forwarding (-R)", "Netcat relay"],
-            correctAnswer: "SSH dynamic port forwarding (-D)",
-            explanation: "SSH -D creates a SOCKS proxy that allows routing traffic through the compromised host.",
-            hint: "Think about dynamic proxy capabilities",
-            topic: "pivoting"
-        },
-        {
-            type: "multiple-choice",
-            question: "Which Windows privilege is most commonly exploited with tools like JuicyPotato or PrintSpoofer?",
-            options: ["SeImpersonatePrivilege", "SeDebugPrivilege", "SeBackupPrivilege", "SeLoadDriverPrivilege"],
-            correctAnswer: "SeImpersonatePrivilege",
-            explanation: "SeImpersonatePrivilege allows a process to impersonate tokens, which can be exploited for privilege escalation.",
-            hint: "This privilege allows token impersonation",
-            topic: "privilege escalation"
-        },
-        {
-            type: "short-answer",
-            question: "What technique allows you to dump NTLM hashes from a domain controller without executing code on it?",
-            expectedKeywords: ["dcsync", "dc sync"],
-            explanation: "DCSync mimics domain controller replication to extract password hashes from Active Directory.",
-            hint: "It simulates domain controller replication",
-            topic: "active directory"
-        },
-        {
-            type: "multiple-choice",
-            question: "During post-exploitation, you find a database connection string with credentials. What should be your FIRST action?",
-            options: ["Test if credentials work for other services", "Extract the entire database", "Delete the connection string", "Modify the database"],
-            correctAnswer: "Test if credentials work for other services",
-            explanation: "Password reuse is common; credentials found should be tested against other services for lateral movement.",
-            hint: "Think about credential reuse and lateral movement",
-            topic: "post exploitation"
-        },
-        {
-            type: "multiple-choice",
-            question: "What type of SQLi payload would you use to determine if the database is MySQL?",
-            options: ["' OR '1'='1' -- -", "' UNION SELECT @@version-- -", "' AND 1=2-- -", "'; DROP TABLE users-- -"],
-            correctAnswer: "' UNION SELECT @@version-- -",
-            explanation: "@@version is MySQL-specific syntax that returns the database version, helping identify the DBMS.",
-            hint: "Look for database-specific version queries",
-            topic: "web exploitation"
-        }
-    ]
-};
 
 // ============================================================================
 // PROMPTS - Enhanced with resources
@@ -1576,8 +1390,8 @@ app.post('/api/generate-questions', async (req, res) => {
             const prompt = PROMPTS.questionGeneration(mode, usedHashes, retakeCount);
             
             console.log('📤 Calling AI API for question generation...');
-            // Use retries=1 to fail fast when APIs are rate-limited
-            const response = await callAI(prompt, { expectJson: true, retries: 1, customKeys: req.customKeys });
+            // Use retries=3 to improve success rate
+            const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys });
             console.log('📄 AI response received, length:', response?.length || 0);
             const parsed = parseJsonResponse(response);
             
@@ -1597,25 +1411,25 @@ app.post('/api/generate-questions', async (req, res) => {
             console.log('✅ Generated', parsed.questions.length, 'questions using AI');
             return res.json(parsed);
         } catch (aiError) {
-            // AI failed - use fallback questions silently
-            console.log('⚠️  AI generation failed, using fallback questions silently');
-            console.log('   Error was:', aiError.message);
+            console.error('❌ AI question generation failed:', aiError.message);
             
-            // Return fallback questions based on mode
-            const fallbackQuestions = FALLBACK_QUESTIONS[mode] || FALLBACK_QUESTIONS.beginner;
-            console.log('✅ Returning', fallbackQuestions.length, 'fallback questions');
-            
-            return res.status(200).json({ questions: fallbackQuestions });
+            // Check if it's a rate limit error
+            const isRateLimit = aiError.message.toLowerCase().includes('rate limit');
+            if (isRateLimit) {
+                return res.status(429).json({
+                    error: 'AI Rate Limited',
+                    userMessage: 'The AI is busy generating assessments for other students. Please wait a few minutes or provide your own API key.'
+                });
+            }
+
+            throw aiError; // Let the outer catch handle it
         }
     } catch (error) {
-        // This should only catch unexpected errors (validation, etc.)
         console.error('❌ Unexpected error in generate-questions:', error.message);
-        console.error('Stack:', error.stack);
-        
-        // Even on unexpected error, return fallback questions to avoid user-facing errors
-        const fallbackQuestions = FALLBACK_QUESTIONS[req.body.mode] || FALLBACK_QUESTIONS.beginner;
-        console.log('✅ Returning fallback questions due to unexpected error');
-        return res.status(200).json({ questions: fallbackQuestions });
+        res.status(500).json({
+            error: 'Failed to generate assessment questions',
+            details: error.message
+        });
     }
 });
 
@@ -1728,27 +1542,10 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         // Check if it's a rate limit error (case-insensitive)
         const isRateLimit = error.message.toLowerCase().includes('rate limit');
         if (isRateLimit) {
-            console.log('⚠️ AI Rate limited during evaluation, using fallback...');
-            const fallback = generateFallbackEvaluation(questions, answers, mode);
-
-            // Save fallback assessment to database if logged in
-            try {
-                if (req.user) {
-                    db.saveAssessment(req.user.id, {
-                        mode: mode || 'beginner',
-                        score: fallback.score,
-                        level: fallback.level,
-                        strengths: fallback.strengths,
-                        weaknesses: fallback.weaknesses,
-                        questions,
-                        answers
-                    });
-                }
-            } catch (dbError) {
-                console.warn('⚠️ Could not save fallback assessment to database:', dbError.message);
-            }
-
-            return res.json(fallback);
+            return res.status(429).json({
+                error: 'AI Rate Limited',
+                userMessage: 'Evaluation is currently unavailable due to high demand. Please try again in a few minutes or use a custom API key.'
+            });
         }
 
         res.status(500).json({

@@ -1219,17 +1219,32 @@ async function callBackendAPI(endpoint, data = {}) {
 
 async function startAssessment() {
     console.log('🎯 Starting assessment...');
+
+    // Clear question container
+    elements.questionContainer.innerHTML = '';
     showSection('assessmentSection');
     
+    // Enhanced multi-stage loading for question generation
+    const loadingStages = [
+        { stage: 1, text: "🧠 Initializing AI Mentor Mindset...", duration: 2000 },
+        { stage: 2, text: "🔍 Scanning cybersecurity domain knowledge...", duration: 2500 },
+        { stage: 3, text: "🎯 Tailoring questions to your level...", duration: 3000 },
+        { stage: 4, text: "✨ Finalizing assessment set...", duration: 1500 }
+    ];
+
+    const loader = showNeoLoading(elements.questionContainer, "CREATING ASSESSMENT", appState.learningMode.toUpperCase() + " MODE", loadingStages);
+
     try {
         elements.startBtn.disabled = true;
-        elements.startBtn.textContent = 'Generating Questions...';
         
         // Call backend API
         const data = await callBackendAPI('/api/generate-questions', {
             mode: appState.learningMode
         });
         
+        loader.complete();
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         appState.questions = data.questions || [];
         
         if (appState.questions.length === 0) {
@@ -1244,6 +1259,7 @@ async function startAssessment() {
         renderQuestion();
         updateProgress();
     } catch (error) {
+        loader.cleanup();
         console.error('❌ Error starting assessment:', error);
         showError('Failed to generate assessment questions. Please try again.');
         elements.startBtn.disabled = false;
@@ -1432,9 +1448,23 @@ function buildReview() {
 }
 
 async function proceedToEvaluation() {
+    // Show evaluation section but clear content for loader
+    const evaluationContainer = document.querySelector('.evaluation-container');
+    const originalContent = evaluationContainer.innerHTML;
+    evaluationContainer.innerHTML = '';
+    showSection('evaluationSection');
+
+    const loadingStages = [
+        { stage: 1, text: "📊 Harvesting assessment data...", duration: 2000 },
+        { stage: 2, text: "🧠 Analyzing answers against OffSec standards...", duration: 3000 },
+        { stage: 3, text: "⚖️ Calculating readiness and skill breakdown...", duration: 2500 },
+        { stage: 4, text: "📝 Formulating mentor suggestions...", duration: 2000 }
+    ];
+
+    const loader = showNeoLoading(evaluationContainer, "ANALYZING SKILLS", "LEVEL EVALUATION", loadingStages);
+
     try {
         elements.reviewContinueBtn.disabled = true;
-        elements.reviewContinueBtn.textContent = 'Analyzing...';
 
         // Call backend API for evaluation
         const data = await callBackendAPI('/api/evaluate-assessment', {
@@ -1443,16 +1473,19 @@ async function proceedToEvaluation() {
             mode: appState.learningMode
         });
 
+        loader.complete();
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Restore content structure before showing evaluation
+        evaluationContainer.innerHTML = originalContent;
+
         appState.assessment = data;
 
-        if (data.isFallback) {
-            showNotification('AI service is busy. Using high-accuracy automated evaluation instead.', 'warn');
-        }
-
         showEvaluation();
-        showSection('evaluationSection');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
+        loader.cleanup();
+        evaluationContainer.innerHTML = originalContent;
         console.error('Error evaluating assessment:', error);
         if (error.status === 429) {
             showError('The AI service is currently at capacity. Please wait a few minutes or provide your own Groq API key in Settings for priority access.');
@@ -1802,117 +1835,7 @@ async function generateRoadmapForCert(certId) {
         { stage: 6, text: "✨ Finalizing your roadmap...", duration: 2000 }
     ];
     
-    // Calculate total duration once
-    const TOTAL_LOADING_DURATION = loadingStages.reduce((sum, stage) => sum + stage.duration, 0);
-    
-    let currentStage = 0;
-    let progress = 0;
-    
-    roadmapContent.innerHTML = `
-        <div class="loading-state enhanced neo-brutal-loading">
-            <div class="loading-header">
-                <h3 class="neo-brutal-title glitch-text">COMPILING ROADMAP</h3>
-                <p class="loading-cert-name-v3">${certName}</p>
-            </div>
-            
-            <div class="brutal-percentage-container">
-                <div class="brutal-percentage-value" id="progressPercentage">0%</div>
-                <div class="brutal-percentage-label">SYSTEM_COMPILING...</div>
-            </div>
-
-            <div class="cyber-loader-container-v3">
-                <div class="loading-joke-container-v3" id="loadingJoke">
-                    "🔧 75% of bugs are fixed by checking the API key..."
-                </div>
-            </div>
-            
-            <div class="loading-stages-neo-v3">
-                ${loadingStages.map((s, i) => `
-                    <div class="stage-item-neo-v3 ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
-                        <div class="stage-indicator-neo-v3">
-                            <span class="stage-num-v3">${s.stage}</span>
-                            <span class="stage-done-v3">DONE</span>
-                        </div>
-                        <div class="stage-label-v3">${s.text}</div>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <div class="neo-progress-container-v3">
-                <div class="neo-progress-bar-v3" id="roadmapProgressBar" style="width: 0%"></div>
-                <div class="neo-progress-glitch"></div>
-            </div>
-            
-            <div class="neo-loading-footer-v3">
-                <div class="terminal-status">
-                    <span class="status-dot"></span>
-                    <span class="status-text">KERNEL_STATUS: ACTIVE</span>
-                </div>
-                <div class="terminal-command">EXEC roadmap_gen --target "${certId}"</div>
-            </div>
-        </div>
-    `;
-
-    // Start Joke Rotation
-    let jokeIndex = 0;
-    window.roadmapJokeInterval = setInterval(() => {
-        const jokeEl = document.getElementById('loadingJoke');
-        if (jokeEl) {
-            jokeIndex = (jokeIndex + 1) % DEV_JOKES.length;
-            jokeEl.style.opacity = 0;
-            setTimeout(() => {
-                jokeEl.textContent = `"${DEV_JOKES[jokeIndex]}"`;
-                jokeEl.style.opacity = 1;
-            }, 300);
-        }
-    }, 4000);
-    
-    // Animate progress through stages
-    const progressBar = document.getElementById('roadmapProgressBar');
-    const progressPercentage = document.getElementById('progressPercentage');
-    let elapsedTime = 0;
-    
-    // Function to update stage UI
-    const updateStage = (stageIndex) => {
-        const stageItems = document.querySelectorAll('.stage-item-neo-v3');
-        stageItems.forEach((item, i) => {
-            if (i < stageIndex) {
-                item.classList.remove('active');
-                item.classList.add('completed');
-            } else if (i === stageIndex) {
-                item.classList.add('active');
-                item.classList.remove('completed');
-            } else {
-                item.classList.remove('active', 'completed');
-            }
-        });
-    };
-    
-    // Progress animation
-    window.roadmapStageInterval = setInterval(() => {
-        elapsedTime += 100;
-        progress = Math.min((elapsedTime / TOTAL_LOADING_DURATION) * 100, 99);
-        
-        if (progressBar) {
-            progressBar.style.width = `${progress}%`;
-        }
-        if (progressPercentage) {
-            progressPercentage.textContent = `${Math.floor(progress)}%`;
-        }
-        
-        // Update stage based on elapsed time
-        let cumulativeTime = 0;
-        for (let i = 0; i < loadingStages.length; i++) {
-            cumulativeTime += loadingStages[i].duration;
-            if (elapsedTime < cumulativeTime) {
-                if (currentStage !== i) {
-                    currentStage = i;
-                    updateStage(i);
-                }
-                break;
-            }
-        }
-    }, 100);
+    const loader = showNeoLoading(roadmapContent, "COMPILING ROADMAP", certName, loadingStages);
     
     try {
         const data = await callBackendAPI('/api/generate-roadmap', {
@@ -1923,20 +1846,8 @@ async function generateRoadmapForCert(certId) {
             assessmentResult: appState.assessment
         });
         
-        // Clear intervals
-        if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
-        if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
-        if (window.roadmapStageInterval) clearInterval(window.roadmapStageInterval);
-        
-        // Complete the progress bar animation
-        if (progressBar) progressBar.style.width = '100%';
-        if (progressPercentage) progressPercentage.textContent = '100%';
-        
-        // Mark all stages complete
-        document.querySelectorAll('.stage-item-neo-v3').forEach(item => {
-            item.classList.remove('active');
-            item.classList.add('completed');
-        });
+        // Complete the loader
+        loader.complete();
         
         // Small delay to show completion
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -1961,10 +1872,7 @@ async function generateRoadmapForCert(certId) {
     } catch (error) {
         console.error('Error generating roadmap:', error);
         
-        // Clear intervals
-        if (window.roadmapCountdownInterval) clearInterval(window.roadmapCountdownInterval);
-        if (window.roadmapJokeInterval) clearInterval(window.roadmapJokeInterval);
-        if (window.roadmapStageInterval) clearInterval(window.roadmapStageInterval);
+        loader.cleanup();
         
         // Show friendly error message (not technical details)
         let errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
@@ -3069,6 +2977,142 @@ function resetAndRetake() {
 // ============================================================================
 // UI UTILITIES
 // ============================================================================
+
+/**
+ * Shows a Neo-Brutalist loading screen with progress stages and joke rotation
+ * @param {HTMLElement} container - The container to inject the loading screen into
+ * @param {string} title - The main title
+ * @param {string} subtitle - The subtitle (e.g. cert name)
+ * @param {Array} stages - Array of { stage: number, text: string, duration: number }
+ * @returns {object} - Helper object with cleanup and complete functions
+ */
+function showNeoLoading(container, title, subtitle, stages) {
+    if (!container) return { cleanup: () => {}, complete: () => {} };
+
+    // Clear any existing intervals
+    if (window.neoJokeInterval) clearInterval(window.neoJokeInterval);
+    if (window.neoStageInterval) clearInterval(window.neoStageInterval);
+
+    const totalDuration = stages.reduce((sum, stage) => sum + stage.duration, 0);
+    let currentStage = 0;
+    let progress = 0;
+    let elapsedTime = 0;
+
+    container.innerHTML = `
+        <div class="loading-state enhanced neo-brutal-loading">
+            <div class="loading-header">
+                <h3 class="neo-brutal-title glitch-text">${title}</h3>
+                <p class="loading-cert-name-v3">${subtitle}</p>
+            </div>
+
+            <div class="brutal-percentage-container">
+                <div class="brutal-percentage-value" id="neoProgressPercentage">0%</div>
+                <div class="brutal-percentage-label">SYSTEM_PROCESSING...</div>
+            </div>
+
+            <div class="cyber-loader-container-v3">
+                <div class="loading-joke-container-v3" id="neoLoadingJoke">
+                    "${DEV_JOKES[0]}"
+                </div>
+            </div>
+
+            <div class="loading-stages-neo-v3">
+                ${stages.map((s, i) => `
+                    <div class="stage-item-neo-v3 ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
+                        <div class="stage-indicator-neo-v3">
+                            <span class="stage-num-v3">${s.stage}</span>
+                            <span class="stage-done-v3">DONE</span>
+                        </div>
+                        <div class="stage-label-v3">${s.text}</div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="neo-progress-container-v3">
+                <div class="neo-progress-bar-v3" id="neoProgressBar" style="width: 0%"></div>
+                <div class="neo-progress-glitch"></div>
+            </div>
+
+            <div class="neo-loading-footer-v3">
+                <div class="terminal-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">KERNEL_STATUS: ACTIVE</span>
+                </div>
+                <div class="terminal-command">EXEC process --task "${title.toLowerCase().replace(/\s+/g, '_')}"</div>
+            </div>
+        </div>
+    `;
+
+    // Joke Rotation
+    let jokeIndex = 0;
+    window.neoJokeInterval = setInterval(() => {
+        const jokeEl = document.getElementById('neoLoadingJoke');
+        if (jokeEl) {
+            jokeIndex = (jokeIndex + 1) % DEV_JOKES.length;
+            jokeEl.style.opacity = 0;
+            setTimeout(() => {
+                jokeEl.textContent = `"${DEV_JOKES[jokeIndex]}"`;
+                jokeEl.style.opacity = 1;
+            }, 300);
+        }
+    }, 4000);
+
+    // Progress and Stage updates
+    const progressBar = document.getElementById('neoProgressBar');
+    const progressPercentage = document.getElementById('neoProgressPercentage');
+
+    const updateStageUI = (stageIndex) => {
+        const stageItems = container.querySelectorAll('.stage-item-neo-v3');
+        stageItems.forEach((item, i) => {
+            if (i < stageIndex) {
+                item.classList.remove('active');
+                item.classList.add('completed');
+            } else if (i === stageIndex) {
+                item.classList.add('active');
+                item.classList.remove('completed');
+            } else {
+                item.classList.remove('active', 'completed');
+            }
+        });
+    };
+
+    window.neoStageInterval = setInterval(() => {
+        elapsedTime += 100;
+        progress = Math.min((elapsedTime / totalDuration) * 100, 99);
+
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (progressPercentage) progressPercentage.textContent = `${Math.floor(progress)}%`;
+
+        let cumulativeTime = 0;
+        for (let i = 0; i < stages.length; i++) {
+            cumulativeTime += stages[i].duration;
+            if (elapsedTime < cumulativeTime) {
+                if (currentStage !== i) {
+                    currentStage = i;
+                    updateStageUI(i);
+                }
+                break;
+            }
+        }
+    }, 100);
+
+    return {
+        cleanup: () => {
+            if (window.neoJokeInterval) clearInterval(window.neoJokeInterval);
+            if (window.neoStageInterval) clearInterval(window.neoStageInterval);
+        },
+        complete: () => {
+            if (window.neoJokeInterval) clearInterval(window.neoJokeInterval);
+            if (window.neoStageInterval) clearInterval(window.neoStageInterval);
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressPercentage) progressPercentage.textContent = '100%';
+            container.querySelectorAll('.stage-item-neo-v3').forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('completed');
+            });
+        }
+    };
+}
 
 function showSection(sectionId) {
     hideAllSections();
