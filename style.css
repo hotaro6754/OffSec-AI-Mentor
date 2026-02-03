@@ -3738,3 +3738,60 @@ body.mode-oscp #pdf-root table td {
     gap: 0.75rem;
     margin-top: 1rem;
 }
+
+/* ============================================================
+   QR Code Section - Neo-Brutalist Styling
+   ============================================================ */
+
+.neo-qr-container {
+    margin-top: 60px;
+    padding: 30px;
+    border: 6px solid var(--black-v3);
+    background: var(--accent-v3);
+    text-align: center;
+    box-shadow: var(--shadow-v3);
+}
+
+body.mode-oscp .neo-qr-container {
+    background: #2d2d2d;
+    border-color: var(--primary-v3);
+    box-shadow: 8px 8px 0px var(--primary-v3);
+}
+
+.neo-qr-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--black-v3);
+}
+
+body.mode-oscp .neo-qr-title {
+    color: var(--primary-v3);
+}
+
+.neo-qr-image {
+    max-width: 300px;
+    border: 4px dashed var(--black-v3);
+    padding: 20px;
+    background: white;
+    margin: 0 auto;
+    display: block;
+}
+
+body.mode-oscp .neo-qr-image {
+    border-color: var(--primary-v3);
+    background: #1e1e1e;
+}
+
+.neo-qr-subtitle {
+    margin-top: 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--black-v3);
+}
+
+body.mode-oscp .neo-qr-subtitle {
+    color: var(--secondary-v3);
+}

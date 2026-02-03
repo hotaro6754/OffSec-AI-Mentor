@@ -135,56 +135,6 @@ const CERTIFICATIONS = [
         provider: 'OffSec',
         level: 'Advanced',
         duration: '~150 hours'
-    },
-    {
-        id: 'pnpt',
-        name: 'PNPT',
-        title: 'Practical Network Penetration Tester',
-        description: 'A comprehensive, practical exam covering OSINT, External/Internal attacks, and Reporting.',
-        type: 'attack',
-        provider: 'TCM Security',
-        level: 'Intermediate',
-        duration: '~100 hours'
-    },
-    {
-        id: 'cpts',
-        name: 'CPTS',
-        title: 'Certified Penetration Testing Specialist',
-        description: 'Highly technical and practical penetration testing certification from Hack The Box.',
-        type: 'attack',
-        provider: 'Hack The Box',
-        level: 'Intermediate',
-        duration: '~250 hours'
-    },
-    {
-        id: 'ejpt',
-        name: 'eJPT',
-        title: 'eLearnSecurity Junior Penetration Tester',
-        description: 'Excellent entry-level practical certification for aspiring penetration testers.',
-        type: 'attack',
-        provider: 'INE',
-        level: 'Beginner',
-        duration: '~80 hours'
-    },
-    {
-        id: 'ceh',
-        name: 'CEH',
-        title: 'Certified Ethical Hacker',
-        description: 'Industry-recognized foundational certification for ethical hacking.',
-        type: 'attack',
-        provider: 'EC-Council',
-        level: 'Beginner',
-        duration: '~120 hours'
-    },
-    {
-        id: 'thm-jr-pentester',
-        name: 'Jr Pentester',
-        title: 'Junior Penetration Tester (THM)',
-        description: 'A complete guided path from TryHackMe covering the essentials of pentesting.',
-        type: 'attack',
-        provider: 'TryHackMe',
-        level: 'Beginner',
-        duration: '~60 hours'
     }
 ];
 
@@ -483,7 +433,15 @@ function setupEventListeners() {
             showSection('assessmentSection');
             return;
         }
-        // Open certification selection modal
+        
+        // OSCP Mode Auto-Selection: Skip modal and auto-select OSCP
+        if (appState.learningMode === 'oscp') {
+            console.log('🎯 OSCP Mode detected - Auto-selecting OSCP certification');
+            generateRoadmapForCert('oscp');
+            return;
+        }
+        
+        // Beginner Mode: Open certification selection modal
         openCertModal();
     });
     
@@ -495,6 +453,15 @@ function setupEventListeners() {
             showSection('assessmentSection');
             return;
         }
+        
+        // OSCP Mode Auto-Selection: Skip modal and auto-select OSCP
+        if (appState.learningMode === 'oscp') {
+            console.log('🎯 OSCP Mode detected - Auto-selecting OSCP certification for regeneration');
+            generateRoadmapForCert('oscp');
+            return;
+        }
+        
+        // Beginner Mode: Open certification selection modal
         openCertModal();
     });
     
@@ -1770,12 +1737,7 @@ async function generateRoadmapForCert(certId) {
     window.assessmentResult = appState.assessment;
     
     const certNames = {
-        'thm-jr-pentester': 'THM JR - TryHackMe Junior Penetration Tester',
-        'ejpt': 'eJPT - eLearnSecurity Junior Penetration Tester',
-        'ceh': 'CEH - Certified Ethical Hacker',
-        'pnpt': 'PNPT - Practical Network Penetration Tester',
         'oscp': 'OSCP - Offensive Security Certified Professional',
-        'cpts': 'CPTS - HTB Certified Penetration Testing Specialist',
         'osep': 'OSEP - Offensive Security Experienced Penetration Tester',
         'oswe': 'OSWE - Offensive Security Web Expert',
         'osda': 'OSDA - Offensive Security Defense Analyst',
@@ -2513,6 +2475,20 @@ function displayRoadmap(roadmapData) {
             setTimeout(() => createSkillTree(roadmapObj.skill_tree), 100);
         }
     }
+
+    // 9. Add QR Code Section with Neo-Brutalist Styling
+    const qrSection = document.createElement('div');
+    qrSection.className = 'neo-qr-container';
+    qrSection.innerHTML = `
+        <div class="neo-qr-title">
+            🎯 SCAN FOR BONUS MENTOR WISDOM
+        </div>
+        <img src="qr-code.svg" alt="Bonus Mentor Content QR Code" class="neo-qr-image" />
+        <div class="neo-qr-subtitle">
+            Unlock exclusive cybersecurity insights and advanced tips!
+        </div>
+    `;
+    container.appendChild(qrSection);
 
     // Append everything to the main container
     roadmapContent.appendChild(container);
