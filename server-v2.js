@@ -120,103 +120,158 @@ app.use((req, res, next) => {
 
 const RESOURCES = {
     youtube: {
-        channels: [
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance, Networking, PrivEsc' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training, Kali Linux tools' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware Analysis, General Hacking, Scripting' },
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HackTheBox walkthroughs, advanced methodology, exploitation' },
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals, IT careers, Linux basics' },
-            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, Cisco, Python, Certifications' },
-            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, Reverse Engineering, CTFs' },
-            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug Bounty, Web Security, Mindset' },
-            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug Bounty, Web Application Security' },
-            { name: 'zSecurity', url: 'https://www.youtube.com/@zSecurity', focus: 'Ethical Hacking, WiFi Security' },
-            { name: 'Learn Linux TV', url: 'https://www.youtube.com/@LearnLinuxTV', focus: 'Linux basics, administration' },
-            { name: 'Practical Networking', url: 'https://www.youtube.com/@PracticalNetworking', focus: 'Networking fundamentals' },
-            { name: 'Corey Schafer', url: 'https://www.youtube.com/@coreyms', focus: 'Python programming' },
-            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', focus: 'Web security, Bug Bounty' },
-            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', focus: 'Web exploitation, OSWE prep' },
+        core_foundations: [
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking, Linux, IT foundations' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'Advanced methodology, HTB walkthroughs' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware, Scripting' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Practical pentesting, Linux, Networking' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Tool tutorials, Ethical hacking' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, Python, Certifications' },
+            { name: 'Computerphile', url: 'https://www.youtube.com/@computerphile', focus: 'Computer science concepts' },
+            { name: 'PowerCert Animated Videos', url: 'https://www.youtube.com/@PowerCertAnimatedVideos', focus: 'Animated IT concepts' },
+            { name: 'Practical Networking', url: 'https://www.youtube.com/@PracticalNetworking', focus: 'Core networking deep dives' },
+            { name: 'freeCodeCamp.org', url: 'https://www.youtube.com/@freecodecamp', focus: 'Programming and CS fundamentals' }
+        ],
+        networking_enumeration: [
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking basics' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking labs' },
+            { name: 'Practical Networking', url: 'https://www.youtube.com/@PracticalNetworking', focus: 'Network protocols' },
+            { name: 'Network Direction', url: 'https://www.youtube.com/@NetworkDirection', focus: 'Enterprise networking' },
+            { name: 'PowerCert Animated Videos', url: 'https://www.youtube.com/@PowerCertAnimatedVideos', focus: 'Network fundamentals' },
+            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug bounty reconnaissance' }
+        ],
+        web_security: [
+            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', focus: 'Web exploitation, PortSwigger' },
+            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug bounty, web mindset' },
+            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Web app pentesting' },
+            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', focus: 'Web security research' },
+            { name: 'BugCrowd', url: 'https://www.youtube.com/@Bugcrowd', focus: 'Web security training' },
+            { name: 'OWASP Foundation', url: 'https://www.youtube.com/@OWASP', focus: 'Web security standards' },
+            { name: 'PortSwigger', url: 'https://www.youtube.com/@PortSwigger', focus: 'Burp Suite & Web security' }
+        ],
+        pentesting_oscp: [
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'The OSCP gold standard' },
+            { name: 'TJ Null', url: 'https://www.youtube.com/@TJNull', focus: 'OSCP prep guidance' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'PEH course content' },
             { name: 'S1REN', url: 'https://www.youtube.com/@S1REN', focus: 'OSCP-style machines' },
-            { name: 'TCM Security Official', url: 'https://www.youtube.com/@TCMSecurity', focus: 'Official certification training' },
-            { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, Wireless security' },
-            { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security, Blue team' },
-            { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' },
-            { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
+            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', focus: 'Manual exploitation' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Methodology & tools' },
+            { name: 'ZSecurity', url: 'https://www.youtube.com/@zSecurity', focus: 'Practical hacking' }
+        ],
+        active_directory: [
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'AD attack paths' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'AD exploitation' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'AD fundamentals' },
+            { name: 'Sektor7', url: 'https://www.youtube.com/@sektor7_inc', focus: 'Advanced AD techniques' },
+            { name: 'ZeroPoint Security', url: 'https://www.youtube.com/@ZeroPointSecurity', focus: 'Enterprise security' },
+            { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Deep AD training' }
+        ],
+        red_team: [
+            { name: 'ZeroPoint Security', url: 'https://www.youtube.com/@ZeroPointSecurity', focus: 'CRTO training' },
+            { name: 'Sektor7', url: 'https://www.youtube.com/@sektor7_inc', focus: 'Evasion & malware' },
+            { name: 'Red Team Village', url: 'https://www.youtube.com/@RedTeamVillage', focus: 'Community content' },
+            { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', focus: 'Enterprise defense/offense' },
+            { name: 'Ired.team (talks)', url: 'https://www.ired.team/', focus: 'Technique walkthroughs' }
+        ],
+        exploit_dev: [
+            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation' },
+            { name: 'Corelan', url: 'https://www.corelan.be/', focus: 'Stack overflows, heap, advanced' },
+            { name: 'OpenSecurityTraining', url: 'https://opensecuritytraining.info/', focus: 'Low-level security' },
+            { name: 'OpenSecurityTraining2', url: 'https://ost2.fyi/', focus: 'Modern low-level training' },
+            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', focus: 'Malware analysis & RE' },
+            { name: 'FuzzySecurity', url: 'https://www.fuzzysecurity.com/', focus: 'Exploit development' }
+        ],
+        wireless: [
+            { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'WiFi equipment & attacks' },
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'WiFi basics' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Wireless security' },
+            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@VivekRamachandran', focus: 'Wireless hacking expert' }
+        ],
+        defensive: [
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'Blue team & DFIR' },
+            { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'NSM & SIEM' },
+            { name: 'Elastic Security', url: 'https://www.youtube.com/@ElasticSecurity', focus: 'Endpoint detection' },
+            { name: 'Blue Team Village', url: 'https://www.youtube.com/@BlueTeamVillage', focus: 'Defensive community' },
+            { name: 'Detection Engineering', url: 'https://www.youtube.com/@DetectionEngineering', focus: 'SIEM & rules' }
+        ],
+        macos_ios: [
+            { name: 'Objective-See', url: 'https://objective-see.org/', focus: 'macOS security tools' },
+            { name: 'Patrick Wardle', url: 'https://twitter.com/patrickwardle', focus: 'macOS expert' },
+            { name: 'BlackHat macOS talks', url: 'https://www.blackhat.com/', focus: 'Advanced research' },
+            { name: 'WWDC Security sessions', url: 'https://developer.apple.com/wwdc/', focus: 'Apple official security' }
+        ],
+        conference_talks: [
+            { name: 'DEF CON Conference', url: 'https://www.youtube.com/@DEFCONConference', focus: 'Advanced hacking' },
+            { name: 'Black Hat', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Enterprise & research' },
+            { name: 'OffensiveCon', url: 'https://www.youtube.com/@OffensiveCon', focus: 'Exploit development' },
+            { name: 'BlueHat', url: 'https://www.youtube.com/@MicrosoftBlueHat', focus: 'Microsoft security' },
+            { name: 'Virus Bulletin', url: 'https://www.youtube.com/@VirusBulletin', focus: 'Malware research' }
         ]
     },
-    platforms: {
-        htb: {
-            name: 'Hack The Box (HTB)',
-            url: 'https://app.hackthebox.com',
-            practiceLabs: ['Starting Point', 'Machines', 'Challenges', 'Endgames', 'Fortresses', 'Pro Labs', 'Battlegrounds', 'CTF', 'Bug Bounty Labs'],
-            proLabs: ['Dante', 'Offshore', 'Cybernetics', 'RastaLabs', 'APTLabs', 'Enterprise', 'Zephyr'],
-            academyPaths: ['Penetration Tester', 'Bug Bounty Hunter', 'SOC Analyst', 'Incident Responder', 'Defensive Security Analyst', 'Active Directory Penetration Tester', 'Web Application Penetration Tester', 'Cloud Security Specialist', 'Security Engineer'],
-            academyModules: ['Getting Started', 'Linux Fundamentals', 'Windows Fundamentals', 'Networking Fundamentals', 'Web Requests', 'Web Attacks', 'Authentication & Authorization', 'Databases', 'Active Directory', 'Pivoting & Tunneling', 'Privilege Escalation', 'Password Attacks', 'Vulnerability Assessment', 'Metasploit Framework', 'Shells & Payloads', 'File Transfers', 'Post-Exploitation', 'Threat Hunting', 'SIEM Fundamentals', 'Malware Analysis', 'Digital Forensics', 'Binary Exploitation', 'Reverse Engineering', 'Cryptography', 'Cloud Security', 'DevOps Security', 'Mobile Security'],
-            certs: ['CPTS', 'CWEE', 'CBBH', 'CAPE', 'CDSA']
-        },
-        thm: {
-            name: 'TryHackMe (THM)',
-            url: 'https://tryhackme.com',
-            practiceLabs: ['Rooms', 'CTF Rooms', 'Boot2Root Rooms', 'Walkthrough Rooms', 'Challenge Rooms'],
-            learningPaths: ['Pre Security', 'Introduction to Cyber Security', 'Complete Beginner', 'Jr Penetration Tester', 'Web Fundamentals', 'Offensive Pentesting', 'Red Teaming', 'Blue Teaming', 'Cyber Defense', 'SOC Level 1', 'Security Engineer', 'DevSecOps', 'Cloud Security', 'Threat Intelligence', 'Incident Response', 'Digital Forensics'],
-            coreSeries: ['Advent of Cyber', 'OWASP Top 10', 'Red Team Fundamentals', 'Blue Team Fundamentals', 'Cyber Defense Frameworks'],
-            domains: ['Linux', 'Windows', 'Networking', 'Web', 'Active Directory', 'Cloud', 'DevOps', 'Mobile', 'OSINT', 'Cryptography', 'Reverse Engineering', 'Binary Exploitation', 'Malware Analysis', 'Digital Forensics', 'Incident Response', 'Threat Detection', 'SIEM'],
-            certs: ['eJPT', 'PNPT', 'CEH', 'Security+', 'Blue Team Level 1']
-        },
-        otw: {
-            name: 'OverTheWire (OTW)',
-            url: 'https://overthewire.org',
-            practiceGames: ['Bandit', 'Leviathan', 'Natas', 'Krypton', 'Narnia', 'Behemoth', 'Utumno', 'Maze', 'Vortex', 'Manpage'],
-            structure: ['Levels', 'SSH Access', 'Progressive Difficulty'],
-            topics: ['Linux Command Line', 'File Permissions', 'Users & Groups', 'Environment Variables', 'Process Management', 'Networking Basics', 'Manual Enumeration', 'Password Discovery', 'Encoding & Decoding', 'Symmetric Cryptography', 'Asymmetric Cryptography', 'Binary Permissions', 'SUID Exploitation', 'Basic Buffer Overflows', 'Memory Concepts'],
-            foundationFor: ['Linux+', 'Network+', 'Security+', 'eJPT']
-        },
-        pico: {
-            name: 'PicoCTF',
-            url: 'https://picoctf.org',
-            focus: 'Beginner CTF challenges'
-        }
-    },
-    tools: {
-        operatingSystems: ['Kali Linux', 'Parrot OS', 'Ubuntu (attacker & lab server)', 'Windows (Client & Server)', 'Windows AD Lab'],
-        virtualization: ['VMware Workstation', 'VirtualBox', 'QEMU', 'Vagrant'],
-        networking: ['Nmap', 'Masscan', 'RustScan', 'Unicornscan', 'Naabu'],
-        serviceEnumeration: ['Enum4linux', 'Enum4linux-ng', 'CrackMapExec', 'SMBMap', 'RPCClient', 'SNMPwalk', 'LDAPSearch'],
-        dnsOsint: ['Dig', 'Nslookup', 'Amass', 'Subfinder', 'Assetfinder', 'theHarvester', 'Recon-ng', 'Maltego'],
-        passwords: ['Hashcat', 'John the Ripper', 'Hydra', 'Medusa', 'Ncrack', 'SecLists', 'RockYou', 'Weakpass'],
-        webTesting: ['Burp Suite', 'OWASP ZAP', 'Postman', 'HTTPie', 'Gobuster', 'Dirsearch', 'FFUF', 'Wfuzz', 'Nikto', 'WhatWeb', 'SQLmap', 'XSStrike', 'NoSQLMap', 'Commix', 'SSRFmap', 'JWT-tool'],
-        exploitation: ['Metasploit Framework', 'Searchsploit', 'ExploitDB', 'Canvas (theory)', 'Core Impact (theory)'],
-        privesc: ['LinPEAS', 'LinEnum', 'Linux-Exploit-Suggester', 'pspy', 'WinPEAS', 'PowerUp', 'Seatbelt', 'SharpUp', 'Watson'],
-        activeDirectory: ['BloodHound', 'SharpHound', 'PowerView', 'ADExplorer', 'Responder', 'Impacket', 'Mimikatz', 'Rubeus', 'Evil-WinRM', 'Kerbrute', 'CrackMapExec (AD)', 'PsExec', 'WMIExec', 'SMBExec', 'WinRM', 'RDP'],
-        redTeam: ['Sliver', 'Mythic', 'Empire', 'Covenant', 'Donut', 'Shellter', 'Veil', 'MSFvenom', 'Nimcrypt', 'LOLBins', 'GTFOBins'],
-        pivoting: ['Chisel', 'Ligolo-NG', 'SSH Tunneling', 'ProxyChains', 'Socat', 'Plink'],
-        wireless: ['Aircrack-ng', 'Airmon-ng', 'Airodump-ng', 'Aireplay-ng', 'Reaver', 'Wash', 'Bettercap', 'Kismet', 'Wifite'],
-        exploitDev: ['WinDbg', 'x64dbg', 'Immunity Debugger', 'GDB', 'Radare2', 'Ghidra', 'IDA Pro', 'NASM', 'MASM', 'GCC', 'Mingw', 'Visual Studio', 'AFL', 'Peach Fuzzer', 'BooFuzz', 'Radamsa'],
-        shells: ['Netcat', 'Ncat', 'Socat', 'Reverse shells (bash, python, powershell)', 'Web shells', 'PowerShell Empire agents'],
-        packetAnalysis: ['Wireshark', 'tcpdump', 'Tshark'],
-        defensive: ['Splunk', 'Elastic Stack', 'Security Onion', 'Wazuh', 'Sigma', 'YARA', 'Suricata', 'Zeek'],
-        macos: ['Objective-C tools', 'Hopper', 'LLDB', 'Frida', 'Xcode', 'class-dump', 'otool'],
-        cloud: ['Docker', 'Docker-Compose', 'Kubernetes (kubectl)', 'Trivy', 'ScoutSuite', 'Pacu'],
-        misc: ['tmux', 'zsh', 'Oh-My-Zsh', 'Terminator', 'Obsidian (notes)', 'CherryTree', 'Flameshot']
+    web: {
+        lab_platforms: [
+            { name: 'TryHackMe', url: 'https://tryhackme.com' },
+            { name: 'Hack The Box', url: 'https://hackthebox.com' },
+            { name: 'Hack The Box Academy', url: 'https://academy.hackthebox.com' },
+            { name: 'Proving Grounds', url: 'https://www.offsec.com/labs/' },
+            { name: 'PortSwigger Web Security Academy', url: 'https://portswigger.net/web-security' },
+            { name: 'VulnHub', url: 'https://www.vulnhub.com' },
+            { name: 'Exploit Education', url: 'https://exploit.education' }
+        ],
+        documentation: [
+            { name: 'OWASP Top 10', url: 'https://owasp.org/www-project-top-ten/' },
+            { name: 'OWASP WebGoat', url: 'https://owasp.org/www-project-webgoat/' },
+            { name: 'Nmap Documentation', url: 'https://nmap.org/book/man.html' },
+            { name: 'Metasploit Documentation', url: 'https://docs.metasploit.com/' },
+            { name: 'Microsoft Learn', url: 'https://learn.microsoft.com/' },
+            { name: 'Linux man pages', url: 'https://man7.org/linux/man-pages/' }
+        ],
+        blogs_kb: [
+            { name: 'IppSec Notes', url: 'https://ippsec.rocks' },
+            { name: '0xdf', url: 'https://0xdf.gitlab.io' },
+            { name: 'PayloadsAllTheThings', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings' },
+            { name: 'HackTricks', url: 'https://book.hacktricks.xyz' },
+            { name: 'GTFOBins', url: 'https://gtfobins.github.io' },
+            { name: 'LOLBAS', url: 'https://lolbas-project.github.io' },
+            { name: 'Red Canary Atomic Red Team', url: 'https://atomicredteam.io' }
+        ],
+        exploit_dev_re: [
+            { name: 'Corelan Team Blog', url: 'https://www.corelan.be' },
+            { name: 'OpenSecurityTraining.info', url: 'https://opensecuritytraining.info' },
+            { name: 'Azeria Labs', url: 'https://azerialabs.com' },
+            { name: 'Malware Unicorn RE101', url: 'https://malwareunicorn.org' },
+            { name: 'Nightmares.re', url: 'https://nightmare.re' }
+        ],
+        defensive_detection: [
+            { name: 'SigmaHQ', url: 'https://github.com/SigmaHQ/sigma' },
+            { name: 'Elastic Security Blog', url: 'https://www.elastic.co/blog/category/security' },
+            { name: 'Splunk Security Blog', url: 'https://www.splunk.com/en_us/blog/security.html' },
+            { name: 'Detection Engineering Blog', url: 'https://detectionengineering.net' },
+            { name: 'MITRE ATT&CK', url: 'https://attack.mitre.org' }
+        ],
+        cloud_modern: [
+            { name: 'AWS Security Blog', url: 'https://aws.amazon.com/blogs/security/' },
+            { name: 'Google Cloud Security', url: 'https://cloud.google.com/blog/products/identity-security' },
+            { name: 'Azure Security Documentation', url: 'https://learn.microsoft.com/en-us/azure/security/' },
+            { name: 'Wiz Research Blog', url: 'https://www.wiz.io/blog' },
+            { name: 'Rhino Security Labs', url: 'https://rhinosecuritylabs.com/blog/' }
+        ]
     },
     books: [
-        { title: "TCP/IP Illustrated", author: "W. Richard Stevens", focus: "Networking Fundamentals" },
-        { title: "Black Hat Python", author: "Justin Seitz", focus: "Python for Hackers" },
-        { title: "Red Team Development and Operations", author: "Joe Vest", focus: "Red Teaming Strategy" },
-        { title: "Penetration Testing Azure for Ethical Hackers", author: "David Okeyode", focus: "Cloud Security" },
-        { title: "Windows Internals", author: "Pavel Yosifovich", focus: "OS Internals" },
-        { title: "The Web Application Hacker's Handbook", author: "Dafydd Stuttard", focus: "Web Security" },
-        { title: "Practical Malware Analysis", author: "Sikorski & Honig", focus: "Malware Analysis" },
-        { title: "The Hacker Playbook 3", author: "Peter Kim", focus: "Red Team Methodology" }
+        { name: 'The Web Application Hacker’s Handbook', url: 'https://www.wiley.com/en-us/9781118026472' },
+        { name: 'Real-World Bug Hunting', url: 'https://nostarch.com/realworldbughunting' },
+        { name: 'Penetration Testing (Georgia Weidman)', url: 'https://nostarch.com/pentesting' },
+        { name: 'Red Team Field Manual', url: 'https://www.amazon.com/dp/1494295539' },
+        { name: 'Blue Team Field Manual', url: 'https://www.amazon.com/dp/154101636X' },
+        { name: 'Windows Internals (Part 1 & 2)', url: 'https://learn.microsoft.com/en-us/sysinternals/resources/windows-internals' },
+        { name: 'Linux Basics for Hackers', url: 'https://nostarch.com/linuxbasicsforhackers' }
     ],
-    reporting: {
-        guides: [
-            { name: "TCM Security Report Writing Guide", url: "https://tcm-sec.com/report-writing-for-penetration-testers/" },
-            { name: "HTB Academy: Report Writing", url: "https://academy.hackthebox.com/module/details/161" }
-        ],
-        tools: ["Dradis", "PlexTrac", "PwnDoc", "Markdown", "LaTeX"]
-    }
+    special: [
+        { name: "OffSec Course Catalog", url: "https://www.offsec.com/courses-and-certifications/", focus: "Official OffSec Training & Certifications" },
+        { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
+    ]
 };
+
 
 const MASTER_SKILLS = [
     { id: 0, name: "Linux Fundamentals", category: "Core Foundations", estimatedTime: "3-4 weeks",
@@ -297,156 +352,6 @@ const MASTER_SKILLS = [
 // CERTIFICATION-SPECIFIC CONTENT DATABASE
 // ============================================================================
 const CERTIFICATION_CONTENT = {
-    'thm-jr-pentester': {
-        name: 'THM JR - TryHackMe Junior Penetration Tester',
-        level: 'Entry',
-        focus: 'Hands-on practical skills with guided labs, perfect for absolute beginners',
-        prerequisites: ['Basic computer literacy', 'Understanding of how the internet works'],
-        examFormat: 'Practical path completion (no proctored exam)',
-        syllabus: [
-            'Linux Fundamentals: terminal commands, file permissions, user management, process control',
-            'Windows Fundamentals: CMD, PowerShell, services, registry basics',
-            'Networking Basics: TCP/IP, ports, protocols, subnetting fundamentals',
-            'Reconnaissance: WHOIS lookups, DNS enumeration, subdomain discovery',
-            'Service Enumeration: Nmap scanning, Gobuster directory brute-forcing, Nikto web scanning',
-            'Burp Suite Basics: proxy setup, intercepting requests, repeater, intruder',
-            'Metasploit Introduction: msfconsole basics, exploit modules, payloads, handlers',
-            'Web Attacks: SQL injection (union, error, time-based), XSS, file inclusion (LFI/RFI), directory traversal, IDOR',
-            'Linux Privilege Escalation: sudo abuse, SUID binaries, cron jobs, PATH hijacking',
-            'Windows Privilege Escalation: service misconfigurations, registry abuse, DLL hijacking',
-            'Password Cracking: Hashcat, John the Ripper, Hydra for credential attacks'
-        ],
-        youtubeChannels: [
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', why: 'Perfect for networking and Linux basics' },
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Excellent pentesting fundamentals' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'TryHackMe room walkthroughs' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', why: 'Tool tutorials and beginner methodology' }
-        ],
-        specificLabs: [
-            { name: 'Pre Security Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/presecurity', duration: '40 hours', skills: ['Linux & Windows Fundamentals', 'Networking Basics'] },
-            { name: 'Jr Penetration Tester Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/jrpenetrationtester', duration: '56 hours', skills: ['Full Pentest Workflow'] },
-            { name: 'Linux Fundamentals', platform: 'THM', url: 'https://tryhackme.com/room/linux1', skills: ['Terminal', 'Permissions'] },
-            { name: 'Nmap', platform: 'THM', url: 'https://tryhackme.com/room/furthernmap', skills: ['Scanning', 'Enumeration'] },
-            { name: 'Burp Suite', platform: 'THM', url: 'https://tryhackme.com/room/burpsuitebasics', skills: ['Web Proxy', 'Intruder'] },
-            { name: 'HTB Starting Point', platform: 'HTB', url: 'https://app.hackthebox.com/starting-point', skills: ['Beginner boxes'] }
-        ],
-        coreTools: ['Nmap', 'Gobuster', 'Nikto', 'Burp Suite', 'Metasploit', 'Hydra', 'Netcat', 'LinPEAS', 'WinPEAS'],
-        keySkills: ['Network enumeration', 'Web app basics', 'Linux fundamentals', 'Metasploit basics', 'Privilege escalation intro']
-    },
-    'ejpt': {
-        name: 'eJPT - eLearnSecurity Junior Penetration Tester',
-        level: 'Entry',
-        focus: 'Professional pentesting workflow with real-world network scenarios',
-        prerequisites: ['Basic networking', 'Linux command line basics'],
-        examFormat: '48-hour practical exam with multiple machines',
-        syllabus: [
-            'Advanced Networking: subnetting calculations, routing concepts, VLANs, firewalls and IDS basics',
-            'Service Enumeration: SMB enumeration (enum4linux, smbclient), FTP, SSH, HTTP, SNMP, MySQL, PostgreSQL',
-            'Nmap Advanced: NSE script usage, timing templates, output formats, service versioning',
-            'Metasploit Framework: complete exploitation workflow, post-exploitation modules, meterpreter',
-            'Web Exploitation: SQL injection variants, XSS types, authentication bypass techniques',
-            'Credential Attacks: password spraying, credential reuse, hash cracking',
-            'Pivoting Basics: port forwarding, SSH tunneling, routing through compromised hosts',
-            'Post-Exploitation: credential looting, password dumping, lateral movement introduction',
-            'Professional Reporting: executive summary writing, technical findings documentation, risk rating methodology'
-        ],
-        youtubeChannels: [
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Practical Ethical Hacking course' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', why: 'Tool tutorials and methodology' },
-            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', why: 'Networking and security foundations' },
-            { name: 'INE Security', url: 'https://www.youtube.com/@INEtraining', why: 'Official eJPT training content' }
-        ],
-        specificLabs: [
-            { name: 'INE PTS Learning Path', platform: 'INE', url: 'https://ine.com/learning/paths/penetration-testing-student', duration: '145 hours', skills: ['Complete eJPT prep'] },
-            { name: 'OverTheWire: Bandit', platform: 'OTW', url: 'https://overthewire.org/wargames/bandit/', levels: '0-34', skills: ['Linux basics'] },
-            { name: 'Blue', platform: 'THM', url: 'https://tryhackme.com/room/blue', difficulty: 'Easy', skills: ['Windows exploitation', 'EternalBlue'] },
-            { name: 'SMB Enumeration', platform: 'THM', url: 'https://tryhackme.com/room/networkservices', skills: ['Enum4linux', 'SMBMap'] },
-            { name: 'Offensive Pentesting', platform: 'THM', url: 'https://tryhackme.com/path/outline/pentesting', skills: ['Complete workflow'] }
-        ],
-        coreTools: ['Nmap', 'Metasploit', 'Searchsploit', 'CrackMapExec', 'Wireshark', 'Burp Suite', 'Enum4linux', 'Nikto'],
-        keySkills: ['Host and network enumeration', 'Web application attacks', 'System exploitation', 'Pivoting basics', 'Professional reporting']
-    },
-    'ceh': {
-        name: 'CEH - Certified Ethical Hacker',
-        level: 'Entry',
-        focus: 'Theory-heavy, broad coverage of ethical hacking concepts, good for vocabulary building',
-        prerequisites: ['2 years IT experience recommended', 'Networking basics', 'Security concepts'],
-        examFormat: '125 multiple-choice questions, 4 hours',
-        syllabus: [
-            'Footprinting & Reconnaissance: passive information gathering, OSINT, search engine reconnaissance',
-            'Scanning & Enumeration: network scanning, vulnerability scanning, port enumeration',
-            'Vulnerability Analysis: vulnerability assessment tools and techniques',
-            'System Hacking: password cracking, privilege escalation, steganography, covering tracks',
-            'Malware Threats: trojans, viruses, worms, malware analysis basics',
-            'Sniffing: packet sniffing, ARP poisoning, MAC flooding',
-            'Social Engineering: phishing, pretexting, baiting, tailgating',
-            'Denial of Service (DoS/DDoS): attack types and mitigation',
-            'Session Hijacking: session attacks and countermeasures',
-            'Web Server Hacking: web server attacks and security',
-            'Web Application Hacking: OWASP Top 10 vulnerabilities',
-            'SQL Injection: types and exploitation techniques',
-            'Wireless Network Hacking: WEP, WPA, WPA2 attacks',
-            'Mobile Platform Security: Android and iOS security',
-            'IoT Security: IoT vulnerabilities and attacks',
-            'Cloud Computing Security: cloud service models and security',
-            'Cryptography: encryption algorithms, hashing, PKI'
-        ],
-        youtubeChannels: [
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', why: 'CEH exam prep and concepts' },
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Practical security concepts' },
-            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', why: 'Networking and security foundations' },
-            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', why: 'Tool demonstrations' }
-        ],
-        specificLabs: [
-            { name: 'TryHackMe: Pre Security Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/presecurity', duration: '40 hours', skills: ['Foundations'] },
-            { name: 'EC-Council iLabs', platform: 'EC-Council', url: 'https://ilabs.eccouncil.org/', type: 'Official', skills: ['CEH labs'] },
-            { name: 'OWASP Top 10', platform: 'THM', url: 'https://tryhackme.com/room/owasptop10', skills: ['Web vulnerabilities'] },
-            { name: 'Nmap', platform: 'THM', url: 'https://tryhackme.com/room/furthernmap', skills: ['Network scanning'] },
-            { name: 'Metasploit: Introduction', platform: 'THM', url: 'https://tryhackme.com/room/metasploitintro', skills: ['Framework basics'] },
-            { name: 'HTB Academy', platform: 'HTB', url: 'https://academy.hackthebox.com/', skills: ['Various modules'] }
-        ],
-        coreTools: ['Nmap', 'Wireshark', 'Metasploit', 'SQLMap', 'Burp Suite', 'Aircrack-ng', 'John the Ripper', 'Nessus', 'SET Toolkit'],
-        keySkills: ['Reconnaissance', 'Scanning and enumeration', 'System hacking', 'Malware threats', 'Sniffing', 'Social engineering', 'Web application hacking', 'Wireless security']
-    },
-    'pnpt': {
-        name: 'PNPT - Practical Network Penetration Tester',
-        level: 'Attack-Focused',
-        focus: 'REAL WORLD RED TEAM TRAINING with heavy Active Directory focus',
-        prerequisites: ['Basic pentesting knowledge', 'Linux proficiency', 'Networking fundamentals'],
-        examFormat: '5-day practical exam with full report due in 2 days + Live Defense Panel',
-        syllabus: [
-            'Professional Methodology: proper scoping, Rules of Engagement, client communication',
-            'Active Directory Architecture: Kerberos authentication, NTLM, LDAP, Group Policy Objects (GPOs)',
-            'AD Enumeration: BloodHound graph analysis, PowerView enumeration, ldapsearch queries',
-            'LLMNR/NBT-NS Poisoning: using Responder to capture hashes',
-            'Kerberoasting: requesting and cracking TGS service tickets with Rubeus and Impacket',
-            'AS-REP Roasting: targeting accounts without Kerberos pre-authentication',
-            'Pass-the-Hash (PtH): lateral movement with captured NTLM hashes',
-            'Pass-the-Ticket (PtT): Kerberos ticket manipulation',
-            'Golden Ticket Attacks: TGT forging with krbtgt hash',
-            'Silver Ticket Attacks: TGS forging for specific services',
-            'BloodHound Attack Paths: identifying privilege escalation routes in AD',
-            'DCSync Attack: replicating domain credentials',
-            'Post-Exploitation: credential dumping with Mimikatz, lateral movement techniques',
-            'Professional Pentest Reporting: executive summary, risk ratings, remediation recommendations with screenshots'
-        ],
-        youtubeChannels: [
-            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Created by Heath Adams (TCM founder) - official PNPT prep' },
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', why: 'AD boxes and advanced methodology walkthroughs' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'AD attack demonstrations' },
-            { name: 'TCM Security Official', url: 'https://www.youtube.com/@TCMSecurity', why: 'Official PNPT training insights' }
-        ],
-        specificLabs: [
-            { name: 'Practical Ethical Hacking', platform: 'TCM Academy', url: 'https://academy.tcm-sec.com/p/practical-ethical-hacking-the-complete-course', skills: ['Full PNPT prep'] },
-            { name: 'Active Directory Basics', platform: 'THM', url: 'https://tryhackme.com/room/winadbasics', skills: ['AD fundamentals'] },
-            { name: 'Attacktive Directory', platform: 'THM', url: 'https://tryhackme.com/room/attacktivedirectory', skills: ['Kerberoasting', 'AS-REP'] },
-            { name: 'Lateral Movement', platform: 'THM', url: 'https://tryhackme.com/room/lateralmovementandpivoting', skills: ['AD lateral movement'] },
-            { name: 'Forest', platform: 'HTB', difficulty: 'Easy', url: 'https://app.hackthebox.com/machines/Forest', skills: ['AD enumeration', 'AS-REP Roasting'] },
-            { name: 'Active', platform: 'HTB', difficulty: 'Easy', url: 'https://app.hackthebox.com/machines/Active', skills: ['Kerberoasting', 'GPP passwords'] }
-        ],
-        coreTools: ['BloodHound', 'CrackMapExec', 'Impacket', 'Responder', 'Mimikatz', 'PowerView', 'PowerUp', 'Rubeus', 'Evil-WinRM'],
-        keySkills: ['External/Internal pentesting', 'Active Directory mastery', 'Professional report writing', 'Live defense presentation']
-    },
     'oscp': {
         name: 'OSCP - Offensive Security Certified Professional',
         level: 'Attack-Focused',
@@ -463,61 +368,22 @@ const CERTIFICATION_CONTENT = {
             'Windows Privilege Escalation: service misconfigurations, unquoted service paths, registry abuse, token impersonation',
             'Pivoting & Tunneling: port forwarding, SSH tunneling, using compromised hosts as pivot points',
             'Active Directory: basic enumeration, Kerberoasting, simple AD attacks',
-            'Manual Exploit Modification: editing Python/Ruby exploits, adjusting payloads, debugging scripts',
-            'Time Management Under Pressure: 24-hour exam simulation strategies'
+            'Manual Exploit Modification: editing Python/Ruby exploits, adjusting payloads, debugging scripts'
         ],
         youtubeChannels: [
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', why: 'Essential HTB walkthroughs with manual methodology - THE OSCP resource' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', why: 'Essential HTB walkthroughs with manual methodology' },
             { name: 'TJ Null', url: 'https://www.youtube.com/@TJNull', why: 'OSCP prep lists and guidance' },
             { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Practical techniques and mindset' },
-            { name: 'S1REN', url: 'https://www.youtube.com/@S1REN', why: 'OSCP-style machine walkthroughs' },
-            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', why: 'Web exploitation techniques' }
+            { name: 'S1REN', url: 'https://www.youtube.com/@S1REN', why: 'OSCP-style machine walkthroughs' }
         ],
         specificLabs: [
-            { name: 'PEN-200 Course Labs', platform: 'OffSec', url: 'https://www.offensive-security.com/pwk-oscp/', skills: ['Official OSCP prep'] },
-            { name: 'Proving Grounds Practice', platform: 'OffSec', url: 'https://www.offensive-security.com/labs/individual/', skills: ['OSCP-like boxes'] },
-            { name: 'TJ Null OSCP HTB List', platform: 'HTB', url: 'https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8', skills: ['OSCP-style practice'] },
-            { name: 'Offensive Pentesting Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/pentesting', skills: ['Complete methodology'] },
-            { name: 'HTB Pro Labs: Dante', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['AD and pivoting'] }
+            { name: 'PEN-200 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/pen-200/', skills: ['Official OSCP prep'] },
+            { name: 'Proving Grounds Practice', platform: 'OffSec', url: 'https://www.offsec.com/labs/individual/', skills: ['OSCP-like boxes'] },
+            { name: 'TJ Null OSCP HTB List', platform: 'HTB', url: 'https://ippsec.rocks', skills: ['OSCP-style practice'] },
+            { name: 'Offensive Pentesting Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/pentesting', skills: ['Complete methodology'] }
         ],
-        coreTools: ['Nmap', 'Netcat', 'Burp Suite', 'Metasploit (limited use)', 'LinPEAS', 'WinPEAS', 'Chisel', 'Impacket', 'Custom scripts'],
-        keySkills: ['Manual exploit modification', 'Time management under pressure', 'Systematic enumeration', 'Privilege escalation', 'Buffer overflow']
-    },
-    'cpts': {
-        name: 'CPTS - HTB Certified Penetration Testing Specialist',
-        level: 'Attack-Focused',
-        focus: 'MOST DETAILED PENTEST COURSE ON EARTH covering wide range of attack vectors',
-        prerequisites: ['Strong Linux/Windows skills', 'Web security knowledge', 'AD mastery'],
-        examFormat: '10-day intense practical exam with full pentest report',
-        syllabus: [
-            'Network Attacks: ARP spoofing, VLAN hopping, man-in-the-middle attacks',
-            'Deep Service Enumeration: exhaustive service fingerprinting and vulnerability identification',
-            'Advanced Web Attacks: advanced SQLi (second-order, out-of-band), XXE, SSRF chaining, deserialization exploits',
-            'Active Directory: all PNPT attacks plus constrained/unconstrained delegation, ADCS attacks, forest trusts',
-            'Wireless Attacks: WPA/WPA2 cracking, evil twin attacks, WPS attacks',
-            'Cloud Security: AWS and Azure misconfigurations, S3 bucket exploitation',
-            'Password Attacks: advanced hash cracking, NTLM relay attacks, Kerberos delegation abuse',
-            'Evasion Techniques: AV bypass, obfuscation, in-memory execution',
-            'Advanced Pivoting & Tunneling: Chisel, Ligolo-NG, SSH advanced tunneling, Metasploit routes',
-            'Exploit Development Basics: fuzzing, basic buffer overflows, identifying vulnerabilities'
-        ],
-        youtubeChannels: [
-            { name: 'Hack The Box Official', url: 'https://www.youtube.com/@HackTheBox', why: 'Official HTB Academy content' },
-            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', why: 'In-depth HTB walkthroughs - essential viewing' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'Detailed exploitation techniques' },
-            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', why: 'Bug bounty and web exploitation' },
-            { name: 'ZSecurity', url: 'https://www.youtube.com/@zSecurity', why: 'Wireless and network attacks' }
-        ],
-        specificLabs: [
-            { name: 'Penetration Tester Path', platform: 'HTB Academy', url: 'https://academy.hackthebox.com/path/preview/penetration-tester', skills: ['Complete CPTS prep'] },
-            { name: 'Dante Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['AD pivoting'] },
-            { name: 'Zephyr Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Advanced techniques'] },
-            { name: 'Offshore Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Enterprise networks'] },
-            { name: 'Pivoting, Tunneling & Port Forwarding', platform: 'HTB Academy', skills: ['Advanced pivoting'] },
-            { name: 'Active Directory Enumeration & Attacks', platform: 'HTB Academy', skills: ['Complete AD'] }
-        ],
-        coreTools: ['Nmap', 'Netcat', 'Gobuster', 'FFUF', 'Empire', 'Sliver', 'Covenant', 'Chisel', 'Ligolo-NG', 'BloodHound', 'CrackMapExec', 'Impacket'],
-        keySkills: ['Advanced pivoting', 'Complex web exploitation', 'Enterprise AD attacks', 'Exhaustive reporting', 'Cloud security']
+        coreTools: ['Nmap', 'Netcat', 'Burp Suite', 'Metasploit', 'LinPEAS', 'WinPEAS', 'Chisel', 'Impacket'],
+        keySkills: ['Manual exploit modification', 'Systematic enumeration', 'Privilege escalation', 'Active Directory basics']
     },
     'osep': {
         name: 'OSEP - Offensive Security Experienced Penetration Tester',
@@ -529,223 +395,246 @@ const CERTIFICATION_CONTENT = {
             'AV Evasion: signature-based bypass, heuristic evasion, behavior-based detection avoidance',
             'AMSI Bypass: PowerShell AMSI patching and obfuscation techniques',
             'Custom Payloads: C# payload development, shellcode loaders, custom droppers',
-            'Living-off-the-Land (LOLBins): using built-in Windows binaries for attack (certutil, rundll32, regsvr32)',
-            'PowerShell Obfuscation: encoding, encryption, script block logging bypass',
-            'C# Tooling: SharpSploit, custom C# tools, in-memory execution',
+            'Living-off-the-Land (LOLBins): using built-in Windows binaries for attack',
             'Process Injection: CreateRemoteThread, process hollowing, reflective DLL injection',
-            'DLL Hijacking & Side-Loading: exploiting DLL search order for persistence',
-            'Custom Loaders: Donut shellcode execution, reflective PE loading',
-            'Advanced AD: cross-forest attacks, trust exploitation, Kerberos delegation abuse'
+            'Advanced AD: cross-forest attacks, trust exploitation, Kerberos delegation abuse',
+            'Linux Evasion: Bypassing local security controls on Linux',
+            'Lateral Movement: Advanced techniques for moving through hardened networks'
         ],
         youtubeChannels: [
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', why: 'Red team training experts, CRTO creators' },
+            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', why: 'Red team training experts' },
             { name: 'Sektor7', url: 'https://institute.sektor7.net/', why: 'Malware development and evasion courses' },
-            { name: 'Red Team Village', url: 'https://www.youtube.com/@RedTeamVillage', why: 'Community red teaming content' },
-            { name: 'Ired.team', url: 'https://www.ired.team/', why: 'Excellent red teaming resource and techniques' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'Malware analysis and evasion techniques' }
+            { name: 'Ired.team', url: 'https://www.ired.team/', why: 'Excellent red teaming resource' },
+            { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', why: 'Enterprise security talks' }
         ],
         specificLabs: [
-            { name: 'PEN-300 Course Labs', platform: 'OffSec', url: 'https://www.offensive-security.com/pen300-osep/', skills: ['Official OSEP prep'] },
+            { name: 'PEN-300 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/pen-300/', skills: ['Official OSEP prep'] },
             { name: 'RastaLabs', platform: 'HTB Pro Lab', url: 'https://app.hackthebox.com/prolabs', skills: ['Enterprise red teaming'] },
-            { name: 'Red Teaming Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/redteaming', skills: ['Red team techniques'] },
-            { name: 'Custom AD Lab', platform: 'Self-Hosted', skills: ['AD attack practice'] }
+            { name: 'Cybernetics', platform: 'HTB Pro Lab', url: 'https://app.hackthebox.com/prolabs', skills: ['Active Directory and Evasion'] },
+            { name: 'Red Teaming Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/redteaming', skills: ['Red team techniques'] }
         ],
-        coreTools: ['Sliver', 'Mythic', 'Empire', 'Covenant', 'Donut', 'SharpSploit', 'ScareCrow', 'Mimikatz', 'BloodHound', 'Custom C# tools'],
-        keySkills: ['AV/EDR evasion', 'Custom payload development', 'Advanced AD persistence', 'Lateral movement', 'C# development']
+        coreTools: ['Sliver', 'Mythic', 'Empire', 'Donut', 'SharpSploit', 'ScareCrow', 'Mimikatz', 'BloodHound'],
+        keySkills: ['AV/EDR evasion', 'Custom payload development', 'Advanced AD attack paths', 'C# development']
     },
     'oswe': {
         name: 'OSWE - Offensive Security Web Expert',
-        level: 'Advanced Attack',
-        focus: 'WHITE-BOX WEB HACKING through source code review and exploit chaining',
-        prerequisites: ['Strong web security knowledge', 'Programming: Python, PHP, Java, Node.js'],
-        examFormat: '48-hour exam reviewing and exploiting real web applications',
+        level: 'Advanced Web',
+        focus: 'White-box web application security and exploit development',
+        prerequisites: ['OSCP recommended', 'Proficiency in JavaScript, PHP, Python', 'Web application security basics'],
+        examFormat: '48-hour practical exam + 24 hours for report',
         syllabus: [
-            'Programming Languages: deep knowledge of Python, PHP, Java, JavaScript, Node.js code patterns',
-            'Source Code Review: manual code audit, identifying logic flaws, authentication bypass',
-            'Logic Flaw Detection: business logic vulnerabilities, race conditions, state manipulation',
-            'Deserialization Attacks: Java deserialization, PHP object injection, Python pickle, .NET deserialization',
-            'SSRF Chaining: exploiting Server-Side Request Forgery to access internal services and cloud metadata',
-            'RCE from Code: template injection (SSTI), eval vulnerabilities, code execution chains',
-            'Advanced Burp Suite: custom extensions, macro creation, automated exploit chains',
-            'Custom Exploit Development: writing proof-of-concept exploits from source code analysis',
-            'Authentication Bypass: JWT attacks, session management flaws, OAuth misconfigurations',
-            'XXE Exploitation: XML External Entity attacks and data exfiltration'
+            'Source Code Analysis: systematic review of large codebases for vulnerabilities',
+            'Deserialization Attacks: PHP, Java, and .NET deserialization vulnerabilities',
+            'SQL Injection: Advanced blind and time-based SQLi via code analysis',
+            'Authentication Bypass: Finding and exploiting flaws in custom auth logic',
+            'Cross-Origin Attacks: XSS to RCE, CSRF to RCE, CORS misconfigurations',
+            'Server-Side Template Injection (SSTI): Exploiting template engines',
+            'Prototype Pollution: Exploiting JavaScript-specific vulnerabilities',
+            'Chaining Vulnerabilities: Combining minor flaws into full RCE chains'
         ],
         youtubeChannels: [
-            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', why: 'Exceptional OSWE prep and web security labs - THE OSWE resource' },
-            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', why: 'Bug bounty and web hacking methodology' },
-            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', why: 'Bug bounty hunting and advanced web techniques' },
-            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', why: 'Advanced web exploitation concepts and bug bounty' },
-            { name: 'BugCrowd', url: 'https://www.youtube.com/@Bugcrowd', why: 'Bug bounty webinars and research' },
-            { name: 'OWASP', url: 'https://www.youtube.com/@OWASPGLOBAL', why: 'Web security standards and research' }
+            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', why: 'Deep dives into OSWE-style web exploitation' },
+            { name: 'PortSwigger', url: 'https://www.youtube.com/@PortSwigger', focus: 'Official Burp Suite and Web Academy content' },
+            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', why: 'Web security research methodology' },
+            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', why: 'Bug bounty mindset and techniques' }
         ],
         specificLabs: [
-            { name: 'WEB-300 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/awae-oswe/', skills: ['Official OSWE prep'] },
-            { name: 'PortSwigger Web Security Academy', platform: 'PortSwigger', url: 'https://portswigger.net/web-security', skills: ['Advanced web exploits'] },
-            { name: 'Web Exploitation Advanced', platform: 'HTB Academy', url: 'https://academy.hackthebox.com/', skills: ['Advanced web techniques'] },
-            { name: 'HackerOne CTFs', platform: 'HackerOne', url: 'https://www.hackerone.com/for-hackers/hacker-101', skills: ['Real-world web vulns'] }
+            { name: 'WEB-300 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/web-300/', skills: ['Official OSWE prep'] },
+            { name: 'PortSwigger Web Security Academy', platform: 'PortSwigger', url: 'https://portswigger.net/web-security', skills: ['Advanced web labs'] },
+            { name: 'Hack The Box Academy: Web Senior', platform: 'HTB', url: 'https://academy.hackthebox.com/', skills: ['Advanced web analysis'] }
         ],
-        coreTools: ['Burp Suite Professional', 'Python', 'Custom scripts', 'Debuggers (gdb, node inspector)', 'Source code analyzers', 'curl', 'jq'],
-        keySkills: ['Source code analysis', 'Exploit development (Python)', 'Complex vulnerability chaining', 'Auth bypass', 'Deserialization']
+        coreTools: ['Burp Suite Professional', 'Visual Studio Code', 'Python', 'Postman', 'SQLMap'],
+        keySkills: ['Source code analysis', 'Exploit chaining', 'Custom exploit development', 'Advanced web exploitation']
     },
     'osda': {
         name: 'OSDA - Offensive Security Defense Analyst',
-        level: 'Defense-Focused',
-        focus: 'SOC & BLUE TEAM operations with focus on log analysis and threat hunting',
-        prerequisites: ['Security fundamentals', 'Log analysis basics', 'Networking knowledge'],
-        examFormat: '24-hour practical defense-oriented exam',
+        level: 'Defensive',
+        focus: 'Detection engineering, log analysis, and incident response',
+        prerequisites: ['Basic networking', 'OS fundamentals', 'Security mindset'],
+        examFormat: '24-hour practical exam',
         syllabus: [
-            'Log Analysis: Windows Event Logs, syslog, Apache/Nginx logs, application logs',
-            'SIEM Usage: Splunk queries (SPL), Elastic Stack (ELK), log aggregation and correlation',
-            'Alert Triage: identifying false positives, validating true positives, alert prioritization',
-            'Incident Response: NIST IR framework, containment strategies, eradication, recovery',
-            'Threat Hunting: proactive searching for IOCs, behavioral analysis, MITRE ATT&CK mapping',
-            'Detection Engineering: writing Sigma rules, YARA rule creation, custom detections',
-            'Network Traffic Analysis: Wireshark packet analysis, Zeek (Bro) logs, Suricata IDS',
-            'Malware Analysis Basics: static and dynamic analysis, sandbox usage',
-            'Forensics Fundamentals: disk forensics, memory analysis, timeline creation'
+            'Security Monitoring: Setting up and managing monitoring infrastructure',
+            'Log Analysis: Analyzing Windows, Linux, and network logs for threats',
+            'SIEM Mastery: Using ELK/Splunk for detection and analysis',
+            'Detection Engineering: Creating Sigma and YARA rules',
+            'Incident Response: Investigating and containing security breaches',
+            'Threat Hunting: Proactively searching for signs of compromise',
+            'Digital Forensics: Basic host and network forensics'
         ],
         youtubeChannels: [
-            { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', why: 'Official defensive security training and platform' },
-            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'IR, log analysis, and malware triage' },
-            { name: 'Blue Team Village', url: 'https://www.youtube.com/@BlueTeamVillage', why: 'Community defensive security content' },
-            { name: 'Elastic Security', url: 'https://www.youtube.com/@OfficialElasticVideos', why: 'Elastic Stack tutorials and use cases' }
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'DFIR and Blue team walkthroughs' },
+            { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security training' },
+            { name: 'Elastic Security', url: 'https://www.youtube.com/@ElasticSecurity', focus: 'SIEM and endpoint detection' },
+            { name: 'Detection Engineering', url: 'https://www.youtube.com/@DetectionEngineering', focus: 'Rules and monitoring' }
         ],
         specificLabs: [
-            { name: 'SOC-200 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/soc200-osda/', skills: ['Official OSDA prep'] },
-            { name: 'SOC Level 1 Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/soclevel1', skills: ['SOC analyst fundamentals'] },
-            { name: 'Sherlock Challenges', platform: 'HTB', url: 'https://app.hackthebox.com/sherlocks', skills: ['Incident investigation'] },
-            { name: 'Splunk Boss of the SOC', platform: 'Splunk', url: 'https://www.splunk.com/en_us/blog/conference/boss-of-the-soc.html', skills: ['SIEM challenges'] },
-            { name: 'Security Onion', platform: 'Self-Hosted', url: 'https://securityonionsolutions.com/', skills: ['Full SOC stack'] }
+            { name: 'SOC-200 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/soc-200/', skills: ['Official OSDA prep'] },
+            { name: 'CyberDefenders', platform: 'CyberDefenders', url: 'https://cyberdefenders.org/', skills: ['Blue team challenges'] },
+            { name: 'Sherlocks', platform: 'HTB', url: 'https://app.hackthebox.com/sherlocks', skills: ['Incident Response labs'] },
+            { name: 'Blue Team Level 1', platform: 'Security Blue Team', url: 'https://securityblue.team/', skills: ['Practical defensive skills'] }
         ],
-        coreTools: ['Splunk', 'Elastic Stack (ELK)', 'Sysmon', 'Sigma Rules', 'YARA', 'Wireshark', 'Zeek', 'Suricata'],
-        keySkills: ['SIEM mastery', 'Log analysis', 'Incident Response', 'Threat hunting', 'Detection engineering']
+        coreTools: ['ELK Stack', 'Splunk', 'Wireshark', 'Sysmon', 'Sigma', 'YARA', 'Velociraptor'],
+        keySkills: ['Detection engineering', 'Log analysis', 'Incident response', 'Threat hunting']
     },
     'oswp': {
         name: 'OSWP - Offensive Security Wireless Professional',
         level: 'Specialized',
-        focus: '802.11 theory and practical wireless attacks (WPA/WPA2, Evil Twin)',
-        prerequisites: ['Networking fundamentals', 'Linux proficiency'],
-        examFormat: '3 hours 45 minutes practical exam',
+        focus: 'Auditing and securing wireless networks',
+        prerequisites: ['Basic networking', 'Linux fundamentals'],
+        examFormat: '4-hour practical exam',
         syllabus: [
-            '802.11 Wireless Theory: 802.11 a/b/g/n/ac/ax standards, frame structures, channel management',
-            'WPA/WPA2 Attacks: 4-way handshake capture, dictionary attacks, PMKID attacks',
-            'Deauthentication Attacks: forcing client disconnection for handshake capture',
-            'Evil Twin Attacks: rogue access point deployment, credential harvesting',
-            'WPS Attacks: PIN brute-forcing, Pixie Dust attacks',
-            'MAC Filtering Bypass: spoofing allowed MAC addresses',
-            'Hidden SSID Discovery: identifying and connecting to hidden networks',
-            'Wireless Packet Analysis: analyzing 802.11 frames with Wireshark',
-            'Hardware Requirements: wireless adapters with monitor mode and packet injection'
+            'Wireless Technology Basics: IEEE 802.11 standards and protocols',
+            'Reconnaissance: Identifying wireless networks and clients',
+            'Aircrack-ng Suite: Mastery of wireless auditing tools',
+            'WEP/WPA/WPA2 Attacks: Exploiting legacy and modern encryption',
+            'WPA3 Security: Understanding the latest wireless security standards',
+            'Rogue Access Points: Setting up and detecting evil twins',
+            'Enterprise Wireless: Attacking WPA-Enterprise and RADIUS'
         ],
         youtubeChannels: [
-            { name: 'Hak5', url: 'https://www.youtube.com/@hak5', why: 'Wireless hacking hardware (WiFi Pineapple) and techniques' },
-            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', why: 'Wireless networking foundations and attacks' },
-            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', why: 'WiFi security concepts and demonstrations' },
-            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@securitytube', why: 'WiFu wireless security training' }
+            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@VivekRamachandran', why: 'Wireless security expert' },
+            { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Wireless equipment and attacks' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Wireless networking labs' }
         ],
         specificLabs: [
-            { name: 'PEN-210 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/pen210-oswp/', skills: ['Official OSWP prep'] },
-            { name: 'Wireless Hacking 101', platform: 'THM', url: 'https://tryhackme.com/room/wifihacking101', skills: ['WPA2 cracking basics'] },
-            { name: 'Real Hardware Testing', platform: 'Home Lab', skills: ['Aircrack-ng with Alfa adapters', 'Hands-on practice'] }
+            { name: 'PEN-210 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/pen-210/', skills: ['Official OSWP prep'] },
+            { name: 'Wireless Pentesting Path', platform: 'Pentester Academy', url: 'https://www.pentesteracademy.com/', skills: ['Advanced wireless attacks'] }
         ],
-        coreTools: ['Aircrack-ng', 'Airmon-ng', 'Airodump-ng', 'Aireplay-ng', 'Bettercap', 'Wifite', 'Reaver', 'Kismet'],
-        keySkills: ['Packet capture/analysis', 'Cracking handshakes', 'Deploying rogue APs', 'WPS attacks', '802.11 protocol knowledge']
-    },
-    'osed': {
-        name: 'OSED - Offensive Security Exploit Developer',
-        level: 'Expert',
-        focus: 'Windows exploit development and reverse engineering',
-        prerequisites: ['x86 Assembly', 'Debugging skills', 'Python programming'],
-        examFormat: '48-hour exam developing multiple working exploits',
-        syllabus: [
-            'x86 Assembly: register manipulation, stack operations, CPU instructions',
-            'Stack-Based Buffer Overflows: EIP control, bad character identification, shellcode space',
-            'SEH Overflows: Structured Exception Handler exploitation, POP POP RET chains',
-            'ROP Chains: Return-Oriented Programming to bypass DEP, gadget finding',
-            'Egg Hunters: finding shellcode when buffer space is limited',
-            'Reverse Engineering: IDA Pro usage, Ghidra analysis, static code analysis',
-            'Debugging: WinDbg mastery, x64dbg, Immunity Debugger with mona.py',
-            'Shellcode Development: custom payload creation, encoder writing',
-            'DEP and ASLR Bypass: Data Execution Prevention and Address Space Layout Randomization mitigation',
-            'Fuzzing Basics: identifying crashes and exploitable conditions'
-        ],
-        youtubeChannels: [
-            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', why: 'Binary exploitation deep dives - essential resource' },
-            { name: 'Corelan Team', url: 'https://www.corelan.be/', why: 'Classic exploit development tutorials' },
-            { name: 'OpenSecurityTraining', url: 'https://opensecuritytraining.info/', why: 'Free exploit development courses' },
-            { name: 'FuzzySecurity', url: 'http://www.fuzzysecurity.com/', why: 'Classic exploit development guides' },
-            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', why: 'Reverse engineering and malware analysis' }
-        ],
-        specificLabs: [
-            { name: 'EXP-301 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/exp301-osed/', skills: ['Official OSED prep'] },
-            { name: 'Phoenix', platform: 'Exploit Education', url: 'https://exploit.education/phoenix/', skills: ['Stack overflow practice'] },
-            { name: 'Narnia', platform: 'OverTheWire', url: 'https://overthewire.org/wargames/narnia/', skills: ['Binary exploitation'] },
-            { name: 'Pwn Machines', platform: 'HTB', skills: ['Binary exploitation challenges'] }
-        ],
-        coreTools: ['WinDbg', 'x64dbg', 'Immunity Debugger', 'mona.py', 'IDA Pro', 'Ghidra', 'GDB', 'Radare2'],
-        keySkills: ['x86 Assembly coding', 'Custom shellcode development', 'Exploit chaining', 'Buffer overflow exploitation', 'ROP chain creation']
-    },
-    'osee': {
-        name: 'OSEE - Offensive Security Exploitation Expert',
-        level: 'Expert',
-        focus: 'Advanced Windows internals and kernel exploitation',
-        prerequisites: ['OSED certification', 'Advanced Assembly', 'OS Internals knowledge'],
-        examFormat: '72-hour intense exploitation exam',
-        syllabus: [
-            'Kernel Exploitation: kernel mode debugging, pool overflows, use-after-free (UAF)',
-            'Windows Internals: advanced heap management, memory structures, kernel objects',
-            'Heap Exploitation: heap spraying, heap overflows, vtable hijacking',
-            'Advanced Shellcode: custom shellcode for modern Windows mitigations',
-            'Browser Exploitation: JavaScript engine exploitation, DOM manipulation',
-            'Mitigation Bypass: DEP, ASLR, CFG, arbitrary write primitives',
-            'Fuzzing: advanced fuzzing techniques, custom fuzzer development',
-            '0-day Research: vulnerability discovery methodology, patch diffing'
-        ],
-        youtubeChannels: [
-            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', why: 'Advanced exploitation techniques and concepts' },
-            { name: 'Saumil Shah', url: 'https://twitter.com/saumilshah', why: 'Browser and advanced exploitation (Twitter for conference talks)' },
-            { name: 'OpenSecurityTraining2', url: 'https://p.ost2.fyi/', why: 'Advanced exploitation courses' },
-            { name: 'REcon Conference', url: 'https://recon.cx/', why: 'Cutting-edge security research presentations' }
-        ],
-        specificLabs: [
-            { name: 'EXP-401 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/exp401-osee/', skills: ['Official OSEE prep'] },
-            { name: 'Custom Kernel Labs', platform: 'Self-Hosted', skills: ['Kernel debugging environment'] },
-            { name: 'Modern Binary Exploitation', platform: 'RPISEC', url: 'https://github.com/RPISEC/MBE', skills: ['Advanced exploitation'] }
-        ],
-        coreTools: ['WinDbg', 'IDA Pro', 'Binary Ninja', 'AFL (American Fuzzy Lop)', 'Visual Studio', 'Hex-Rays Decompiler'],
-        keySkills: ['Kernel-mode exploitation', 'Mitigation bypass (modern Windows)', '0-day research mindset', 'Heap exploitation', 'Browser exploitation']
+        coreTools: ['Aircrack-ng', 'Wifite', 'Bettercap', 'Kismet', 'Hostapd-WPE'],
+        keySkills: ['Wireless auditing', 'Encryption cracking', 'Rogue AP deployment', 'WPA3 knowledge']
     },
     'osmr': {
         name: 'OSMR - Offensive Security macOS Researcher',
-        level: 'Expert',
-        focus: 'macOS internals, XNU kernel, and Objective-C research',
-        prerequisites: ['macOS proficiency', 'Reverse engineering', 'C/Objective-C programming'],
-        examFormat: '48-hour macOS exploitation exam',
+        level: 'Specialized',
+        focus: 'macOS internals and exploit development',
+        prerequisites: ['Advanced OS knowledge', 'Reverse engineering basics', 'C/Objective-C knowledge'],
+        examFormat: '48-hour practical exam',
         syllabus: [
-            'macOS Internals: XNU kernel architecture, Mach-O binary format, dyld loading',
-            'XNU Kernel: kernel debugging, kernel extensions (kexts), system calls',
-            'TCC (Transparency, Consent, Control): privacy database exploitation',
-            'Sandbox Bypass: escaping macOS application sandbox',
-            'SIP Bypass: System Integrity Protection circumvention techniques',
-            'Code Signing: understanding and bypassing code signature validation',
-            'Objective-C Reversing: class-dump usage, runtime manipulation, method swizzling',
-            'XPC Exploitation: Inter-Process Communication vulnerabilities',
-            'Entitlements: privilege escalation through entitlement abuse',
-            'macOS Malware Analysis: analyzing Mac-specific threats'
+            'macOS Internals: XNU kernel, Mach-O binary format, system architecture',
+            'macOS Security Controls: Sandbox, TCC, SIP, Gatekeeper',
+            'Objective-C/Swift Analysis: Reversing macOS applications',
+            'macOS Exploit Dev: Exploiting memory corruption on macOS',
+            'Persistence: Sophisticated macOS persistence mechanisms',
+            'Privilege Escalation: macOS-specific escalation techniques',
+            'Frida for macOS: Dynamic instrumentation for research'
         ],
         youtubeChannels: [
-            { name: 'Patrick Wardle (Objective-See)', url: 'https://objective-see.org/', why: 'THE leading macOS security researcher - essential resource' },
-            { name: 'BlackHat macOS Talks', url: 'https://www.youtube.com/@BlackHatOfficialYT', why: 'State-of-the-art macOS security research presentations' },
-            { name: 'macOS Security Conference', url: 'https://www.youtube.com/@ObjectivebytheSea', why: 'Objective by the Sea conference talks' }
+            { name: 'Objective-See', url: 'https://objective-see.org/', why: 'macOS security tools and research' },
+            { name: 'Patrick Wardle', url: 'https://twitter.com/patrickwardle', why: 'Top macOS security researcher' },
+            { name: 'BlackHat macOS talks', url: 'https://www.blackhat.com/', focus: 'Advanced macOS research' }
         ],
         specificLabs: [
-            { name: 'EXP-312 Course', platform: 'OffSec', url: 'https://www.offensive-security.com/exp312-osmr/', skills: ['Official OSMR prep'] },
-            { name: 'Objective-See Tools', platform: 'Personal Lab', url: 'https://objective-see.org/tools.html', skills: ['macOS security tools'] },
-            { name: 'macOS Internals Labs', platform: 'Self-Hosted', skills: ['XNU kernel debugging'] }
+            { name: 'EXP-301 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/exp-301/', skills: ['Official OSMR prep'] }
         ],
-        coreTools: ['Hopper Disassembler', 'LLDB', 'Frida', 'Xcode', 'class-dump', 'otool', 'MachOView', 'dtrace'],
-        keySkills: ['macOS kernel research', 'Objective-C reversing', 'XPC security analysis', 'Sandbox escapes', 'SIP bypass']
+        coreTools: ['Frida', 'Hopper Disassembler', 'Ghidra', 'LLDB', 'TaskExplorer', 'LuLu'],
+        keySkills: ['macOS internals', 'Exploit development', 'Reverse engineering', 'Security control bypass']
+    },
+    'cpts': {
+        name: 'CPTS - Certified Penetration Testing Specialist (HTB)',
+        level: 'Attack-Focused',
+        focus: 'Extremely detailed and technical penetration testing methodology',
+        prerequisites: ['Strong technical background', 'Linux and Windows proficiency'],
+        examFormat: '10-day practical exam',
+        syllabus: [
+            'Network Enumeration: Advanced Nmap and service-specific enumeration',
+            'Web Exploitation: Comprehensive coverage of web attack vectors',
+            'Active Directory: Extensive AD attack paths and methodology',
+            'Pivoting: Complex multi-layer network pivoting',
+            'Privilege Escalation: Deep dives into Linux and Windows escalation',
+            'Vulnerability Assessment: Professional reporting and methodology'
+        ],
+        youtubeChannels: [
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', why: 'Essential HTB walkthroughs' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', why: 'Tool tutorials and methodology' }
+        ],
+        specificLabs: [
+            { name: 'CPTS Path', platform: 'HTB Academy', url: 'https://academy.hackthebox.com/path/outline/penetration-tester', skills: ['Complete CPTS prep'] },
+            { name: 'HTB Machines', platform: 'HTB', url: 'https://app.hackthebox.com/machines', skills: ['Practical application'] }
+        ],
+        coreTools: ['Nmap', 'Burp Suite', 'Metasploit', 'BloodHound', 'CrackMapExec', 'Impacket'],
+        keySkills: ['Advanced methodology', 'Detailed reporting', 'Technical depth']
+    },
+    'ejpt': {
+        name: 'eJPT - eLearnSecurity Junior Penetration Tester',
+        level: 'Entry',
+        focus: 'Professional pentesting workflow with real-world network scenarios',
+        prerequisites: ['Basic networking', 'Linux command line basics'],
+        examFormat: '48-hour practical exam with multiple machines',
+        syllabus: [
+            'Advanced Networking: subnetting calculations, routing concepts, VLANs',
+            'Service Enumeration: SMB, FTP, SSH, HTTP, SNMP, MySQL, PostgreSQL',
+            'Metasploit Framework: complete exploitation workflow',
+            'Web Exploitation: SQL injection, XSS, auth bypass',
+            'Credential Attacks: password spraying, hash cracking',
+            'Pivoting Basics: port forwarding, SSH tunneling'
+        ],
+        youtubeChannels: [
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Excellent entry-level content' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking and certifications' }
+        ],
+        specificLabs: [
+            { name: 'eJPT Course Labs', platform: 'INE', url: 'https://ine.com/learning/paths/elearnsecurity-junior-penetration-tester-v2-ejptv2', skills: ['Official eJPT prep'] }
+        ],
+        coreTools: ['Nmap', 'Metasploit', 'Hydra', 'Netcat', 'Enum4linux'],
+        keySkills: ['Network scanning', 'Exploit exploitation basics', 'Professional reporting']
+    },
+    'thm-jr-pentester': {
+        name: 'THM JR - TryHackMe Junior Penetration Tester',
+        level: 'Entry',
+        focus: 'Hands-on practical skills with guided labs, perfect for absolute beginners',
+        prerequisites: ['Basic computer literacy'],
+        examFormat: 'Practical path completion',
+        syllabus: [
+            'Linux Fundamentals', 'Windows Fundamentals', 'Networking Basics', 'Reconnaissance',
+            'Web Attacks', 'Privilege Escalation', 'Metasploit Basics'
+        ],
+        youtubeChannels: [
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', why: 'Excellent walkthroughs' }
+        ],
+        specificLabs: [
+            { name: 'Jr Pentester Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/jrpenetrationtester', skills: ['Basic pentesting'] }
+        ],
+        coreTools: ['Nmap', 'Gobuster', 'Metasploit', 'Burp Suite'],
+        keySkills: ['Enumeration', 'Exploitation basics']
+    },
+    'pnpt': {
+        name: 'PNPT - Practical Network Penetration Tester',
+        level: 'Attack-Focused',
+        focus: 'Real-world penetration testing with OSINT and AD focus',
+        prerequisites: ['Basic networking', 'Security mindset'],
+        examFormat: '5-day exam + 2 days for report + debrief',
+        syllabus: [
+            'OSINT', 'External Reconnaissance', 'Internal Network Penetration Testing',
+            'Active Directory Exploitation', 'Post-Exploitation', 'Professional Reporting'
+        ],
+        youtubeChannels: [
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', why: 'Creator of PNPT' }
+        ],
+        specificLabs: [
+            { name: 'Practical Ethical Hacking', platform: 'TCM Academy', url: 'https://academy.tcm-sec.com/', skills: ['Full pentest methodology'] }
+        ],
+        coreTools: ['Nmap', 'Responder', 'CrackMapExec', 'BloodHound', 'Impacket'],
+        keySkills: ['OSINT', 'Active Directory', 'Report writing']
+    },
+    'osed': {
+        name: 'OSED - Offensive Security Experienced Exploit Developer',
+        level: 'Advanced Exploit Dev',
+        focus: 'Windows exploit development and reverse engineering',
+        prerequisites: ['OSCP or equivalent', 'Assembly basics', 'Debugging skills'],
+        examFormat: '48-hour practical exam',
+        syllabus: [
+            'Windows x86 Exploit Development', 'Bypassing DEP and ASLR', 'Format String Attacks',
+            'Reverse Engineering with IDA Pro/Ghidra', 'Custom Shellcode', 'Advanced ROP'
+        ],
+        youtubeChannels: [
+            { name: 'Corelan', url: 'https://www.corelan.be/', why: 'Exploit development legend' },
+            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', focus: 'Reverse engineering' }
+        ],
+        specificLabs: [
+            { name: 'EXP-301 Course Labs', platform: 'OffSec', url: 'https://www.offsec.com/courses/exp-301/', skills: ['Official OSED prep'] }
+        ],
+        coreTools: ['WinDbg', 'x64dbg', 'Ghidra', 'IDA Free'],
+        keySkills: ['Windows internals', 'Exploit development', 'Reverse engineering']
     }
 };
 
@@ -1135,20 +1024,23 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${phaseCount} phases). Focus on quality over quantity.
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
-5. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
-6. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
-7. **CLICKABLE LINKS**: For YouTube, Web resources, and Books, you MUST provide working clickable links in the "url" field. If a specific URL is unknown, use a high-quality search URL or the primary site.
-8. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
-9. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
-10. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
-11. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus provided. The generated roadmap MUST cover EVERY SINGLE technical topic and element listed in the respective syllabus without exception.
+6. **RESOURCE DIVERSITY**: Each phase MUST contain at least 1 HTB lab, 1 THM lab, and 1 YouTube resource.
+7. **CONTEXTUAL GUIDANCE**: Tailor "Mentor Key Points" to the specific certification's mindset (e.g., "Manual enumeration" for OSCP vs "Code review" for OSWE).
+8. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
+9. **CLICKABLE LINKS**: For YouTube, Web resources, and Books, you MUST provide working clickable links in the "url" field. If a specific URL is unknown, use a high-quality search URL or the primary site.
+10. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
+11. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
+12. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
+13. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+14. **API KEY MANAGEMENT**: Include specific guidance on generating and safely segregating API keys for platforms like HTB, THM, and other suggested resources within the relevant roadmap phases.
 ${modeSpecificInstructions}
 
-${!modeSpecificInstructions ? `PHASE STRUCTURE (8-10 Phases):
+${!modeSpecificInstructions ? `PHASE STRUCTURE (${phaseCount} Phases):
 Phases 1-2: Foundations (Linux, Networking, Windows, Scripting)
 Phases 3-4: Web & Network Enumeration + Initial Access
 Phases 5-6: Privilege Escalation & Active Directory
-Phases 7-8: Advanced Topics (Evasion, Post-Exploitation, Cloud)
+Phases 7-8: Advanced Topics (${cert} specific)
 Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 
         let certSpecificInstructions = '';
@@ -1198,8 +1090,8 @@ REQUIREMENTS:
    - "Why it matters for ${cert}" - syllabus alignment
    - Specific Learning Outcomes
    - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
-   - Mandatory Labs with WORKING URLs and brief "Mentor Key Points"
-   - Resources (YouTube, Web, Books) with CLICKABLE LINKS
+   - Mandatory Labs (At least 1 HTB and 1 THM per phase) with WORKING URLs and brief "Mentor Key Points"
+   - Resources (YouTube, Web, Books) with CLICKABLE LINKS (At least 1 YouTube resource per phase)
 3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
 4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
 5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
@@ -1207,6 +1099,8 @@ REQUIREMENTS:
 STRICT RULES:
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
 - Use the following RESOURCES for verified links: ${JSON.stringify(resources)}
+- SYLLABUS ALIGNMENT IS MANDATORY: Map specific syllabus items for ${cert} to roadmap phases.
+- RESOURCE DIVERSITY IS MANDATORY: 1 HTB, 1 THM, 1 YouTube resource per phase.
 - RESPOND WITH PURE JSON ONLY.
 
 JSON FORMAT:
@@ -1232,7 +1126,7 @@ JSON FORMAT:
           "name": "Specific lab name",
           "platform": "HTB|THM|OTW",
           "url": "working URL",
-          "key_points": "Mindset and enumeration tips"
+          "key_points": "Mindset and enumeration tips tailored to ${cert}"
         }
       ],
       "resources": [{"type": "YouTube|Web|Book", "name": "Name", "url": "URL"}],
