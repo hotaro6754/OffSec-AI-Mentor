@@ -1207,7 +1207,18 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
     }
 }
 
-async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) {
+async function callAI(prompt, options = {}) {
+    // Backwards compatibility handling
+    let expectJson, retries, customKeys, maxTokens;
+    if (typeof options === 'boolean') {
+        expectJson = options;
+        retries = arguments[2] || 3;
+        customKeys = arguments[3] || {};
+        maxTokens = 4000;
+    } else {
+        ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 4000 } = options);
+    }
+
     // Groq ONLY
     let currentApiKey = customKeys.groq || AI_API_KEY;
 
@@ -1217,7 +1228,7 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
 
     console.log(`📤 Calling GROQ API...`);
     
-    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries);
+    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries, maxTokens);
     
     if (result.success) {
         return result.data;
@@ -1226,7 +1237,7 @@ async function callAI(prompt, expectJson = false, retries = 3, customKeys = {}) 
     throw new Error(result.error || "AI call failed");
 }
 
-async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3) {
+async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 4000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             let response, data;
@@ -1245,7 +1256,7 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                 model: model,
                 messages,
                 temperature: expectJson ? 0.1 : 0.7,
-                max_tokens: 4000
+                max_tokens: maxTokens
             };
 
             response = await fetchWithTimeout(apiUrl, {
@@ -1293,8 +1304,13 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
     return { success: false, rateLimit: false, error: 'Max retries exceeded' };
 }
 
+/**
+ * Robustly parses JSON that might be wrapped in markdown or truncated
+ */
 function parseJsonResponse(text) {
-    // 1. Try standard parse
+    if (!text || typeof text !== 'string') return text;
+
+    // 1. Try standard parse first
     try {
         return JSON.parse(text);
     } catch (e) {
@@ -1328,46 +1344,77 @@ function parseJsonResponse(text) {
             }
         }
 
-        // 3. Clean common LLM artifacts (trailing commas)
-        content = content.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+        return robustParse(content);
+    }
+}
 
-        // 4. Try parsing the extracted/cleaned content
-        try {
-            return JSON.parse(content);
-        } catch (e2) {
-            // Still fails, maybe truncated. Try to close brackets/braces.
-            let fixedContent = content;
-            let stack = [];
-            let inString = false;
-            let escaped = false;
+/**
+ * Helper to handle truncated JSON by backtracking
+ */
+function robustParse(content) {
+    // 1. Clean common LLM artifacts (trailing commas)
+    content = content.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
 
-            for (let i = 0; i < content.length; i++) {
-                const char = content[i];
-                if (escaped) { escaped = false; continue; }
-                if (char === '\\') { escaped = true; continue; }
-                if (char === '"') { inString = !inString; continue; }
-                if (!inString) {
-                    if (char === '{') stack.push('}');
-                    else if (char === '[') stack.push(']');
-                    else if (char === '}') { if (stack[stack.length - 1] === '}') stack.pop(); }
-                    else if (char === ']') { if (stack[stack.length - 1] === ']') stack.pop(); }
-                }
-            }
-
-            if (inString) fixedContent += '"';
-            while (stack.length > 0) {
-                fixedContent += stack.pop();
-            }
-
+    // 2. Try standard parse of the content
+    try {
+        return JSON.parse(content);
+    } catch (e) {
+        // 3. Try to fix truncation by backtracking to the last valid structure
+        let currentContent = content;
+        while (currentContent.length > 0) {
             try {
-                return JSON.parse(fixedContent);
-            } catch (e3) {
-                // Return original error if robust parsing also fails
-                console.error('Robust JSON parsing failed:', e3.message);
-                throw e2;
+                const fixed = attemptFix(currentContent);
+                return JSON.parse(fixed);
+            } catch (eInner) {
+                // If it fails, backtrack to the last interesting character
+                const lastComma = currentContent.lastIndexOf(',');
+                const lastBrace = currentContent.lastIndexOf('{');
+                const lastBracket = currentContent.lastIndexOf('[');
+                const lastPos = Math.max(lastComma, lastBrace, lastBracket);
+
+                if (lastPos === -1) break;
+                currentContent = currentContent.substring(0, lastPos);
             }
         }
+
+        console.error('Robust JSON parsing failed completely');
+        throw e; // Throw original error if all attempts fail
     }
+}
+
+/**
+ * Attempts to close open braces/brackets and strings
+ */
+function attemptFix(content) {
+    let stack = [];
+    let inString = false;
+    let escaped = false;
+    let fixedContent = content;
+
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        if (escaped) { escaped = false; continue; }
+        if (char === '\\') { escaped = true; continue; }
+        if (char === '"') { inString = !inString; continue; }
+        if (!inString) {
+            if (char === '{') stack.push('}');
+            else if (char === '[') stack.push(']');
+            else if (char === '}') { if (stack[stack.length - 1] === '}') stack.pop(); }
+            else if (char === ']') { if (stack[stack.length - 1] === ']') stack.pop(); }
+        }
+    }
+
+    if (inString) fixedContent += '"';
+
+    // Clean up trailing comma before closing
+    fixedContent = fixedContent.trim().replace(/,$/, '');
+
+    // Close all open structures
+    while (stack.length > 0) {
+        fixedContent += stack.pop();
+    }
+
+    return fixedContent;
 }
 
 // Validate and clean resources to fix undefined names
@@ -1511,7 +1558,7 @@ app.post('/api/generate-questions', async (req, res) => {
             
             console.log('📤 Calling AI API for question generation...');
             // Use retries=1 to fail fast when APIs are rate-limited
-            const response = await callAI(prompt, true, 1, req.customKeys);
+            const response = await callAI(prompt, { expectJson: true, retries: 1, customKeys: req.customKeys });
             console.log('📄 AI response received, length:', response?.length || 0);
             const parsed = parseJsonResponse(response);
             
@@ -1583,7 +1630,7 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         const prompt = `${PROMPTS.evaluation}\n\nAssessment:\n${answersText}`;
         
         console.log('📤 Calling AI API for evaluation...');
-        const response = await callAI(prompt, true, 3, req.customKeys);
+        const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys });
         console.log('📄 AI response received, length:', response?.length || 0);
         const parsed = parseJsonResponse(response);
         
@@ -1655,7 +1702,13 @@ app.post('/api/generate-roadmap', async (req, res) => {
         
         console.log(`📤 Calling AI API for roadmap generation...`);
         // Use default retries (3) which now has optimized backoff for Render
-        const response = await callAI(prompt, true, 3, req.customKeys);
+        // Roadmap can be long, so we use a higher maxTokens
+        const response = await callAI(prompt, {
+            expectJson: true,
+            retries: 3,
+            customKeys: req.customKeys,
+            maxTokens: 8000
+        });
         console.log('📄 Roadmap response received, length:', response?.length || 0);
         
         // Validate response
@@ -1754,7 +1807,7 @@ app.post('/api/mentor-chat', async (req, res) => {
         
         console.log('📤 Calling AI API for mentor chat...');
         // Use fewer retries for mentor chat to fail faster and fallback quicker
-        const response = await callAI(prompt, false, 1, req.customKeys);
+        const response = await callAI(prompt, { expectJson: false, retries: 1, customKeys: req.customKeys });
         console.log('📄 AI response received');
 
         // Save chat history if logged in
