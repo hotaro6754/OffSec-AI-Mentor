@@ -2562,11 +2562,20 @@ body.mode-oscp .chat-area { background: #0d1117; }
     line-height: 1.6;
 }
 .chat-bubble.mentor { 
-    background: var(--white); 
+    background: var(--black-v3);
+    color: var(--success-v3);
     margin-right: auto;
     transform: rotate(-0.5deg);
+    border: 3px solid var(--secondary-v3);
+    box-shadow: 4px 4px 0px var(--secondary-v3);
+    font-family: 'Space Mono', monospace;
 }
-body.mode-oscp .chat-bubble.mentor { background: #21262d; border-color: #30363d; }
+body.mode-oscp .chat-bubble.mentor {
+    background: #0a0a0a;
+    color: #00ff00;
+    border-color: var(--primary-v3);
+    box-shadow: 4px 4px 0px var(--primary-v3);
+}
 .chat-bubble.user { 
     background: var(--primary); 
     color: #fff; 
