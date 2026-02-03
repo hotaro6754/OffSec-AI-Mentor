@@ -1,54 +1,53 @@
-# 🤖 OffSec AI Mentor - Mini Community Project (MCP)
+# 🤖 OffSec AI Mentor & KaliGuru - Community MCP
 
 ## 🏆 Submission for the OffSec "Build with AI" Challenge
 
-**OffSec AI Mentor** is a specialized, AI-powered study planner and resource recommender built by the community, for the community. It is designed to help learners navigate the rigorous path to OffSec certifications (OSCP, OSEP, OSWE, and more) by providing personalized guidance, objective skill assessment, and high-fidelity roadmaps.
+**OffSec AI Mentor** is a specialized, AI-powered platform designed to guide cybersecurity aspirants from absolute zero to elite certification readiness. At its heart lies **KaliGuru**, a senior-level technical mentor that bridges the gap between generic AI chat and a real-world OffSec instructor.
 
 ---
 
-## 💡 Project Impact: Who Does This Help?
+## ✨ The KaliGuru Advantage: What Makes Us Unique?
 
-- **Absolute Zeroes**: Those with no IT background get a gentle "Stage 0" foundation path.
-- **Certification Aspirants**: Specific guidance for **13+ certifications** ranging from entry-level (eJPT, CEH) to elite OffSec Expert paths (OSEE, OSMR).
-- **Stuck Learners**: The "OSCP Mode" provides brutal, honest evaluation to identify precisely where a learner's mindset or technical gaps are.
-- **The Community**: A free, open tool that aggregates the best community resources (YouTube, HTB, THM, OTW) into one structured experience.
+Unlike standard AI models (ChatGPT, etc.), KaliGuru is precision-tuned for the OffSec community:
+
+1. **🛡️ Real-World Lab Hardstop**: KaliGuru strictly requires an authorized lab context (THM, HTB, Proving Grounds). It refuses to discuss targeting real systems, ensuring 100% ethical compliance.
+2. **🧑‍🏫 Coach, Not a Tool**: It won't just hand you a script. It mentors you through the *logic* of enumeration and the *why* behind exploitation.
+3. **📝 Professional Shorthand**: Responses use technical pentester notation:
+    - `[+]` Success/Findings
+    - `[-]` Risks/Mistakes
+    - `[!]` Critical Warnings
+    - `[>]` Commands/Actions
+4. **🧠 OffSec Mindset DNA**: Precision-aligned with the "Try Harder" philosophy and current syllabi for **OSCP, OSEP, OSWE, OSDA, and OSED**.
+5. **📱 Specialized Domains**: Expertise includes Kali NetHunter, Mobile Security (Android/iOS), Bluetooth Recon, and CAN bus (Car Hacking) theory.
 
 ---
 
-## ✨ Key AI Features & Implementation
+## 🔑 Core AI Features
 
 ### 1. **Neural Skill Assessment (Groq + LLaMA 3.3)**
-- **Dynamic Questioning**: Uses LLaMA 3.3 (70B) via the Groq API for lightning-fast, scenario-based technical questions.
-- **Mode-Specific Logic**:
-    - **Beginner Mode**: Encouraging, foundational, and jargon-free.
-    - **OSCP Mode**: Brutal, exam-level scenarios that test methodology, not just facts.
+- **Lightning Fast**: Powered by LLaMA 3.3 (70B) via the Groq API.
+- **Adaptive Modes**:
+    - *Beginner Mode*: Gentle foundations.
+    - *OSCP Mode*: Brutal, exam-level methodology checks.
 
-### 2. **Personalized Neural Roadmaps**
-- **Gap Analysis**: AI analyzes assessment performance to identify strengths, weaknesses, and "Confidence Gaps".
-- **Certification Segregation**: Generates unique paths for different certs, ensuring the syllabus alignment is 100% accurate.
-- **Clickable Resource Engine**: Automatically curates working links for YouTube channels, technical books, and lab environments.
+### 2. **Structured Neural Roadmaps**
+- **Gap Analysis**: Deep analysis of your assessment performance.
+- **Resource Engine**: Automatically curates working links for the best community labs and content.
+- **Versioning**: Switch between different generated roadmap versions via the UI.
 
-### 3. **Progress Persistence & Database Integration**
-- Automatically saves assessment results, chat history, and multiple roadmap versions to a local SQLite database for continuous learning tracking.
-
----
-
-## 🏗️ Neo-Brutalist v3.0 UI
-
-The project features a unique **Neo-Brutalist Hacker Aesthetic**:
-- **High-Contrast Design**: Bold black borders, vibrant accents, and sharp edges.
-- **Interactive Skill Constellation**: A professional, SVG-based hierarchical tree visualizing your learning journey.
-- **Terminal Boot Animation**: A cinematic entry experience that sets the tone for an OffSec learner.
-- **Developer Jokes & Easter Eggs**: Keeps the "Try Harder" mindset fun with rotating jokes and a special "Mentor's Final Gift" (Rickroll).
+### 3. **The Hacker UI (Neo-Brutalist v3.0)**
+- **Skill Constellation**: Interactive SVG visualization of your progress.
+- **Terminal Aesthetic**: High-contrast, sharp-edged UI designed for the hacker community.
+- **Cinematic Boot**: A functional console-style startup experience.
 
 ---
 
 ## 🚀 Technical Stack
 
-- **Frontend**: Vanilla JS, HTML5, CSS3 (No frameworks, pure speed).
+- **Frontend**: Vanilla JS, HTML5, CSS3 (Built for speed and clean design).
 - **Backend**: Node.js (Express), SQLite (better-sqlite3).
 - **AI Stack**: Groq API (LLaMA 3.3 70B Versatile).
-- **Security**: "Bring Your Own Key" (BYOK) support for users to bypass rate limits safely.
+- **Security**: "Bring Your Own Key" (BYOK) support for priority access.
 
 ---
 
@@ -67,15 +66,10 @@ The project features a unique **Neo-Brutalist Hacker Aesthetic**:
 
 ---
 
-## 📺 Demo Video
-*[Link to your demo video here]*
-
----
-
 ## 🛡️ Ethical Disclaimer
-This tool provides **educational guidance only**. It does not teach hacking, provide exploit code, or guarantee exam success. It is built to mentor the next generation of ethical hackers with integrity and the "Try Harder" spirit.
+This tool is a **Mini Community Project (MCP)** providing educational guidance only. It strictly follows ethical guidelines, requires authorized lab environments for all technical discussions, and does not provide exploits for unauthorized use.
 
 ---
 
-**Built with ❤️ for the OffSec Community by [Your Name/Handle]**
-**#OffSec #AI #CyberSecurity #OSCP #HackingMentor**
+**Built with ❤️ for the community. Master the mindset. Try Harder.**
+**#OffSec #KaliLinux #KaliGuru #EthicalHacking #BuildWithAI**
