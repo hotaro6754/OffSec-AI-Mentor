@@ -74,6 +74,8 @@ if (ILOVEPDF_PUBLIC_KEY && ILOVEPDF_SECRET_KEY) {
 } else {
     console.warn('⚠️  WARNING: No iLovePDF API keys found!');
     console.warn('   PDF export will not be available.');
+    console.warn('   Please set ILOVEPDF_PUBLIC_KEY and ILOVEPDF_SECRET_KEY in your .env file.');
+    console.warn('   💡 TIP: See ILOVEPDF_DEPLOYMENT.md for instructions and keys.');
 }
 
 
@@ -2131,14 +2133,16 @@ app.post('/api/generate-pdf', async (req, res) => {
         console.log('✅ ZIP file uploaded successfully');
         
         console.log('📄 [6/7] Processing HTML to PDF conversion...');
-        // Increase delay to 5000ms for better asset loading (fonts, etc)
+        // iLovePDF API expects delay in seconds (max 10). 5000 was causing 400 error.
+        // Also providing both 'margin' and 'page_margin' for maximum compatibility.
         await task.process({
             view_width: 1280,
-            delay: 5000,
+            delay: 5,
             single_page: false,
             page_size: 'A4',
             page_orientation: 'portrait',
             page_margin: 10,
+            margin: 10,
             remove_popups: true
         });
         console.log('✅ Processing completed');
