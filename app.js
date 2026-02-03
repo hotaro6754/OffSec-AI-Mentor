@@ -1438,13 +1438,6 @@ async function proceedToEvaluation() {
         showEvaluation();
         showSection('evaluationSection');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // 10% chance to show easter egg after assessment completion
-        if (Math.random() < 0.1) {
-            setTimeout(() => {
-                showRandomEasterEgg();
-            }, 2000);
-        }
     } catch (error) {
         console.error('Error evaluating assessment:', error);
         showError('Failed to evaluate assessment. Please try again.');
