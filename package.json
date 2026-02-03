@@ -1,7 +1,7 @@
 {
-  "name": "kaliguru",
-  "version": "2025.2.0",
-  "description": "KaliGuru: A specialized AI assistant designed to support offensive and defensive security operations using Kali Linux.",
+  "name": "offsec-ai-mentor",
+  "version": "3.0.0",
+  "description": "OffSec AI Mentor featuring KaliGuru: A specialized AI assistant for offensive and defensive security operations using Kali Linux.",
   "main": "server-v2.js",
   "scripts": {
     "start": "node server-v2.js",
