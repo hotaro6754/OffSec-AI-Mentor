@@ -1037,14 +1037,15 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
 
 async function callAI(prompt, options = {}) {
     // Backwards compatibility handling
-    let expectJson, retries, customKeys, maxTokens;
+    let expectJson, retries, customKeys, maxTokens, stream;
     if (typeof options === 'boolean') {
         expectJson = options;
         retries = arguments[2] || 3;
         customKeys = arguments[3] || {};
         maxTokens = 4000;
+        stream = false;
     } else {
-        ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 4000 } = options);
+        ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 4000, stream = false } = options);
     }
 
     // Groq ONLY
@@ -1054,9 +1055,9 @@ async function callAI(prompt, options = {}) {
         throw new Error("Groq API key is missing");
     }
 
-    console.log(`📤 Calling GROQ API...`);
+    console.log(`📤 Calling GROQ API (stream=${stream})...`);
     
-    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries, maxTokens);
+    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries, maxTokens, stream);
     
     if (result.success) {
         return result.data;
@@ -1065,7 +1066,7 @@ async function callAI(prompt, options = {}) {
     throw new Error(result.error || "AI call failed");
 }
 
-async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 4000) {
+async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 4000, stream = false) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             let response, data;
@@ -1084,7 +1085,8 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                 model: model,
                 messages,
                 temperature: expectJson ? 0.1 : 0.7,
-                max_tokens: maxTokens
+                max_tokens: maxTokens,
+                stream: stream
             };
 
             response = await fetchWithTimeout(apiUrl, {
@@ -1097,6 +1099,10 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
             }, 60000);
 
             if (response.ok) {
+                if (stream) {
+                    console.log(`✅ GROQ API stream started`);
+                    return { success: true, data: response.body };
+                }
                 data = await response.json();
                 if (data.choices?.[0]?.message?.content) {
                     console.log(`✅ GROQ API call successful`);
@@ -1644,7 +1650,7 @@ app.post('/api/mentor-chat', async (req, res) => {
     }
 
     try {
-        const { message, context = {} } = req.body;
+        const { message, context = {}, stream = true } = req.body;
         
         if (!message?.trim()) {
             return res.status(400).json({ error: 'Message required' });
@@ -1657,23 +1663,69 @@ app.post('/api/mentor-chat', async (req, res) => {
 
         const prompt = `${PROMPTS.mentorChat}${contextInfo}\n\nUser: "${message}"`;
         
-        console.log('📤 Calling AI API for mentor chat...');
-        // Use fewer retries for mentor chat to fail faster and return error quicker
-        const response = await callAI(prompt, { expectJson: false, retries: 1, customKeys: req.customKeys });
-        console.log('📄 AI response received');
+        if (stream) {
+            console.log('📤 Calling AI API for mentor chat (streaming)...');
+            const aiStream = await callAI(prompt, { expectJson: false, retries: 1, customKeys: req.customKeys, stream: true });
 
-        // Save chat history if logged in
-        try {
-            if (req.user) {
-                db.saveChatMessage(req.user.id, 'user', message);
-                db.saveChatMessage(req.user.id, 'mentor', response);
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+
+            let fullContent = '';
+            let buffer = '';
+
+            // Pipe the stream and also capture it for DB
+            for await (const chunk of aiStream) {
+                const chunkStr = chunk.toString();
+                res.write(chunk);
+
+                buffer += chunkStr;
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep last incomplete line in buffer
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed || trimmed === 'data: [DONE]') continue;
+                    if (trimmed.startsWith('data: ')) {
+                        try {
+                            const json = JSON.parse(trimmed.substring(6));
+                            const content = json.choices[0]?.delta?.content || '';
+                            fullContent += content;
+                        } catch (e) {}
+                    }
+                }
             }
-        } catch (dbError) {
-            console.warn('⚠️  Could not save chat to database:', dbError.message);
-        }
 
-        console.log('✅ Mentor response sent');
-        res.json({ reply: response });
+            // After stream ends, save to DB
+            try {
+                if (req.user) {
+                    db.saveChatMessage(req.user.id, 'user', message);
+                    if (fullContent) {
+                        db.saveChatMessage(req.user.id, 'mentor', fullContent);
+                    }
+                }
+            } catch (dbError) {
+                console.warn('⚠️  Could not save chat to database:', dbError.message);
+            }
+
+            res.end();
+            console.log('✅ Mentor response stream ended');
+        } else {
+            console.log('📤 Calling AI API for mentor chat (non-streaming)...');
+            const response = await callAI(prompt, { expectJson: false, retries: 1, customKeys: req.customKeys, stream: false });
+
+            // Save chat history if logged in
+            try {
+                if (req.user) {
+                    db.saveChatMessage(req.user.id, 'user', message);
+                    db.saveChatMessage(req.user.id, 'mentor', response);
+                }
+            } catch (dbError) {
+                console.warn('⚠️  Could not save chat to database:', dbError.message);
+            }
+
+            res.json({ reply: response });
+        }
     } catch (error) {
         console.error('❌ Error in mentor-chat:', error.message);
         console.error('Stack:', error.stack);

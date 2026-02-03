@@ -2610,6 +2610,7 @@ body.mode-oscp .chat-bubble-header {
 .chat-history {
     height: 500px;
     overflow-y: auto;
+    scroll-behavior: smooth;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -2623,7 +2624,7 @@ body.mode-oscp .chat-history {
 .mentor-container.fullscreen {
     position: fixed;
     inset: 0;
-    z-index: 5000;
+    z-index: 10000;
     width: 100vw;
     height: 100vh;
     max-width: none;
@@ -2632,6 +2633,7 @@ body.mode-oscp .chat-history {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    transition: all 0.3s ease;
 }
 .mentor-container.fullscreen .chat-history {
     flex: 1;
@@ -2643,12 +2645,16 @@ body.mode-oscp .chat-history {
     padding: 14px;
     border-top: var(--border);
 }
-.chat-input {
+.chat-input, .mentor-input {
     flex: 1;
     padding: 10px;
     border: var(--border);
     font-family: var(--font);
     font-size: 13px;
+    resize: none;
+    min-height: 42px;
+    max-height: 150px;
+    overflow-y: auto;
 }
 body.mode-oscp .chat-input { background: #0d1117; color: #c9d1d9; border-color: #30363d; }
 
