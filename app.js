@@ -1192,6 +1192,16 @@ async function callBackendAPI(endpoint, data = {}) {
         // Check response status after parsing
         if (!response.ok) {
             console.error(`❌ API Error (${response.status}):`, result);
+
+            // Special handling for rate limit
+            if (response.status === 429) {
+                const rateLimitError = new Error(result.error || 'API Rate Limited');
+                rateLimitError.status = 429;
+                rateLimitError.details = result.details;
+                rateLimitError.retryAfter = result.retryAfter;
+                throw rateLimitError;
+            }
+
             throw new Error(result.error || `API request failed with status ${response.status}`);
         }
 
@@ -1435,12 +1445,20 @@ async function proceedToEvaluation() {
 
         appState.assessment = data;
 
+        if (data.isFallback) {
+            showNotification('AI service is busy. Using high-accuracy automated evaluation instead.', 'warn');
+        }
+
         showEvaluation();
         showSection('evaluationSection');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
         console.error('Error evaluating assessment:', error);
-        showError('Failed to evaluate assessment. Please try again.');
+        if (error.status === 429) {
+            showError('The AI service is currently at capacity. Please wait a few minutes or provide your own Groq API key in Settings for priority access.');
+        } else {
+            showError('Failed to evaluate assessment. Please try again.');
+        }
     } finally {
         elements.reviewContinueBtn.disabled = false;
         elements.reviewContinueBtn.textContent = 'Continue to Evaluation';
@@ -1949,15 +1967,22 @@ async function generateRoadmapForCert(certId) {
         if (window.roadmapStageInterval) clearInterval(window.roadmapStageInterval);
         
         // Show friendly error message (not technical details)
-        const errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
+        let errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
+        let subMessage = 'The AI service might be experiencing high demand. This usually resolves in a few minutes.';
+
+        if (error.status === 429) {
+            errorMessage = 'AI Service at Capacity';
+            subMessage = 'The mentor is currently helping many other students. Please wait a few minutes or provide your own Groq API key in Settings for priority access.';
+        }
         
         roadmapContent.innerHTML = `
             <div class="error-state">
-                <div class="error-icon">⏳</div>
-                <h3>Roadmap Generation Delayed</h3>
+                <div class="error-icon">${error.status === 429 ? '🚦' : '⏳'}</div>
+                <h3>${error.status === 429 ? 'Rate Limit Exceeded' : 'Roadmap Generation Delayed'}</h3>
                 <p class="error-message-main">${errorMessage}</p>
-                <p class="error-message-sub">The AI service might be experiencing high demand. This usually resolves in a few minutes.</p>
+                <p class="error-message-sub">${subMessage}</p>
                 <button class="btn btn-primary" onclick="openCertModal()">Try Again</button>
+                ${!localStorage.getItem('groqKey') ? '<button class="btn btn-secondary" style="margin-top:10px" onclick="showSettingsModal()">Configure API Key</button>' : ''}
             </div>
         `;
     }
