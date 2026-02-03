@@ -16,7 +16,6 @@
     
     <!-- Marked.js removed - using pure JSON rendering instead -->
     
-    <!-- PDF generation now handled by backend via iLovePDF API -->
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -118,21 +117,11 @@
         <div class="modal-content settings-modal">
             <button class="modal-close" id="closeSettingsModal">&times;</button>
             <h3>⚙️ API Settings</h3>
-            <p class="settings-desc">Provide your own API keys to bypass global rate limits. Keys are stored locally in your browser.</p>
+            <p class="settings-desc">Provide your own Groq API key to bypass global rate limits. Your key is stored locally in your browser.</p>
 
             <div class="form-group">
                 <label for="groqKey">Groq API Key</label>
                 <input type="password" id="groqKey" placeholder="gsk_...">
-            </div>
-
-            <div class="form-group">
-                <label for="ilovepdfPublicKey">iLovePDF Public Key</label>
-                <input type="password" id="ilovepdfPublicKey" placeholder="project_public_...">
-            </div>
-
-            <div class="form-group">
-                <label for="ilovepdfSecretKey">iLovePDF Secret Key</label>
-                <input type="password" id="ilovepdfSecretKey" placeholder="secret_key_...">
             </div>
 
             <div class="settings-actions">
@@ -477,10 +466,14 @@
             </div>
 
             <div class="roadmap-actions hidden" id="roadmapActionsDiv">
-                <button class="btn btn-secondary" id="copyRoadmapBtn">📋 Copy Roadmap</button>
-                <button class="btn btn-secondary" id="exportRoadmapBtn">💾 Export as JSON</button>
-                <button class="btn btn-secondary" id="downloadPdfBtn">📄 Download as PDF</button>
-                <button class="btn btn-primary" id="regenerateRoadmapBtn">🔄 Generate New Roadmap</button>
+                <div id="roadmapVersionContainer" class="version-selector-container">
+                    <!-- Version selector will be injected here -->
+                </div>
+                <div class="action-buttons-grid">
+                    <button class="btn btn-secondary" id="copyRoadmapBtn">📋 Copy Roadmap</button>
+                    <button class="btn btn-secondary" id="exportRoadmapBtn">💾 Export as JSON</button>
+                    <button class="btn btn-primary" id="regenerateRoadmapBtn">🔄 Generate New Roadmap</button>
+                </div>
             </div>
 
             <!-- Integrated Checklist Section -->

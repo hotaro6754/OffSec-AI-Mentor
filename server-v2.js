@@ -23,9 +23,6 @@ const path = require('path');
 const db = require('./database');
 const fs = require('fs');
 const os = require('os');
-const ILovePDFApi = require('@ilovepdf/ilovepdf-nodejs');
-const ILovePDFFile = require('@ilovepdf/ilovepdf-nodejs/ILovePDFFile');
-const AdmZip = require('adm-zip');
 
 // ============================================================================
 // CONFIGURATION
@@ -64,18 +61,6 @@ if (AI_PROVIDER !== 'none') {
     console.log('✅ API key loaded successfully');
 }
 
-// iLovePDF Configuration
-const ILOVEPDF_PUBLIC_KEY = process.env.ILOVEPDF_PUBLIC_KEY;
-const ILOVEPDF_SECRET_KEY = process.env.ILOVEPDF_SECRET_KEY;
-
-if (ILOVEPDF_PUBLIC_KEY && ILOVEPDF_SECRET_KEY) {
-    console.log('✅ iLovePDF API configured for PDF generation');
-} else {
-    console.warn('⚠️  WARNING: No iLovePDF API keys found!');
-    console.warn('   PDF export will not be available.');
-    console.warn('   Please set ILOVEPDF_PUBLIC_KEY and ILOVEPDF_SECRET_KEY in your .env file.');
-    console.warn('   💡 TIP: See ILOVEPDF_DEPLOYMENT.md for instructions and keys.');
-}
 
 
 // ============================================================================
@@ -86,7 +71,7 @@ if (ILOVEPDF_PUBLIC_KEY && ILOVEPDF_SECRET_KEY) {
 app.use(cors({
     origin: true, // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Groq-API-Key', 'X-ILovePDF-Public-Key', 'X-ILovePDF-Secret-Key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Groq-API-Key'],
     credentials: true
 }));
 
@@ -108,9 +93,7 @@ app.use((req, res, next) => {
     
     // Extract custom API keys from request headers
     req.customKeys = {
-        groq: req.headers['x-groq-api-key'],
-        ilovepdfPublic: req.headers['x-ilovepdf-public-key'],
-        ilovepdfSecret: req.headers['x-ilovepdf-secret-key']
+        groq: req.headers['x-groq-api-key']
     };
     next();
 });
@@ -677,8 +660,8 @@ BEGINNER-LEVEL TOPICS (foundational):
 
         return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'absolute beginner cybersecurity learners (ZERO KNOWLEDGE)'}.
 
-CRITICAL: Generate COMPLETELY NEW questions. This is retake #${retakeCount + 1}.
-${usedHashes.length > 0 ? `\nAVOID these previously used question patterns - create entirely different scenarios.` : ''}
+CRITICAL: Generate COMPLETELY NEW questions. EVERY question must be different from any you have generated before. This is retake #${retakeCount + 1}.
+${usedHashes.length > 0 ? `\nAVOID these previously used question patterns and topics at all costs - create entirely different scenarios and test different edge cases: ${usedHashes.join(', ')}` : ''}
 
 ${isOscp ? oscpTopics : beginnerTopics}
 
@@ -850,6 +833,9 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 12. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
 13. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
 14. **API KEY MANAGEMENT**: Include specific guidance on generating and safely segregating API keys for platforms like HTB, THM, and other suggested resources within the relevant roadmap phases.
+15. **STEP-BY-STEP LADDER**: Each phase must clearly lead into the next. Explain the transition.
+16. **MENTOR TIPS**: Include 3-5 "Senior Mentor Tips" for each phase, sharing real-world insights that aren't in books.
+17. **DETAILED GAINS**: For "What You Will Gain", be specific about technical commands, methodology nuances, and professional soft skills.
 ${modeSpecificInstructions}
 
 ${!modeSpecificInstructions ? `PHASE STRUCTURE (${phaseCount} Phases):
@@ -887,7 +873,9 @@ Include these in Phase 1-2 as: "Consider completing eJPT or THM Jr Pentester pat
 `;
         }
 
-        return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap as an AI Mentor.
+        return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap.
+
+PERSONA: You are a ELITE SENIOR OFFSEC MENTOR. You aren't just an AI; you are a master expressing your core values, sharing deep industry thoughts, and teaching your philosophy to a junior student. Your tone should be authoritative yet inspiring, like a mentor passing down a legacy.
 
 USER PROFILE:
 - Mode: ${mode.toUpperCase()}
@@ -901,18 +889,22 @@ ${certSpecificInstructions}
 ${prepRecommendations}
 
 REQUIREMENTS:
-1. **Gap Analysis**: Detailed missing skills vs requirements.
-2. **Dynamic Phases**: MUST generate exactly ${phaseCount} phases. Each phase MUST have:
-   - "Why it matters for ${cert}" - syllabus alignment
+1. **Mentor's Philosophy**: A section where you express your ideas on the ${cert} mindset.
+2. **Gap Analysis**: Detailed missing skills vs requirements.
+3. **Dynamic Phases**: MUST generate exactly ${phaseCount} phases. Each phase MUST have:
+   - "Why it matters for ${cert}" - syllabus alignment and mentor's perspective
+   - "What You Will Do": Detailed step-by-step actions the user must perform.
+   - "What You Will Gain": The specific skills, mindset shifts, and technical depth acquired.
    - Specific Learning Outcomes
    - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
    - Mandatory Labs (At least 1 HTB and 1 THM per phase) with WORKING URLs and brief "Mentor Key Points"
    - Resources (YouTube, Web, Books) with CLICKABLE LINKS (At least 1 YouTube resource per phase)
-3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
-4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
-5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+4. **Skill Tree**: A concise tree of skills learned, grouped by categories.
+5. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
+6. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 STRICT RULES:
+- EVERY certification roadmap MUST be distinct and unique. Do not use a generic template.
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
 - Use the following RESOURCES for verified links: ${JSON.stringify(resources)}
 - SYLLABUS ALIGNMENT IS MANDATORY: Map specific syllabus items for ${cert} to roadmap phases.
@@ -923,6 +915,7 @@ JSON FORMAT:
 {
   "targetCertification": "${cert}",
   "currentLevel": "${level}",
+  "mentor_philosophy": "[Your deep thoughts and values on this path]",
   "certificationFocus": "${certContent ? certContent.focus : 'General pentesting skills'}",
   "examFormat": "${certContent ? certContent.examFormat : 'See certification details'}",
   "gap_analysis": {
@@ -934,7 +927,11 @@ JSON FORMAT:
     {
       "phase": 1,
       "phase_name": "[Name]",
-      "why_it_matters": "[Significance]",
+      "why_it_matters": "[Mentor perspective on why this matters]",
+      "what_you_will_do": "[Detailed step-by-step actions]",
+      "what_you_will_gain": "[Skills and depth acquired]",
+        "mentor_tips": ["[Tip 1]", "[Tip 2]", "[Tip 3]"],
+        "transition_to_next": "[How this leads to Phase 2]",
       "duration_weeks": 4,
       "learning_outcomes": [],
       "mandatory_labs": [
@@ -1119,7 +1116,7 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
                 }
-                // Return rate limit error so caller can use fallback
+                // Return rate limit error
                 return { success: false, rateLimit: true, error: `GROQ rate limit exceeded`, retryAfter: waitTime };
             }
 
@@ -1433,56 +1430,6 @@ app.post('/api/generate-questions', async (req, res) => {
     }
 });
 
-/**
- * Generates a basic fallback evaluation when AI is unavailable
- */
-function generateFallbackEvaluation(questions, answers, mode) {
-    let score = 0;
-    const strengths = [];
-    const weaknesses = [];
-    const totalQuestions = questions.length || 10;
-
-    questions.forEach((q, idx) => {
-        const answer = answers[idx];
-        const isCorrect = answer && q.correctAnswer &&
-            answer.toLowerCase().trim() === q.correctAnswer.toLowerCase().trim();
-
-        if (isCorrect) {
-            score += (100 / totalQuestions);
-            if (q.topic && !strengths.includes(q.topic)) strengths.push(q.topic);
-        } else {
-            if (q.topic && !weaknesses.includes(q.topic)) weaknesses.push(q.topic);
-        }
-    });
-
-    score = Math.round(score);
-
-    // Simple level determination
-    let level = "Beginner";
-    if (score >= 80) level = "Advanced";
-    else if (score >= 50) level = "Intermediate";
-
-    return {
-        readinessScore: mode === 'oscp' ? score : 0,
-        readinessStatus: mode === 'oscp' ? (score >= 70 ? "Ready" : (score >= 40 ? "Almost Ready" : "Not Ready")) : "N/A",
-        level: level,
-        score: score,
-        strengths: strengths.length > 0 ? strengths : ["General Security Concepts"],
-        weaknesses: weaknesses.length > 0 ? weaknesses : ["Advanced Topics"],
-        confidenceGaps: ["Detailed analysis requires AI"],
-        skillBreakdown: {
-            "Foundations": score,
-            "Linux/Windows": score,
-            "Networking": score,
-            "Web Security": score,
-            "Methodology": score
-        },
-        focusSuggestion: "AI evaluation was rate-limited. This is a basic fallback based on correct answers. For a detailed roadmap, please try again when the service is available.",
-        oscpAlignment: mode === 'oscp' ? "Alignment check requires AI evaluation." : undefined,
-        isFallback: true
-    };
-}
-
 app.post('/api/evaluate-assessment', async (req, res) => {
     console.log('\n📊 POST /api/evaluate-assessment');
     
@@ -1696,7 +1643,7 @@ app.post('/api/mentor-chat', async (req, res) => {
         const prompt = `${PROMPTS.mentorChat}${contextInfo}\n\nUser: "${message}"`;
         
         console.log('📤 Calling AI API for mentor chat...');
-        // Use fewer retries for mentor chat to fail faster and fallback quicker
+        // Use fewer retries for mentor chat to fail faster and return error quicker
         const response = await callAI(prompt, { expectJson: false, retries: 1, customKeys: req.customKeys });
         console.log('📄 AI response received');
 
@@ -1719,14 +1666,10 @@ app.post('/api/mentor-chat', async (req, res) => {
         // Check if it's a rate limit error (case-insensitive)
         const isRateLimit = error.message.toLowerCase().includes('rate limit');
         if (isRateLimit) {
-            console.log('💬 GROQ API rate-limited, returning helpful guidance...');
-            const demoReply = "I'm currently helping many learners and the AI service is temporarily overloaded. Here's what I'd recommend in the meantime:\n\n" +
-                "1. **Practice with TryHackMe** - Complete beginner-friendly rooms\n" +
-                "2. **Study Linux Basics** - Focus on file system navigation and permissions\n" +
-                "3. **Learn Networking** - Understand TCP/IP and common protocols\n" +
-                "4. **Set up a lab** - Create a virtual machine for hands-on practice\n\n" +
-                "Please try again in a few minutes when the service is less busy!";
-            return res.status(200).json({ reply: demoReply });
+            return res.status(429).json({
+                error: 'AI Rate Limited',
+                userMessage: 'The AI service is currently busy. Please try again in a few minutes or provide your own API key.'
+            });
         }
         
         res.status(500).json({
@@ -1735,8 +1678,6 @@ app.post('/api/mentor-chat', async (req, res) => {
         });
     }
 });
-
-// Helper function to generate fallback mentor responses
 
 app.get('/api/chat-history', (req, res) => {
     if (!req.user) {
@@ -1818,162 +1759,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// PDF Generation endpoint using iLovePDF
-app.post('/api/generate-pdf', async (req, res) => {
-    try {
-        let { html, filename } = req.body;
-        
-        if (!html) {
-            return res.status(400).json({ error: 'HTML content is required' });
-        }
-
-        // Prioritize custom keys from headers for BYOK support
-        const publicKey = req.customKeys?.ilovepdfPublic || ILOVEPDF_PUBLIC_KEY;
-        const secretKey = req.customKeys?.ilovepdfSecret || ILOVEPDF_SECRET_KEY;
-
-        if (!publicKey || !secretKey) {
-            return res.status(503).json({ 
-                error: 'PDF generation service is not configured. Please contact the administrator.' 
-            });
-        }
-
-        // Validate HTML structure before proceeding
-        console.log('📋 [1/7] Validating HTML structure...');
-        if (!html.includes('<!DOCTYPE html>')) {
-            console.warn('⚠️ Missing DOCTYPE declaration - adding it');
-            html = '<!DOCTYPE html>\n' + html;
-        }
-        
-        // Check for html opening tag more robustly
-        const hasHtmlTag = /<html[\s>]/i.test(html);
-        if (!hasHtmlTag) {
-            console.error('❌ Invalid HTML: Missing <html> tag');
-            return res.status(400).json({ error: 'Invalid HTML structure: Missing <html> tag' });
-        }
-        
-        if (!html.includes('<head>')) {
-            console.warn('⚠️ Missing <head> section - may cause rendering issues');
-        }
-        if (!html.includes('<meta charset')) {
-            console.warn('⚠️ Missing charset declaration - adding UTF-8');
-            if (html.includes('<head>')) {
-                html = html.replace('<head>', '<head>\n    <meta charset="UTF-8">');
-            }
-        }
-
-        // Clean HTML: Remove scripts, buttons, and inputs to reduce complexity for PDF engine
-        console.log('🧹 Cleaning HTML for PDF generation...');
-        const originalSize = html.length;
-        html = html
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-            .replace(/<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi, '') // Remove buttons
-            .replace(/<input\b[^>]*>/gi, '')                                   // Remove inputs
-            .replace(/<textarea\b[^<]*(?:(?!<\/textarea>)<[^<]*)*<\/textarea>/gi, ''); // Remove textareas
-
-        console.log(`✅ HTML structure validated and cleaned (Size: ${originalSize} -> ${html.length} bytes)`);
-
-        // High-fidelity rendering: Inject local style.css content directly into HTML
-        try {
-            console.log('🎨 [2/7] Preparing CSS injection for PDF...');
-            const cssPath = path.join(__dirname, 'style.css');
-            if (fs.existsSync(cssPath)) {
-                let cssContent = fs.readFileSync(cssPath, 'utf8');
-
-                // Simple minification to reduce payload size
-                cssContent = cssContent
-                    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
-                    .replace(/\s+/g, ' ')             // Collapse whitespace
-                    .trim();
-
-                const styleTag = `\n<style id="injected-style">\n${cssContent}\n</style>\n`;
-
-                // Inject style tag into head or at the beginning of body
-                if (html.includes('</head>') && !html.includes('id="injected-style"')) {
-                    html = html.replace('</head>', `${styleTag}</head>`);
-                } else if (html.includes('<body>') && !html.includes('id="injected-style"')) {
-                    html = html.replace('<body>', `<body>${styleTag}`);
-                } else if (!html.includes('id="injected-style"')) {
-                    html = styleTag + html;
-                }
-                console.log(`✅ CSS injected and minified (${cssContent.length} bytes)`);
-            }
-        } catch (cssError) {
-            console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
-        }
-
-        console.log('📄 [3/7] Initializing iLovePDF API...');
-        const instance = new ILovePDFApi(publicKey, secretKey);
-        
-        console.log('📄 [4/7] Packaging HTML and assets into ZIP buffer...');
-        // iLovePDF htmlpdf tool requires local files to be uploaded as ZIP containing index.html
-        const zip = new AdmZip();
-        zip.addFile('index.html', Buffer.from(html, 'utf8'));
-
-        // Include local assets if they exist
-        const qrPath = path.join(__dirname, 'qr-code.svg');
-        if (fs.existsSync(qrPath)) {
-            zip.addLocalFile(qrPath);
-            console.log('🖼️  Added qr-code.svg to ZIP bundle');
-        }
-
-        const zipBuffer = zip.toBuffer();
-        console.log(`✅ ZIP package created (${zipBuffer.length} bytes)`);
-        
-        console.log('📄 [5/7] Starting iLovePDF task...');
-        const task = instance.newTask('htmlpdf');
-        await task.start();
-        console.log(`✅ Task started: ${task.id} on server ${task.server}`);
-        
-        // Use ILovePDFFile.fromArray to upload the ZIP buffer
-        const file = ILovePDFFile.fromArray(zipBuffer, 'roadmap.zip');
-        await task.addFile(file);
-        console.log('✅ ZIP file uploaded successfully');
-        
-        console.log('📄 [6/7] Processing HTML to PDF conversion...');
-        // iLovePDF API expects delay in seconds (max 10). 5000 was causing 400 error.
-        // Also providing both 'margin' and 'page_margin' for maximum compatibility.
-        await task.process({
-            view_width: 1280,
-            delay: 5,
-            single_page: false,
-            page_size: 'A4',
-            page_orientation: 'portrait',
-            page_margin: 10,
-            margin: 10,
-            remove_popups: true
-        });
-        console.log('✅ Processing completed');
-        
-        console.log('📄 [7/7] Downloading generated PDF buffer...');
-        const pdfBuffer = await task.download();
-        
-        console.log('✅ PDF generation workflow completed successfully');
-        
-        // Send PDF as response
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename || 'roadmap.pdf'}"`);
-        res.send(Buffer.from(pdfBuffer));
-        
-    } catch (error) {
-        console.error('❌ PDF generation error:', error);
-
-        // Extract detailed error information if available (e.g. from iLovePDF API response)
-        let detailedError = error.message;
-        if (error.response && error.response.data) {
-            console.error('📦 Detailed error response:', JSON.stringify(error.response.data));
-            if (error.response.data.error && error.response.data.error.message) {
-                detailedError = `${error.message}: ${error.response.data.error.message}`;
-            } else {
-                detailedError = `${error.message}: ${JSON.stringify(error.response.data)}`;
-            }
-        }
-
-        res.status(500).json({ 
-            error: 'Failed to generate PDF. Please try again or use the JSON export option.',
-            details: detailedError
-        });
-    }
-});
 
 
 // Serve static files (CSS, images, etc.) 
@@ -1997,7 +1782,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`║   🚀 Server running on http://0.0.0.0:${PORT}                    ║`);
     console.log('║                                                                ║');
     console.log('║   📊 System Status:                                            ║');
-    console.log(`║   • AI Provider: ${AI_PROVIDER.toUpperCase() || 'FALLBACK ONLY'}${AI_PROVIDER !== 'none' ? ' ✅' : ' ⚠️ '}          ║`);
+    console.log(`║   • AI Provider: ${AI_PROVIDER === 'none' ? 'BYOK (NOT CONFIGURED)' : AI_PROVIDER.toUpperCase()}${AI_PROVIDER !== 'none' ? ' ✅' : ' ⚠️ '}     ║`);
     console.log('║   • Database: SQLite ✅                                        ║');
     console.log('║   • CORS: Public Access ✅                                    ║');
     console.log('║   • Authentication: Enabled ✅                                ║');

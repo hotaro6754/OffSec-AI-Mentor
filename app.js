@@ -171,7 +171,8 @@ let appState = {
     // Checklist
     checklist: [],
     // Resources
-    resources: null
+    resources: null,
+    currentRoadmapId: null
 };
 
 // ============================================================================
@@ -301,9 +302,6 @@ function init() {
     setupCertFilters();
     checkExistingSession();
     
-    // Check PDF library status
-    checkPDFLibraryStatus();
-    
     if (elements.modeCheckbox) {
         toggleLearningMode();
     }
@@ -355,31 +353,6 @@ function setupSkillPanel() {
     });
 }
 
-async function checkPDFLibraryStatus() {
-    try {
-        // Check if backend PDF generation API is available
-        const response = await fetch('/api/health');
-        const health = await response.json();
-        
-        if (health.status === 'ok') {
-            console.log('✅ PDF generation API available (iLovePDF)');
-        } else {
-            throw new Error('Backend not healthy');
-        }
-    } catch (error) {
-        console.warn('⚠️ PDF generation API unavailable. PDF export will not work.');
-        console.warn('💡 Users can still export as JSON or TXT format.');
-        
-        // Disable PDF download button
-        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-        if (downloadPdfBtn) {
-            downloadPdfBtn.disabled = true;
-            downloadPdfBtn.title = 'PDF export unavailable - API not configured';
-            downloadPdfBtn.style.opacity = '0.5';
-            downloadPdfBtn.style.cursor = 'not-allowed';
-        }
-    }
-}
 
 function checkApiKeyAndStart() {
     // Check if user is logged in - if not, show auth modal
@@ -420,9 +393,6 @@ function setupEventListeners() {
     elements.retakeBtn?.addEventListener('click', resetAndRetake);
     elements.sendMentorBtn?.addEventListener('click', sendMentorMessage);
     
-    // PDF Download
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    downloadPdfBtn?.addEventListener('click', downloadRoadmapPDF);
     
     // Main Generate Roadmap Button (after evaluation)
     const generateRoadmapMainBtn = document.getElementById('generateRoadmapMainBtn');
@@ -1121,8 +1091,6 @@ function showSettingsModal() {
 
     // Load existing keys
     document.getElementById('groqKey').value = localStorage.getItem('groqKey') || '';
-    document.getElementById('ilovepdfPublicKey').value = localStorage.getItem('ilovepdfPublicKey') || '';
-    document.getElementById('ilovepdfSecretKey').value = localStorage.getItem('ilovepdfSecretKey') || '';
 }
 
 function hideSettingsModal() {
@@ -1131,8 +1099,6 @@ function hideSettingsModal() {
 
 function saveSettings() {
     localStorage.setItem('groqKey', document.getElementById('groqKey').value.trim());
-    localStorage.setItem('ilovepdfPublicKey', document.getElementById('ilovepdfPublicKey').value.trim());
-    localStorage.setItem('ilovepdfSecretKey', document.getElementById('ilovepdfSecretKey').value.trim());
 
     showNotification('Settings saved successfully', 'success');
     hideSettingsModal();
@@ -1146,14 +1112,10 @@ function saveSettings() {
 
 function clearSettings() {
     localStorage.removeItem('groqKey');
-    localStorage.removeItem('ilovepdfPublicKey');
-    localStorage.removeItem('ilovepdfSecretKey');
 
     document.getElementById('groqKey').value = '';
-    document.getElementById('ilovepdfPublicKey').value = '';
-    document.getElementById('ilovepdfSecretKey').value = '';
 
-    showNotification('API keys cleared', 'info');
+    showNotification('API key cleared', 'info');
 }
 
 /**
@@ -2248,6 +2210,22 @@ function displayRoadmap(roadmapData) {
     `;
     container.appendChild(header);
 
+    // 1.5 Mentor Philosophy
+    if (roadmapObj.mentor_philosophy) {
+        const philosophySection = document.createElement('div');
+        philosophySection.className = 'mentor-philosophy-section-v3';
+        philosophySection.innerHTML = `
+            <div class="section-header-v3">
+                <i data-lucide="quote" class="w-8 h-8"></i>
+                <h2>Mentor's Philosophy</h2>
+            </div>
+            <div class="philosophy-content-v3">
+                ${roadmapObj.mentor_philosophy}
+            </div>
+        `;
+        container.appendChild(philosophySection);
+    }
+
     // 2. Gap Analysis
     if (roadmapObj.gap_analysis) {
         const gapHeader = document.createElement('div');
@@ -2289,7 +2267,38 @@ function displayRoadmap(roadmapData) {
                 <span class="phase-meta-tag">${phase.duration_weeks || 4} WEEKS</span>
             </div>
             <h3 class="card-title-v2">${phase.phase_name}</h3>
-            <p class="phase-why-v3">${phase.why_it_matters}</p>
+
+            <div class="phase-mentor-perspective-v3">
+                <strong>Mentor Perspective:</strong> ${phase.why_it_matters}
+            </div>
+
+            <div class="step-by-step-v3">
+                <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                    <h3><i data-lucide="list-checks"></i> What You Will Do</h3>
+                </div>
+                <div class="step-content-v3">${phase.what_you_will_do}</div>
+
+                <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                    <h3><i data-lucide="trending-up"></i> What You Will Gain</h3>
+                </div>
+                <div class="step-content-v3">${phase.what_you_will_gain}</div>
+            </div>
+
+            ${phase.mentor_tips && phase.mentor_tips.length > 0 ? `
+                <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
+                    <h3><i data-lucide="award"></i> Senior Mentor Tips</h3>
+                </div>
+                <ul class="mentor-tips-list-v3">
+                    ${phase.mentor_tips.map(tip => `<li>${tip}</li>`).join('')}
+                </ul>
+            ` : ''}
+
+            ${phase.transition_to_next ? `
+                <div class="transition-container-v3">
+                    <div class="transition-label">🪜 LADDER TO NEXT PHASE:</div>
+                    <div class="transition-content">${phase.transition_to_next}</div>
+                </div>
+            ` : ''}
 
             <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
                 <h3>Learning Outcomes</h3>
@@ -2404,28 +2413,23 @@ function displayRoadmap(roadmapData) {
 
         // 9. Cyber Wisdom Section (Always at the end)
     const randomQuote = getRandomQuote();
-    const qrSection = document.createElement('div');
-    qrSection.className = 'neo-qr-container';
-    qrSection.innerHTML = `
+    const wisdomSection = document.createElement('div');
+    wisdomSection.className = 'cyber-wisdom-section-v3';
+    wisdomSection.innerHTML = `
         <blockquote class="cyber-quote" style="margin-bottom: 30px; border-left: 10px solid var(--black-v3); background: rgba(0,0,0,0.05); padding: 20px; font-style: italic; font-size: 1.2rem;">
             "${randomQuote}"
         </blockquote>
-        <div class="neo-qr-title">
-            🎯 CYBER WISDOM AWAITS
-        </div>
-        <div class="qr-fallback-wrapper" style="margin: 0 auto; max-width: 400px;">
-            <img src="qr-code.svg" alt="QR code" class="neo-qr-image" />
-            <div class="neo-qr-subtitle">
-                Unlock exclusive cybersecurity insights and advanced tips!
-            </div>
-            <div class="fallback-box"
-                 onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')"
-                 style="margin-top: 25px; padding: 20px; border: 4px solid var(--black-v3); background: var(--primary-v3); color: white; font-weight: 900; text-align: center; text-transform: uppercase; cursor: pointer; transition: all 0.2s; box-shadow: 6px 6px 0px var(--black-v3);">
-                QR NOT WORKING? CLICK HERE FOR WISDOM 🎵
-            </div>
+        <div class="wisdom-cta-container" style="text-align: center; margin-top: 40px;">
+            <div style="font-weight: 900; font-size: 1.5rem; margin-bottom: 20px; text-transform: uppercase;">✨ Ready for the ultimate mentor secret?</div>
+            <button class="btn-cyber-wisdom"
+                    onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')"
+                    style="padding: 24px 48px; font-size: 1.4rem; background: var(--primary-v3); color: white; border: 4px solid var(--black-v3); box-shadow: 8px 8px 0px var(--black-v3); font-weight: 900; cursor: pointer; text-transform: uppercase; transition: all 0.2s;">
+                🎁 REVEAL CYBER WISDOM 🎁
+            </button>
+            <p style="margin-top: 20px; font-weight: 700; opacity: 0.7;">Click at your own risk. Knowledge cannot be unlearned.</p>
         </div>
     `;
-    container.appendChild(qrSection);
+    container.appendChild(wisdomSection);
 
     // Append everything to the main container
     roadmapContent.appendChild(container);
@@ -2437,6 +2441,58 @@ function displayRoadmap(roadmapData) {
 
     // Scroll to top of roadmap
     window.scrollTo({ top: elements.roadmapSection.offsetTop - 100, behavior: 'smooth' });
+
+    // Show version selector if applicable
+    if (roadmapObj.targetCertification) {
+        fetchAndShowRoadmapVersions(roadmapObj.targetCertification);
+    }
+}
+
+async function fetchAndShowRoadmapVersions(certName) {
+    if (!appState.user) return;
+    try {
+        const response = await fetch('/api/roadmaps', {
+            headers: { 'Authorization': `Bearer ${appState.sessionId}` }
+        });
+        const data = await response.json();
+
+        // Match certification names
+        const roadmaps = data.roadmaps.filter(r => r.target_cert === certName);
+
+        const container = document.getElementById('roadmapVersionContainer');
+        if (!container) return;
+
+        if (roadmaps.length <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Reverse to show newest first
+        container.innerHTML = `
+            <div class="version-selector-neo">
+                <span class="version-label">📂 VERSION HISTORY:</span>
+                <select id="roadmapVersionSelect" class="neo-select">
+                    ${roadmaps.map((r, i) => `
+                        <option value="${r.id}" ${appState.currentRoadmapId === r.id || (i===0 && !appState.currentRoadmapId) ? 'selected' : ''}>
+                            Version ${roadmaps.length - i} (${new Date(r.created_at).toLocaleDateString()})
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
+
+        document.getElementById('roadmapVersionSelect').addEventListener('change', async (e) => {
+            const roadmapId = e.target.value;
+            const res = await fetch(`/api/roadmaps/${roadmapId}`, {
+                headers: { 'Authorization': `Bearer ${appState.sessionId}` }
+            });
+            const d = await res.json();
+            appState.currentRoadmapId = roadmapId;
+            displayRoadmap(d.roadmap.content);
+        });
+    } catch (e) {
+        console.error('Error fetching versions:', e);
+    }
 }
 
 function openSkillPanel(phaseData) {
@@ -2687,201 +2743,6 @@ function exportRoadmap() {
     showSuccess('Roadmap exported!');
 }
 
-async function downloadRoadmapPDF() {
-    if (!appState.roadmapJSON || !appState.roadmapJSON.roadmap) {
-        showError('No valid roadmap data available. Please generate a roadmap first.');
-        return;
-    }
-    
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const originalText = downloadPdfBtn.innerHTML;
-    
-    try {
-        // Loading state
-        downloadPdfBtn.disabled = true;
-        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Initializing...';
-        showNotification('Preparing your roadmap for high-quality PDF export...', 'info');
-
-        // Ensure skill tree and other dynamic elements are fully rendered
-        await new Promise(resolve => setTimeout(resolve, 500));
-        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Capturing Content...';
-
-        const isDarkMode = document.body.classList.contains('mode-oscp');
-
-        // Step 1: Create print-safe HTML content
-        const pdfRoot = document.createElement('div');
-        pdfRoot.id = 'pdf-root';
-        pdfRoot.className = 'roadmap-v3-container';
-        // Apply critical styles directly to ensure they are captured by outerHTML
-        pdfRoot.style.cssText = `
-            width: 1000px;
-            display: block;
-            background: ${isDarkMode ? '#121212' : '#ffffff'};
-            color: ${isDarkMode ? '#ffffff' : '#000000'};
-            padding: 40px;
-            margin: 0 auto;
-            min-height: 100vh;
-        `;
-        
-        // Clone roadmap content
-        const contentClone = elements.roadmapContent.cloneNode(true);
-        
-        // Strip interactive elements and scripts but keep layout
-        contentClone.querySelectorAll('button, input, select, script, .btn-reveal-secret, .hidden').forEach(el => el.remove());
-        
-        // Ensure all links are absolute and styled
-        contentClone.querySelectorAll('a').forEach(link => {
-            link.style.color = '#ff3e00';
-            link.style.textDecoration = 'underline';
-            link.style.fontWeight = 'bold';
-        });
-
-        // Add branding header
-        const header = document.createElement('div');
-        header.className = 'roadmap-v3-header';
-        header.style.cssText = `
-            background: #ff3e00;
-            border: 3px solid #000;
-            padding: 30px;
-            box-shadow: 6px 6px 0px #000;
-            color: white;
-            margin-bottom: 30px;
-            text-align: center;
-        `;
-        header.innerHTML = `
-            <h1 style="font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: white;">
-                OffSec Learning Roadmap
-            </h1>
-            <div style="display: flex; gap: 20px; justify-content: center; font-size: 14px;">
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Target: <strong>${appState.selectedCert?.toUpperCase() || 'Roadmap'}</strong></span>
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Date: <strong>${new Date().toLocaleDateString()}</strong></span>
-                <span style="background: rgba(0,0,0,0.1); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.2);">Mode: <strong>${isDarkMode ? 'OSCP (Advanced)' : 'Beginner'}</strong></span>
-            </div>
-        `;
-        
-        pdfRoot.appendChild(header);
-        pdfRoot.appendChild(contentClone);
-        
-        // Add Raw JSON data (hidden in UI but present in PDF for copy-paste)
-        const jsonSection = document.createElement('div');
-        jsonSection.style.cssText = `
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border: 2px dashed #000;
-            page-break-before: always;
-        `;
-        jsonSection.innerHTML = `
-            <h2 style="font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px;">Raw Roadmap Data (JSON)</h2>
-            <pre style="font-size: 10px; white-space: pre-wrap; word-break: break-all; color: #333;">${JSON.stringify(appState.roadmapJSON, null, 2)}</pre>
-        `;
-        pdfRoot.appendChild(jsonSection);
-
-        // Add footer
-        const footer = document.createElement('div');
-        footer.style.cssText = `
-            margin-top: 50px;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            border-top: 3px solid #000;
-            font-family: 'Space Mono', monospace;
-        `;
-        footer.innerHTML = `
-            <p><strong>OFFSEC AI MENTOR</strong> - Your Path to Mastery</p>
-            <p style="margin-top: 5px; opacity: 0.7;">This roadmap is generated based on your unique skill profile.</p>
-            <p style="margin-top: 10px; font-size: 10px;">&copy; 2026 OffSec AI Mentor | Powered by Groq API & iLovePDF</p>
-        `;
-        pdfRoot.appendChild(footer);
-        
-        // Create complete HTML document - using outerHTML to preserve root styles
-        // Note: style.css is now injected by the backend for higher reliability
-        const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>OffSec Learning Roadmap</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { margin: 0; padding: 0; background: ${isDarkMode ? '#121212' : '#ffffff'}; }
-        * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        @page { margin: 0; size: A4; }
-    </style>
-</head>
-<body class="${isDarkMode ? 'mode-oscp' : ''}">
-    ${pdfRoot.outerHTML}
-</body>
-</html>
-        `.trim();
-        
-        const filename = `OffSec-Roadmap-${appState.selectedCert || 'Learning'}-${new Date().toISOString().split('T')[0]}.pdf`;
-        
-        // Prepare headers with custom keys if available
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-
-        const ilovepdfPublic = localStorage.getItem('ilovepdfPublicKey');
-        const ilovepdfSecret = localStorage.getItem('ilovepdfSecretKey');
-
-        if (ilovepdfPublic) headers['X-ILovePDF-Public-Key'] = ilovepdfPublic;
-        if (ilovepdfSecret) headers['X-ILovePDF-Secret-Key'] = ilovepdfSecret;
-
-        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Converting via API...';
-
-        // Step 2: Send to backend API
-        const response = await fetch('/api/generate-pdf', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                html: htmlContent,
-                filename: filename
-            })
-        });
-        
-        if (!response.ok) {
-            // Robust error parsing for non-JSON responses
-            let errorMsg = 'Failed to generate PDF';
-
-            try {
-                // Read response as text first so we don't consume the stream twice
-                const responseText = await response.text();
-                try {
-                    const errorData = JSON.parse(responseText);
-                    errorMsg = errorData.details ? `${errorData.error} (${errorData.details})` : (errorData.error || errorMsg);
-                } catch (parseError) {
-                    // Fallback for non-JSON content
-                    console.error('API Error Response (not JSON):', responseText.substring(0, 500));
-                    errorMsg = `Server Error (${response.status}): The PDF service is temporarily unavailable.`;
-                }
-            } catch (readError) {
-                console.error('Could not read error response:', readError);
-            }
-            throw new Error(errorMsg);
-        }
-        
-        // Step 3: Download the PDF
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showSuccess('PDF generated successfully via iLovePDF!');
-        
-    } catch (error) {
-        console.error('❌ PDF generation error:', error);
-        showError(`PDF generation failed: ${error.message}. Please use "Export as JSON" instead.`);
-    } finally {
-        downloadPdfBtn.disabled = false;
-        downloadPdfBtn.innerHTML = originalText;
-    }
-}
 
 // ============================================================================
 // SECTION 4: GUIDED MENTOR CHAT

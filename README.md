@@ -28,8 +28,8 @@
 - **Certification Segregation**: Generates unique paths for different certs, ensuring the syllabus alignment is 100% accurate.
 - **Clickable Resource Engine**: Automatically curates working links for YouTube channels, technical books, and lab environments.
 
-### 3. **High-Fidelity PDF Export (iLovePDF Integration)**
-- Converts the Neo-Brutalist learning path into a professional, print-safe PDF document using the iLovePDF API for offline study.
+### 3. **Progress Persistence & Database Integration**
+- Automatically saves assessment results, chat history, and multiple roadmap versions to a local SQLite database for continuous learning tracking.
 
 ---
 
@@ -47,7 +47,7 @@ The project features a unique **Neo-Brutalist Hacker Aesthetic**:
 
 - **Frontend**: Vanilla JS, HTML5, CSS3 (No frameworks, pure speed).
 - **Backend**: Node.js (Express), SQLite (better-sqlite3).
-- **AI Stack**: Groq API (LLaMA 3.3 70B Versatile), iLovePDF API.
+- **AI Stack**: Groq API (LLaMA 3.3 70B Versatile).
 - **Security**: "Bring Your Own Key" (BYOK) support for users to bypass rate limits safely.
 
 ---
