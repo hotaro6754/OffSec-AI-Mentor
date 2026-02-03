@@ -1080,10 +1080,59 @@ MASTER TOOL LIST (Include ALL relevant tools for ${cert}):
 - Exploit Dev: WinDbg, x64dbg, Ghidra, GDB, AFL
 - Analysis: Wireshark, tcpdump, Splunk, Elastic, Security Onion`;
 
+        let modeSpecificInstructions = '';
+        
+        // Determine if this is OSCP certification
+        const isOscpCert = cert.toLowerCase().includes('oscp - offensive security certified professional') || 
+                           cert.toLowerCase().startsWith('oscp');
+        
+        // OSCP Mode: Weakness-focused, exam-ready training
+        if (isOscp && isOscpCert) {
+            modeSpecificInstructions = `
+🎯 **OSCP MODE - EXAM PREPARATION (Brutal & Focused)**
+This user has selected OSCP Mode - they want EXAM-READY training, not beginner content.
+- ASSUME FOUNDATIONAL KNOWLEDGE: User already knows Linux basics, Windows basics, Networking fundamentals
+- FOCUS ON WEAKNESSES: ${weaknesses.join(', ')}
+- Generate 8-10 INTENSIVE phases targeting exam gaps and weak areas
+- MUST include HTB Pro Labs: Offshore, RastaLabs, Cybernetics, APTLabs
+- Advanced resources: IppSec walkthroughs, TJ Null OSCP list, Proving Grounds Practice
+- Time management strategies for 24-hour exam
+- Manual exploitation focus (no auto-pwn tools like Metasploit Auto-exploit)
+- Privilege escalation mastery (Linux + Windows)
+- Active Directory attack paths and enumeration
+- Buffer overflow basics with detailed walkthroughs
+- Exam simulation and reporting practice
+- Each phase should be 3-5 weeks of intensive, focused study
+`;
+        } else if (mode === 'beginner' && isOscpCert) {
+            // Beginner Mode selecting OSCP: Ground-up learning path
+            const readinessScore = assessmentResult.readinessScore || 0;
+            const needsPrep = readinessScore < 60;
+            
+            modeSpecificInstructions = `
+🌱 **BEGINNER MODE PATH TO OSCP**
+This user is new to cybersecurity but ambitious - selected OSCP as goal.
+- START FROM ZERO: Absolute foundations required
+- Generate 12-14 PROGRESSIVE phases with gradual difficulty increase
+- Phases 1-4: Foundations (4-6 weeks each) - Linux, Windows, Networking, Scripting basics
+- Phases 5-8: Intermediate (3-4 weeks each) - Web attacks, privilege escalation basics, enumeration
+- Phases 9-12: OSCP Prep (3-5 weeks each) - Manual exploitation, AD basics, exam readiness
+- Include beginner resources: TryHackMe rooms, OverTheWire, basic HTB boxes (Easy rated)
+${needsPrep ? '- CRITICAL: Current readiness score < 60%. STRONGLY recommend completing eJPT or THM Jr Pentester path first' : ''}
+- Progressive difficulty curve - don't jump to advanced content too early
+- Check prerequisites before introducing advanced topics
+- Build confidence with achievable milestones in early phases
+`;
+        }
+        
+        // Determine phase count based on mode and certification
+        const phaseCount = (isOscp && isOscpCert) ? '8-10' : 
+                          (mode === 'beginner' && isOscpCert) ? '12-14' : '8-10';
+
         const instructions = `
 CRITICAL INSTRUCTIONS FOR AI MENTOR:
 1. **ROLE**: You are an elite cybersecurity mentor. Your guidance must be CONCISE, PRACTICAL, and HIGH-IMPACT.
-2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (8-10 phases). Focus on quality over quantity.
+2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${phaseCount} phases). Focus on quality over quantity.
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
 5. **SYLLABUS**: Analyze the ${cert} syllabus deeply. Map key topics to the most relevant phases.
@@ -1093,13 +1142,14 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 9. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
 10. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
 11. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+${modeSpecificInstructions}
 
-PHASE STRUCTURE (8-10 Phases):
+${!modeSpecificInstructions ? `PHASE STRUCTURE (8-10 Phases):
 Phases 1-2: Foundations (Linux, Networking, Windows, Scripting)
 Phases 3-4: Web & Network Enumeration + Initial Access
 Phases 5-6: Privilege Escalation & Active Directory
 Phases 7-8: Advanced Topics (Evasion, Post-Exploitation, Cloud)
-Phases 9-10: Certification Mastery, Reporting, & Mock Exams`;
+Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 
         let certSpecificInstructions = '';
         if (certContent) {
@@ -1111,6 +1161,22 @@ CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
 - MUST USE THESE LABS: ${certContent.specificLabs.map(l => l.name).join(', ')}
 - MUST USE THESE TOOLS: ${certContent.coreTools.join(', ')}
 - YT RESOURCES: ${certContent.youtubeChannels.map(y => `${y.name} (${y.url})`).join(', ')}`;
+        }
+        
+        // Add preparation recommendations for beginner mode
+        let prepRecommendations = '';
+        if (mode === 'beginner' && isOscpCert) {
+            prepRecommendations = `
+📚 **PREPARATION CERTIFICATIONS (Include as recommendations in early phases)**:
+For users with low readiness (<60%), mention these as optional preparatory certifications:
+- eJPT (eLearnSecurity Junior Penetration Tester) - INE: Good for networking and basic pentesting
+- THM Jr Pentester (TryHackMe): Excellent guided hands-on practice
+- CEH (Certified Ethical Hacker) - EC-Council: Broad theoretical foundation
+- PNPT (Practical Network Penetration Tester) - TCM Security: Practical exam with reporting
+- CPTS (Certified Penetration Testing Specialist) - HTB: Technical and practical
+
+Include these in Phase 1-2 as: "Consider completing eJPT or THM Jr Pentester path before attempting OSCP if you feel overwhelmed by the material."
+`;
         }
 
         return `Create a comprehensive, visually stunning 1-YEAR ${cert} learning roadmap as an AI Mentor.
@@ -1124,10 +1190,11 @@ ${universalFoundations}
 ${masterToolList}
 ${instructions}
 ${certSpecificInstructions}
+${prepRecommendations}
 
 REQUIREMENTS:
 1. **Gap Analysis**: Detailed missing skills vs requirements.
-2. **Dynamic Phases**: MUST generate exactly 8-10 phases. Each phase MUST have:
+2. **Dynamic Phases**: MUST generate exactly ${phaseCount} phases. Each phase MUST have:
    - "Why it matters for ${cert}" - syllabus alignment
    - Specific Learning Outcomes
    - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
@@ -1933,9 +2000,34 @@ app.post('/api/generate-pdf', async (req, res) => {
             });
         }
 
+        // Validate HTML structure before proceeding
+        console.log('📋 [1/7] Validating HTML structure...');
+        if (!html.includes('<!DOCTYPE html>')) {
+            console.warn('⚠️ Missing DOCTYPE declaration - adding it');
+            html = '<!DOCTYPE html>\n' + html;
+        }
+        
+        // Check for html opening tag more robustly
+        const hasHtmlTag = /<html[\s>]/i.test(html);
+        if (!hasHtmlTag) {
+            console.error('❌ Invalid HTML: Missing <html> tag');
+            return res.status(400).json({ error: 'Invalid HTML structure: Missing <html> tag' });
+        }
+        
+        if (!html.includes('<head>')) {
+            console.warn('⚠️ Missing <head> section - may cause rendering issues');
+        }
+        if (!html.includes('<meta charset')) {
+            console.warn('⚠️ Missing charset declaration - adding UTF-8');
+            if (html.includes('<head>')) {
+                html = html.replace('<head>', '<head>\n    <meta charset="UTF-8">');
+            }
+        }
+        console.log('✅ HTML structure validated');
+
         // High-fidelity rendering: Inject local style.css content directly into HTML
         try {
-            console.log('🎨 [1/6] Preparing CSS injection for PDF...');
+            console.log('🎨 [2/7] Preparing CSS injection for PDF...');
             const cssPath = path.join(__dirname, 'style.css');
             if (fs.existsSync(cssPath)) {
                 let cssContent = fs.readFileSync(cssPath, 'utf8');
@@ -1962,16 +2054,16 @@ app.post('/api/generate-pdf', async (req, res) => {
             console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
         }
 
-        console.log('📄 [2/6] Initializing iLovePDF API...');
+        console.log('📄 [3/7] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        console.log('📄 [3/6] Packaging HTML into ZIP buffer...');
+        console.log('📄 [4/7] Packaging HTML into ZIP buffer...');
         // iLovePDF htmlpdf tool requires local files to be uploaded as ZIP containing index.html
         const zip = new AdmZip();
         zip.addFile('index.html', Buffer.from(html, 'utf8'));
         const zipBuffer = zip.toBuffer();
         
-        console.log('📄 [4/6] Starting iLovePDF task...');
+        console.log('📄 [5/7] Starting iLovePDF task...');
         const task = instance.newTask('htmlpdf');
         await task.start();
         
@@ -1979,7 +2071,7 @@ app.post('/api/generate-pdf', async (req, res) => {
         const file = ILovePDFFile.fromArray(zipBuffer, 'roadmap.zip');
         await task.addFile(file);
         
-        console.log('📄 [5/6] Processing HTML to PDF conversion...');
+        console.log('📄 [6/7] Processing HTML to PDF conversion...');
         await task.process({
             view_width: 1024,
             delay: 3000, // Slightly more delay for asset loading
@@ -1989,7 +2081,7 @@ app.post('/api/generate-pdf', async (req, res) => {
             page_margin: 10
         });
         
-        console.log('📄 [6/6] Downloading generated PDF buffer...');
+        console.log('📄 [7/7] Downloading generated PDF buffer...');
         const pdfBuffer = await task.download();
         
         console.log('✅ PDF generation workflow completed successfully');
