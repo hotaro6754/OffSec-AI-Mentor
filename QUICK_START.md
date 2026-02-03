@@ -32,7 +32,6 @@ VERSION:        1.0.0
 | `style.css` | Neo-brutalism design system | 23 KB |
 | `app.js` | AI logic, state, Gemini API | 29 KB |
 | `README.md` | Complete documentation | 11 KB |
-| `DEPLOYMENT.md` | Setup, testing, deployment | 10 KB |
 | `SUBMISSION_SUMMARY.md` | Feature checklist for judges | 11 KB |
 
 ---
@@ -251,7 +250,6 @@ Privacy: User anonymous
 | Document | Purpose |
 |----------|---------|
 | README.md | Features, tech stack, usage |
-| DEPLOYMENT.md | Setup, testing, deployment |
 | SUBMISSION_SUMMARY.md | Feature checklist for judges |
 | SECURITY.md | Ethical constraints, guidelines |
 | ARCHITECTURE.txt | System design details |
@@ -324,7 +322,7 @@ Privacy: User anonymous
 
 ## 📞 SUPPORT REFERENCES
 
-- **Setup Issues?** → See DEPLOYMENT.md
+- **Setup Issues?** → See README.md
 - **How Features Work?** → See README.md  
 - **Code Details?** → See inline comments in files
 - **Ethical Guidelines?** → See SECURITY.md

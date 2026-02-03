@@ -135,7 +135,6 @@ STYLE: [How the AI should communicate]
 
 1. **Update documentation**
    - Update README.md if needed
-   - Update USAGE_GUIDE.md for new features
    - Add comments in code
 
 2. **Commit messages**
