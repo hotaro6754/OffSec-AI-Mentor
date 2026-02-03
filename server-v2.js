@@ -1992,9 +1992,30 @@ app.post('/api/generate-pdf', async (req, res) => {
             });
         }
 
+        // Validate HTML structure before proceeding
+        console.log('📋 [1/7] Validating HTML structure...');
+        if (!html.includes('<!DOCTYPE html>')) {
+            console.warn('⚠️ Missing DOCTYPE declaration - adding it');
+            html = '<!DOCTYPE html>\n' + html;
+        }
+        if (!html.includes('<html')) {
+            console.error('❌ Invalid HTML: Missing <html> tag');
+            return res.status(400).json({ error: 'Invalid HTML structure: Missing <html> tag' });
+        }
+        if (!html.includes('<head>')) {
+            console.warn('⚠️ Missing <head> section - may cause rendering issues');
+        }
+        if (!html.includes('<meta charset')) {
+            console.warn('⚠️ Missing charset declaration - adding UTF-8');
+            if (html.includes('<head>')) {
+                html = html.replace('<head>', '<head>\n    <meta charset="UTF-8">');
+            }
+        }
+        console.log('✅ HTML structure validated');
+
         // High-fidelity rendering: Inject local style.css content directly into HTML
         try {
-            console.log('🎨 [1/6] Preparing CSS injection for PDF...');
+            console.log('🎨 [2/7] Preparing CSS injection for PDF...');
             const cssPath = path.join(__dirname, 'style.css');
             if (fs.existsSync(cssPath)) {
                 let cssContent = fs.readFileSync(cssPath, 'utf8');
@@ -2021,16 +2042,16 @@ app.post('/api/generate-pdf', async (req, res) => {
             console.warn('⚠️ Could not inject local style.css, continuing with original HTML:', cssError.message);
         }
 
-        console.log('📄 [2/6] Initializing iLovePDF API...');
+        console.log('📄 [3/7] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        console.log('📄 [3/6] Packaging HTML into ZIP buffer...');
+        console.log('📄 [4/7] Packaging HTML into ZIP buffer...');
         // iLovePDF htmlpdf tool requires local files to be uploaded as ZIP containing index.html
         const zip = new AdmZip();
         zip.addFile('index.html', Buffer.from(html, 'utf8'));
         const zipBuffer = zip.toBuffer();
         
-        console.log('📄 [4/6] Starting iLovePDF task...');
+        console.log('📄 [5/7] Starting iLovePDF task...');
         const task = instance.newTask('htmlpdf');
         await task.start();
         
@@ -2038,7 +2059,7 @@ app.post('/api/generate-pdf', async (req, res) => {
         const file = ILovePDFFile.fromArray(zipBuffer, 'roadmap.zip');
         await task.addFile(file);
         
-        console.log('📄 [5/6] Processing HTML to PDF conversion...');
+        console.log('📄 [6/7] Processing HTML to PDF conversion...');
         await task.process({
             view_width: 1024,
             delay: 3000, // Slightly more delay for asset loading
@@ -2048,7 +2069,7 @@ app.post('/api/generate-pdf', async (req, res) => {
             page_margin: 10
         });
         
-        console.log('📄 [6/6] Downloading generated PDF buffer...');
+        console.log('📄 [7/7] Downloading generated PDF buffer...');
         const pdfBuffer = await task.download();
         
         console.log('✅ PDF generation workflow completed successfully');
