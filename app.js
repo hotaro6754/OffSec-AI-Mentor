@@ -2761,9 +2761,7 @@ function initMentorChat() {
     
     const welcomeMsg = {
         role: 'mentor',
-        text: `Hi! I'm KaliGuru — your ethical hacking mentor for authorized labs only.
-Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.
-Which lab, machine, or topic are you working on right now? 😎`
+        text: `Hi! I’m KaliGuru — your ethical hacking mentor for authorized labs only. Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self‑owned labs, etc. Which lab, machine, or topic are you working on right now? 😎`
     };
     
     appState.mentorChat.push(welcomeMsg);
@@ -2838,8 +2836,20 @@ function addChatMessage(msg) {
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${msg.role}`;
     
-    // Use textContent to safely render all messages as plain text (no markup needed)
-    bubble.textContent = msg.text;
+    if (msg.role === 'mentor') {
+        const header = document.createElement('div');
+        header.className = 'chat-bubble-header';
+        header.textContent = 'KALIGURU@OFFSEC:~$';
+        bubble.appendChild(header);
+
+        const content = document.createElement('div');
+        content.className = 'chat-bubble-content';
+        content.textContent = msg.text;
+        bubble.appendChild(content);
+    } else {
+        // Use textContent to safely render all messages as plain text
+        bubble.textContent = msg.text;
+    }
     
     elements.chatHistory.appendChild(bubble);
     elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
