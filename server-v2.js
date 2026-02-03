@@ -162,13 +162,13 @@ const RESOURCES = {
             { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'AD attack paths' },
             { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'AD exploitation' },
             { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'AD fundamentals' },
-            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Advanced AD techniques' },
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Enterprise security' },
-            { name: 'Pentester Academy', url: 'https://www.pentesteracademy.com/', focus: 'Deep AD training' }
+            { name: 'Sektor7', url: 'https://www.youtube.com/@sektor7_inc', focus: 'Advanced AD techniques' },
+            { name: 'ZeroPoint Security', url: 'https://www.youtube.com/@ZeroPointSecurity', focus: 'Enterprise security' },
+            { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademyTV', focus: 'Deep AD training' }
         ],
         red_team: [
-            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'CRTO training' },
-            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Evasion & malware' },
+            { name: 'ZeroPoint Security', url: 'https://www.youtube.com/@ZeroPointSecurity', focus: 'CRTO training' },
+            { name: 'Sektor7', url: 'https://www.youtube.com/@sektor7_inc', focus: 'Evasion & malware' },
             { name: 'Red Team Village', url: 'https://www.youtube.com/@RedTeamVillage', focus: 'Community content' },
             { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', focus: 'Enterprise defense/offense' },
             { name: 'Ired.team (talks)', url: 'https://www.ired.team/', focus: 'Technique walkthroughs' }
@@ -258,16 +258,16 @@ const RESOURCES = {
         ]
     },
     books: [
-        { name: 'The Web Application Hacker’s Handbook', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Real-World Bug Hunting', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Penetration Testing (Georgia Weidman)', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Red Team Field Manual', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Blue Team Field Manual', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Windows Internals (Part 1 & 2)', url: 'https://amzn.to/3Y2Y2Y2' },
-        { name: 'Linux Basics for Hackers', url: 'https://amzn.to/3Y2Y2Y2' }
+        { name: 'The Web Application Hacker’s Handbook', url: 'https://www.wiley.com/en-us/9781118026472' },
+        { name: 'Real-World Bug Hunting', url: 'https://nostarch.com/realworldbughunting' },
+        { name: 'Penetration Testing (Georgia Weidman)', url: 'https://nostarch.com/pentesting' },
+        { name: 'Red Team Field Manual', url: 'https://www.amazon.com/dp/1494295539' },
+        { name: 'Blue Team Field Manual', url: 'https://www.amazon.com/dp/154101636X' },
+        { name: 'Windows Internals (Part 1 & 2)', url: 'https://learn.microsoft.com/en-us/sysinternals/resources/windows-internals' },
+        { name: 'Linux Basics for Hackers', url: 'https://nostarch.com/linuxbasicsforhackers' }
     ],
     special: [
-        { name: 'Special Link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', focus: 'Secret Cyber Security Wisdom' },
+        { name: "OffSec Course Catalog", url: "https://www.offsec.com/courses-and-certifications/", focus: "Official OffSec Training & Certifications" },
         { name: 'Harshith OS', url: 'https://hotaro6754.github.io/Roadmap/', focus: 'Comprehensive Red Team Roadmap Source' }
     ]
 };
@@ -1024,7 +1024,7 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${phaseCount} phases). Focus on quality over quantity.
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
-5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus. Map specific syllabus items to corresponding roadmap phases.
+5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus provided. The generated roadmap MUST cover EVERY SINGLE technical topic and element listed in the respective syllabus without exception.
 6. **RESOURCE DIVERSITY**: Each phase MUST contain at least 1 HTB lab, 1 THM lab, and 1 YouTube resource.
 7. **CONTEXTUAL GUIDANCE**: Tailor "Mentor Key Points" to the specific certification's mindset (e.g., "Manual enumeration" for OSCP vs "Code review" for OSWE).
 8. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
@@ -1033,6 +1033,7 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 11. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
 12. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
 13. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+14. **API KEY MANAGEMENT**: Include specific guidance on generating and safely segregating API keys for platforms like HTB, THM, and other suggested resources within the relevant roadmap phases.
 ${modeSpecificInstructions}
 
 ${!modeSpecificInstructions ? `PHASE STRUCTURE (${phaseCount} Phases):
