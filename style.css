@@ -3740,58 +3740,183 @@ body.mode-oscp #pdf-root table td {
 }
 
 /* ============================================================
-   QR Code Section - Neo-Brutalist Styling
+   Cyber Wisdom Section - Neo-Brutalist Styling
    ============================================================ */
 
-.neo-qr-container {
+.cyber-wisdom-section-v3 {
     margin-top: 60px;
-    padding: 30px;
+    padding: 60px 40px;
     border: 6px solid var(--black-v3);
-    background: var(--accent-v3);
+    background: #ffff00;
     text-align: center;
-    box-shadow: var(--shadow-v3);
+    box-shadow: 12px 12px 0px var(--black-v3);
 }
 
-body.mode-oscp .neo-qr-container {
-    background: #2d2d2d;
+body.mode-oscp .cyber-wisdom-section-v3 {
+    background: #1a1a1a;
     border-color: var(--primary-v3);
-    box-shadow: 8px 8px 0px var(--primary-v3);
+    box-shadow: 12px 12px 0px var(--primary-v3);
+    color: white;
 }
 
-.neo-qr-title {
-    font-size: 1.5rem;
-    font-weight: 900;
+.btn-cyber-wisdom {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-cyber-wisdom:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 16px 16px 0px var(--black-v3);
+}
+
+.btn-cyber-wisdom:active {
+    transform: translate(8px, 8px);
+    box-shadow: 0px 0px 0px var(--black-v3);
+}
+
+body.mode-oscp .btn-cyber-wisdom {
+    background: var(--primary-v3);
+    border-color: white;
+    box-shadow: 8px 8px 0px white;
+}
+
+body.mode-oscp .btn-cyber-wisdom:hover {
+    box-shadow: 12px 12px 0px white;
+}
+
+/* ============================================================
+   New Roadmap Components & Versioning
+   ============================================================ */
+
+.action-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    width: 100%;
+}
+
+.version-selector-container {
     margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    padding: 15px;
+    background: #f0f0f0;
+    border: 3px solid var(--black-v3);
+    box-shadow: 4px 4px 0px var(--black-v3);
+}
+
+.version-selector-neo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.version-label {
+    font-weight: 900;
+    font-size: 0.9rem;
     color: var(--black-v3);
 }
 
-body.mode-oscp .neo-qr-title {
+.neo-select {
+    padding: 8px 12px;
+    border: 3px solid var(--black-v3);
+    background: white;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+
+.mentor-philosophy-section-v3 {
+    margin: 30px 0;
+    padding: 25px;
+    background: white;
+    border: 4px solid var(--secondary-v3);
+    box-shadow: 8px 8px 0px var(--secondary-v3);
+}
+
+.philosophy-content-v3 {
+    font-style: italic;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #444;
+}
+
+.phase-mentor-perspective-v3 {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 6px solid var(--primary-v3);
+    font-size: 1rem;
+}
+
+.step-content-v3 {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: white;
+    border: 2px dashed #ccc;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+body.mode-oscp .version-selector-container {
+    background: #222;
+    border-color: var(--primary-v3);
+    box-shadow: 4px 4px 0px var(--primary-v3);
+}
+
+body.mode-oscp .version-label {
+    color: white;
+}
+
+body.mode-oscp .neo-select {
+    background: #333;
+    color: white;
+    border-color: var(--primary-v3);
+}
+
+body.mode-oscp .mentor-philosophy-section-v3 {
+    background: #1e1e1e;
+    border-color: var(--secondary-v3);
+    color: #eee;
+}
+
+body.mode-oscp .philosophy-content-v3 {
+    color: #ddd;
+}
+
+.mentor-tips-list-v3 {
+    margin-top: 10px;
+    padding-left: 20px;
+    list-style-type: '💡 ';
+    font-size: 0.95rem;
+    color: #333;
+}
+
+body.mode-oscp .mentor-tips-list-v3 {
+    color: #ccc;
+}
+
+.transition-container-v3 {
+    margin: 25px 0;
+    padding: 15px;
+    background: var(--black-v3);
+    color: white;
+    border-left: 10px solid var(--primary-v3);
+    box-shadow: 6px 6px 0px var(--secondary-v3);
+}
+
+.transition-label {
+    font-weight: 900;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
     color: var(--primary-v3);
 }
 
-.neo-qr-image {
-    max-width: 300px;
-    border: 4px dashed var(--black-v3);
-    padding: 20px;
-    background: white;
-    margin: 0 auto;
-    display: block;
+.transition-content {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
 }
 
-body.mode-oscp .neo-qr-image {
+body.mode-oscp .transition-container-v3 {
+    background: #111;
     border-color: var(--primary-v3);
-    background: #1e1e1e;
-}
-
-.neo-qr-subtitle {
-    margin-top: 20px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--black-v3);
-}
-
-body.mode-oscp .neo-qr-subtitle {
-    color: var(--secondary-v3);
+    box-shadow: 6px 6px 0px var(--secondary-v3);
 }
