@@ -301,6 +301,7 @@ function init() {
     setupNavbarScroll();
     setupCertFilters();
     checkExistingSession();
+    initChecklist();
     
     if (elements.modeCheckbox) {
         toggleLearningMode();
@@ -1894,8 +1895,8 @@ async function generateRoadmap() {
 // Show integrated checklist based on certification
 function showIntegratedChecklist(cert) {
     const checklistSection = document.getElementById('roadmapChecklist');
-    const checklistItems = document.getElementById('checklistItems');
-    const checklistCertName = document.getElementById('checklistCertName');
+    const checklistItems = document.getElementById('roadmapChecklistItems');
+    const checklistCertName = document.getElementById('roadmapChecklistCertName');
     
     if (!checklistSection || !checklistItems) return;
     
@@ -1924,7 +1925,7 @@ function showIntegratedChecklist(cert) {
             if (icon) {
                 icon.style.display = item.classList.contains('completed') ? 'block' : 'none';
             }
-            updateChecklistProgress();
+            updateRoadmapChecklistProgress();
         });
     });
     
@@ -2070,13 +2071,16 @@ function generateChecklistForCert(certId, level) {
     return baseChecklist[certId] || baseChecklist['oscp'];
 }
 
-function updateChecklistProgress() {
-    const items = document.querySelectorAll('.checklist-item');
-    const completed = document.querySelectorAll('.checklist-item.completed');
+function updateRoadmapChecklistProgress() {
+    const container = document.getElementById('roadmapChecklistItems');
+    if (!container) return;
+
+    const items = container.querySelectorAll('.checklist-item');
+    const completed = container.querySelectorAll('.checklist-item.completed');
     const progress = items.length > 0 ? Math.round((completed.length / items.length) * 100) : 0;
     
-    const progressCircle = document.getElementById('checklistProgressCircle');
-    const progressText = document.getElementById('checklistProgressText');
+    const progressCircle = document.getElementById('roadmapChecklistProgressCircle');
+    const progressText = document.getElementById('roadmapChecklistProgressText');
     
     if (progressCircle) {
         const circumference = 283; // 2 * PI * 45
@@ -2092,7 +2096,7 @@ function updateChecklistProgress() {
 // Show integrated resources based on cert and level
 function showIntegratedResources(cert, level) {
     const resourcesSection = document.getElementById('roadmapResources');
-    const resourcesContent = document.getElementById('resourcesContent');
+    const resourcesContent = document.getElementById('roadmapResourcesContent');
     
     if (!resourcesSection || !resourcesContent) return;
     
@@ -3238,5 +3242,115 @@ function showRandomEasterEgg() {
 // ============================================================================
 // STARTUP
 // ============================================================================
+
+// ============================================================================
+// CHECKLIST TRACKER LOGIC
+// ============================================================================
+
+function initChecklist() {
+    const addBtn = document.getElementById('addChecklistBtn');
+    const input = document.getElementById('newChecklistItem');
+
+    if (addBtn && input) {
+        addBtn.addEventListener('click', () => {
+            const text = input.value.trim();
+            if (text) {
+                addChecklistItem(text, 'custom');
+                input.value = '';
+            }
+        });
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const text = input.value.trim();
+                if (text) {
+                    addChecklistItem(text, 'custom');
+                    input.value = '';
+                }
+            }
+        });
+    }
+
+    // Load existing checklist
+    renderMainChecklist();
+}
+
+function addChecklistItem(text, category) {
+    const checklist = JSON.parse(localStorage.getItem('userChecklist') || '[]');
+    checklist.push({ text, category, completed: false });
+    localStorage.setItem('userChecklist', JSON.stringify(checklist));
+    renderMainChecklist();
+}
+
+function renderMainChecklist() {
+    const container = document.getElementById('checklistItems');
+    if (!container) return;
+
+    const checklist = JSON.parse(localStorage.getItem('userChecklist') || '[]');
+
+    if (checklist.length === 0) {
+        container.innerHTML = '<p class="login-prompt">No custom goals yet. Add one above!</p>';
+        updateMainChecklistProgress();
+        return;
+    }
+
+    container.innerHTML = checklist.map((item, i) => `
+        <div class="checklist-item ${item.completed ? 'completed' : ''}" data-index="${i}">
+            <div class="checklist-checkbox ${item.completed ? 'checked' : ''}">
+                <span class="check-icon" style="display: ${item.completed ? 'block' : 'none'};">✓</span>
+            </div>
+            <span class="checklist-text">${item.text} <small>(${item.category})</small></span>
+            <button class="delete-btn" onclick="deleteChecklistItem(${i})">&times;</button>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.checklist-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) return;
+
+            const index = item.getAttribute('data-index');
+            toggleChecklistItem(index);
+        });
+    });
+
+    updateMainChecklistProgress();
+}
+
+function toggleChecklistItem(index) {
+    const checklist = JSON.parse(localStorage.getItem('userChecklist') || '[]');
+    checklist[index].completed = !checklist[index].completed;
+    localStorage.setItem('userChecklist', JSON.stringify(checklist));
+    renderMainChecklist();
+}
+
+function deleteChecklistItem(index) {
+    const checklist = JSON.parse(localStorage.getItem('userChecklist') || '[]');
+    checklist.splice(index, 1);
+    localStorage.setItem('userChecklist', JSON.stringify(checklist));
+    renderMainChecklist();
+}
+
+function updateMainChecklistProgress() {
+    const progressCircle = document.getElementById('checklistProgressCircle');
+    const progressText = document.getElementById('checklistProgressText');
+    const progressLabel = document.getElementById('checklistProgressLabel');
+
+    if (!progressCircle || !progressText) return;
+
+    const checklist = JSON.parse(localStorage.getItem('userChecklist') || '[]');
+    const total = checklist.length;
+    const completed = checklist.filter(item => item.completed).length;
+
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    const circumference = 2 * Math.PI * 45;
+    const offset = circumference - (percentage / 100) * circumference;
+    progressCircle.style.strokeDashoffset = offset;
+    progressText.textContent = `${percentage}%`;
+
+    if (progressLabel) {
+        progressLabel.textContent = `${completed} of ${total} completed`;
+    }
+}
 
 window.addEventListener('DOMContentLoaded', init);
