@@ -1278,19 +1278,36 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
             }
 
             // Handle errors
-            const errorData = await response.json().catch(() => ({}));
             if (response.status === 429) {
+                const retryAfter = response.headers.get('retry-after');
+                let waitTime = 0;
+
+                if (retryAfter) {
+                    // retry-after can be in seconds or a date string
+                    waitTime = isNaN(retryAfter)
+                        ? (new Date(retryAfter).getTime() - Date.now()) / 1000
+                        : parseInt(retryAfter);
+                }
+
                 if (attempt < retries) {
-                    // Optimized backoff for Render 30s timeout: 2s, 5s, 10s
-                    const waitTimes = [2, 5, 10];
-                    const waitTime = waitTimes[Math.min(attempt - 1, waitTimes.length - 1)];
+                    // If no retry-after header, use optimized backoff: 2s, 5s, 10s, 15s, 20s
+                    if (!waitTime || waitTime <= 0) {
+                        const waitTimes = [2, 5, 10, 15, 20];
+                        waitTime = waitTimes[Math.min(attempt - 1, waitTimes.length - 1)];
+                    }
+
+                    // Cap wait time to 30s to avoid Render timeout if possible
+                    waitTime = Math.min(waitTime, 30);
+
                     console.log(`⏳ GROQ rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
                 }
                 // Return rate limit error so caller can use fallback
-                return { success: false, rateLimit: true, error: `GROQ rate limit exceeded` };
+                return { success: false, rateLimit: true, error: `GROQ rate limit exceeded`, retryAfter: waitTime };
             }
+
+            const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.error?.message || `API Error: ${response.status}`);
         } catch (error) {
             if (attempt === retries) {
@@ -1600,6 +1617,56 @@ app.post('/api/generate-questions', async (req, res) => {
     }
 });
 
+/**
+ * Generates a basic fallback evaluation when AI is unavailable
+ */
+function generateFallbackEvaluation(questions, answers, mode) {
+    let score = 0;
+    const strengths = [];
+    const weaknesses = [];
+    const totalQuestions = questions.length || 10;
+
+    questions.forEach((q, idx) => {
+        const answer = answers[idx];
+        const isCorrect = answer && q.correctAnswer &&
+            answer.toLowerCase().trim() === q.correctAnswer.toLowerCase().trim();
+
+        if (isCorrect) {
+            score += (100 / totalQuestions);
+            if (q.topic && !strengths.includes(q.topic)) strengths.push(q.topic);
+        } else {
+            if (q.topic && !weaknesses.includes(q.topic)) weaknesses.push(q.topic);
+        }
+    });
+
+    score = Math.round(score);
+
+    // Simple level determination
+    let level = "Beginner";
+    if (score >= 80) level = "Advanced";
+    else if (score >= 50) level = "Intermediate";
+
+    return {
+        readinessScore: mode === 'oscp' ? score : 0,
+        readinessStatus: mode === 'oscp' ? (score >= 70 ? "Ready" : (score >= 40 ? "Almost Ready" : "Not Ready")) : "N/A",
+        level: level,
+        score: score,
+        strengths: strengths.length > 0 ? strengths : ["General Security Concepts"],
+        weaknesses: weaknesses.length > 0 ? weaknesses : ["Advanced Topics"],
+        confidenceGaps: ["Detailed analysis requires AI"],
+        skillBreakdown: {
+            "Foundations": score,
+            "Linux/Windows": score,
+            "Networking": score,
+            "Web Security": score,
+            "Methodology": score
+        },
+        focusSuggestion: "AI evaluation was rate-limited. This is a basic fallback based on correct answers. For a detailed roadmap, please try again when the service is available.",
+        oscpAlignment: mode === 'oscp' ? "Alignment check requires AI evaluation." : undefined,
+        isFallback: true
+    };
+}
+
 app.post('/api/evaluate-assessment', async (req, res) => {
     console.log('\n📊 POST /api/evaluate-assessment');
     
@@ -1613,9 +1680,9 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         });
     }
 
+    const { answers, questions, mode } = req.body;
+
     try {
-        const { answers, questions, mode } = req.body;
-        
         if (!answers || !questions) {
             return res.status(400).json({ error: 'Answers and questions required' });
         }
@@ -1630,7 +1697,7 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         const prompt = `${PROMPTS.evaluation}\n\nAssessment:\n${answersText}`;
         
         console.log('📤 Calling AI API for evaluation...');
-        const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys });
+        const response = await callAI(prompt, { expectJson: true, retries: 5, customKeys: req.customKeys });
         console.log('📄 AI response received, length:', response?.length || 0);
         const parsed = parseJsonResponse(response);
         
@@ -1655,16 +1722,31 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         res.json(parsed);
     } catch (error) {
         console.error('❌ Error in evaluate-assessment:', error.message);
-        console.error('Stack:', error.stack);
         
         // Check if it's a rate limit error (case-insensitive)
         const isRateLimit = error.message.toLowerCase().includes('rate limit');
         if (isRateLimit) {
-            return res.status(429).json({
-                error: 'API Rate Limited',
-                details: 'The AI service is currently overloaded. Please wait a few minutes and try again. Consider upgrading to a paid API tier for better reliability.',
-                retryAfter: 300
-            });
+            console.log('⚠️ AI Rate limited during evaluation, using fallback...');
+            const fallback = generateFallbackEvaluation(questions, answers, mode);
+
+            // Save fallback assessment to database if logged in
+            try {
+                if (req.user) {
+                    db.saveAssessment(req.user.id, {
+                        mode: mode || 'beginner',
+                        score: fallback.score,
+                        level: fallback.level,
+                        strengths: fallback.strengths,
+                        weaknesses: fallback.weaknesses,
+                        questions,
+                        answers
+                    });
+                }
+            } catch (dbError) {
+                console.warn('⚠️ Could not save fallback assessment to database:', dbError.message);
+            }
+
+            return res.json(fallback);
         }
 
         res.status(500).json({
@@ -1701,11 +1783,11 @@ app.post('/api/generate-roadmap', async (req, res) => {
         const prompt = PROMPTS.roadmap(mode, level, weaknesses, cert, RESOURCES, assessmentResult);
         
         console.log(`📤 Calling AI API for roadmap generation...`);
-        // Use default retries (3) which now has optimized backoff for Render
+        // Increased retries (5) with optimized backoff
         // Roadmap can be long, so we use a higher maxTokens
         const response = await callAI(prompt, {
             expectJson: true,
-            retries: 3,
+            retries: 5,
             customKeys: req.customKeys,
             maxTokens: 8000
         });
@@ -1744,8 +1826,17 @@ app.post('/api/generate-roadmap', async (req, res) => {
         res.json({ roadmap: cleanedRoadmap });
     } catch (error) {
         console.error('❌ Error in generate-roadmap:', error.message);
-        console.error('Stack:', error.stack);
         
+        // Check if it's a rate limit error (case-insensitive)
+        const isRateLimit = error.message.toLowerCase().includes('rate limit');
+        if (isRateLimit) {
+            return res.status(429).json({
+                error: 'AI Rate Limited',
+                userMessage: 'The AI service is currently at capacity. Please wait a few minutes or provide your own API key.',
+                technicalDetails: error.message
+            });
+        }
+
         // Return user-friendly error message (NO static fallback roadmap)
         res.status(500).json({
             error: 'AI is taking longer than expected. Please try again.',
