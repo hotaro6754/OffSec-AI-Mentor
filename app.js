@@ -176,6 +176,101 @@ let appState = {
 };
 
 // ============================================================================
+// STATE PERSISTENCE
+// ============================================================================
+
+function saveState() {
+    try {
+        const stateToSave = {
+            questions: appState.questions,
+            answers: appState.answers,
+            assessment: appState.assessment,
+            selectedCert: appState.selectedCert,
+            roadmap: appState.roadmap,
+            mentorChat: appState.mentorChat,
+            learningMode: appState.learningMode,
+            currentQuestion: appState.currentQuestion,
+            currentRoadmapId: appState.currentRoadmapId
+        };
+        localStorage.setItem('offsec_mentor_app_state', JSON.stringify(stateToSave));
+        console.log('💾 App state saved');
+    } catch (e) {
+        console.error('❌ Failed to save state:', e);
+    }
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem('offsec_mentor_app_state');
+        if (!saved) return;
+
+        const parsed = JSON.parse(saved);
+        Object.assign(appState, parsed);
+        console.log('📂 App state loaded');
+
+        restoreUI();
+    } catch (e) {
+        console.error('❌ Error loading state:', e);
+    }
+}
+
+function restoreUI() {
+    // Restore Learning Mode UI
+    if (elements.modeCheckbox) {
+        elements.modeCheckbox.checked = appState.learningMode === 'oscp';
+        updateLearningModeUI();
+    }
+
+    if (appState.roadmap) {
+        displayRoadmap(appState.roadmap);
+        showSection('roadmapSection');
+
+        // Show "Latest Roadmap" button in navbar
+        document.getElementById('lastRoadmapBtn')?.classList.remove('hidden');
+        // Show actions
+        document.getElementById('roadmapActionsDiv')?.classList.remove('hidden');
+
+        // Restore Mentor Chat
+        const mentor = document.getElementById('mentorSection');
+        if (mentor) {
+            mentor.classList.remove('hidden');
+            elements.chatHistory.innerHTML = '';
+            appState.mentorChat.forEach(msg => addChatMessage(msg));
+        }
+    } else if (appState.assessment) {
+        showEvaluation();
+        showSection('evaluationSection');
+    } else if (appState.questions && appState.questions.length > 0) {
+        renderQuestion();
+        updateProgress();
+        showSection('assessmentSection');
+    }
+}
+
+function updateLearningModeUI() {
+    if (elements.modeLabel) {
+        elements.modeLabel.textContent = appState.learningMode === 'oscp' ? 'OSCP Mode' : 'Beginner Mode';
+    }
+    if (elements.modeBanner) {
+        elements.modeBanner.classList.toggle('active', appState.learningMode === 'oscp');
+    }
+    if (elements.heroSubtitle) {
+        elements.heroSubtitle.textContent = appState.learningMode === 'oscp'
+            ? 'OSCP-ready prep: prove your fundamentals and sharpen your mindset.'
+            : 'Discover your security skills. Build your path to mastery.';
+    }
+    if (elements.assessmentTitle && elements.assessmentSubtitle) {
+        elements.assessmentTitle.textContent = appState.learningMode === 'oscp'
+            ? 'OSCP Readiness Check'
+            : 'Skill Assessment';
+        elements.assessmentSubtitle.textContent = appState.learningMode === 'oscp'
+            ? 'Brutal but fair questions to measure your readiness.'
+            : 'Answer these questions honestly. This helps us personalize your roadmap.';
+    }
+    document.body.classList.toggle('mode-oscp', appState.learningMode === 'oscp');
+}
+
+// ============================================================================
 // DOM ELEMENTS
 // ============================================================================
 
@@ -269,7 +364,7 @@ const elements = {
     loadingTip: document.getElementById('loadingTip'),
     
     // Checklist
-    checklistItems: document.getElementById('checklistItems'),
+    checklistItems: document.getElementById('generalChecklistItems'),
     checklistProgressCircle: document.getElementById('checklistProgressCircle'),
     checklistProgressText: document.getElementById('checklistProgressText'),
     checklistProgressLabel: document.getElementById('checklistProgressLabel'),
@@ -305,9 +400,14 @@ function init() {
     setupCertFilters();
     checkExistingSession();
     
-    if (elements.modeCheckbox) {
+    // Load saved state
+    loadState();
+
+    if (elements.modeCheckbox && !appState.assessment && !appState.roadmap && appState.questions.length === 0) {
         toggleLearningMode();
     }
+
+    setupMentorInputAutoExpand();
 
     // Initial Boot Animation
     runBootAnimation();
@@ -352,7 +452,7 @@ function setupSkillPanel() {
     const panel = document.getElementById('skillPanel');
 
     closeBtn?.addEventListener('click', () => {
-        panel.classList.remove('open');
+        panel.classList.remove('active');
     });
 }
 
@@ -458,7 +558,7 @@ function setupEventListeners() {
         elements.modeCheckbox.addEventListener('change', toggleLearningMode);
     }
     
-    elements.mentorInput?.addEventListener('keypress', (e) => {
+    elements.mentorInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMentorMessage();
@@ -473,6 +573,16 @@ function setupEventListeners() {
             });
         });
     }
+}
+
+function setupMentorInputAutoExpand() {
+    const input = elements.mentorInput;
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+    });
 }
 
 // ============================================================================
@@ -1038,29 +1148,9 @@ function setupCertFilters() {
 
 function toggleLearningMode() {
     appState.learningMode = elements.modeCheckbox?.checked ? 'oscp' : 'beginner';
-    
-    if (elements.modeLabel) {
-        elements.modeLabel.textContent = appState.learningMode === 'oscp' ? 'OSCP Mode' : 'Beginner Mode';
-    }
-    if (elements.modeBanner) {
-        elements.modeBanner.classList.toggle('active', appState.learningMode === 'oscp');
-    }
-    if (elements.heroSubtitle) {
-        elements.heroSubtitle.textContent = appState.learningMode === 'oscp'
-            ? 'OSCP-ready prep: prove your fundamentals and sharpen your mindset.'
-            : 'Discover your security skills. Build your path to mastery.';
-    }
-    if (elements.assessmentTitle && elements.assessmentSubtitle) {
-        elements.assessmentTitle.textContent = appState.learningMode === 'oscp'
-            ? 'OSCP Readiness Check'
-            : 'Skill Assessment';
-        elements.assessmentSubtitle.textContent = appState.learningMode === 'oscp'
-            ? 'Brutal but fair questions to measure your readiness.'
-            : 'Answer these questions honestly. This helps us personalize your roadmap.';
-    }
-    
-    document.body.classList.toggle('mode-oscp', appState.learningMode === 'oscp');
+    updateLearningModeUI();
     showSuccess(`Switched to ${appState.learningMode === 'oscp' ? 'OSCP' : 'Beginner'} mode`);
+    saveState();
 }
 
 // ============================================================================
@@ -1230,6 +1320,7 @@ async function startAssessment() {
         
         appState.currentQuestion = 0;
         appState.answers = {};
+        saveState();
         
         renderQuestion();
         updateProgress();
@@ -1290,6 +1381,7 @@ function renderQuestion() {
                 optionItem.classList.add('selected');
                 // Save answer
                 appState.answers[appState.currentQuestion] = option;
+                saveState();
             });
             
             optionsContainer.appendChild(optionItem);
@@ -1304,6 +1396,7 @@ function renderQuestion() {
         input.value = appState.answers[appState.currentQuestion] || '';
         input.addEventListener('input', (e) => {
             appState.answers[appState.currentQuestion] = e.target.value;
+            saveState();
         });
         questionEl.appendChild(input);
     }
@@ -1335,6 +1428,7 @@ function nextQuestion() {
     
     if (appState.currentQuestion < appState.questions.length - 1) {
         appState.currentQuestion++;
+        saveState();
         renderQuestion();
         updateProgress();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1455,6 +1549,7 @@ async function proceedToEvaluation() {
         evaluationContainer.innerHTML = originalContent;
 
         appState.assessment = data;
+        saveState();
 
         showEvaluation();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1850,6 +1945,7 @@ async function generateRoadmapForCert(certId) {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         appState.roadmap = data.roadmap;
+        saveState();
         displayRoadmap(data.roadmap);
         
         // Show "Latest Roadmap" button in navbar
@@ -1906,7 +2002,7 @@ async function generateRoadmap() {
 // Show integrated checklist based on certification
 function showIntegratedChecklist(cert) {
     const checklistSection = document.getElementById('roadmapChecklist');
-    const checklistItems = document.getElementById('checklistItems');
+    const checklistItems = document.getElementById('roadmapChecklistItems');
     const checklistCertName = document.getElementById('checklistCertName');
     
     if (!checklistSection || !checklistItems) return;
@@ -2512,34 +2608,30 @@ function openSkillPanel(phaseData) {
     if (!panel) return;
 
     document.getElementById('skillTitle').innerText = phaseData.phase_name;
-    document.getElementById('skillIcon').innerText = '🛡️';
-    document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks`;
-    document.getElementById('skillDescription').innerText = phaseData.why_it_matters || 'Advanced mentor guidance for this phase.';
+    // document.getElementById('skillIcon').innerText = '🛡️'; // Removed icon from V3
+    // document.getElementById('skillCategory').innerText = `Duration: ${phaseData.duration_weeks || '?'} Weeks`; // Updated ID in V3
+    document.getElementById('skillDesc').innerText = phaseData.why_it_matters || 'Advanced mentor guidance for this phase.';
 
-    // Objectives
-    const objectivesList = document.getElementById('skillObjectives');
-    objectivesList.innerHTML = (phaseData.learning_outcomes || [])
-        .map(obj => `<li>${obj}</li>`).join('');
-
-    // Labs with Key Points
-    const labsList = document.getElementById('skillLabs');
-    labsList.innerHTML = (phaseData.mandatory_labs || [])
-        .map(lab => `
-            <li style="margin-bottom: 15px;">
-                <div style="font-weight: 800; color: var(--primary-v3);">${lab.name} (${lab.platform})</div>
-                <div style="font-size: 0.85rem; background: var(--bg-v3); padding: 10px; border-left: 3px solid var(--black-v3); margin-top: 5px;">
-                    <strong>Mentor Key Points:</strong> ${lab.key_points || 'Focus on systematic enumeration and methodology.'}
-                </div>
-                ${lab.url ? `<a href="${lab.url}" target="_blank" style="display: inline-block; margin-top: 8px; font-size: 0.8rem; color: var(--secondary-v3); font-weight: 700;">Start Lab →</a>` : ''}
-            </li>
-        `).join('');
-
-    // Tools
+    // V3 uses specific section structure, mapping data here
     const toolsContainer = document.getElementById('skillTools');
-    toolsContainer.innerHTML = (phaseData.tools || [])
-        .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); border-style: dashed;">${t.name || t}</span>`).join('');
+    if (toolsContainer) {
+        toolsContainer.innerHTML = (phaseData.tools || [])
+            .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); margin-right: 5px;">${t.name || t}</span>`).join('');
+    }
 
-    panel.classList.add('open');
+    const resourceEl = document.getElementById('skillResource');
+    if (resourceEl && phaseData.resources && phaseData.resources.length > 0) {
+        resourceEl.textContent = phaseData.resources[0].name;
+    }
+
+    const linksContainer = document.getElementById('skillLinks');
+    if (linksContainer) {
+        linksContainer.innerHTML = (phaseData.resources || [])
+            .map(r => `<a href="${r.url}" target="_blank" class="res-link-btn-v3">Access ${r.type} →</a>`)
+            .join('');
+    }
+
+    panel.classList.add('active');
 }
 
 function createSkillTree(treeData) {
@@ -2644,8 +2736,8 @@ function openSkillDetailPanel(skill, categoryName) {
     if (!panel) return;
 
     document.getElementById('skillTitle').innerText = skill.name;
-    document.getElementById('skillIcon').innerText = skill.icon || '🛡️';
-    document.getElementById('skillCategory').innerText = categoryName + ' • ' + (skill.level || 'Mastery');
+    // document.getElementById('skillIcon').innerText = skill.icon || '🛡️';
+    // document.getElementById('skillCategory').innerText = categoryName + ' • ' + (skill.level || 'Mastery');
 
     // Use descriptions from assessment or default
     const descriptions = {
@@ -2655,23 +2747,7 @@ function openSkillDetailPanel(skill, categoryName) {
         'Active Directory Architecture': 'Understanding domain environments, Kerberos, and GPO structures.'
     };
 
-    document.getElementById('skillDescription').innerText = descriptions[skill.name] || `Advanced level competency in ${skill.name} required for this certification path.`;
-
-    // Dynamic Objectives
-    const objectivesList = document.getElementById('skillObjectives');
-    objectivesList.innerHTML = [
-        `Master the core concepts of ${skill.name}`,
-        `Implement advanced techniques in a lab environment`,
-        `Apply knowledge to real-world ${appState.selectedCert} scenarios`
-    ].map(obj => `<li>${obj}</li>`).join('');
-
-    // Labs
-    const labsList = document.getElementById('skillLabs');
-    labsList.innerHTML = `
-        <li>TryHackMe: ${skill.name} Modules</li>
-        <li>HackTheBox: Specialized Challenges</li>
-        <li>Custom Lab: Infrastructure Simulation</li>
-    `;
+    document.getElementById('skillDesc').innerText = descriptions[skill.name] || `Advanced level competency in ${skill.name} required for this certification path.`;
 
     // Tools
     const toolsContainer = document.getElementById('skillTools');
@@ -2679,7 +2755,7 @@ function openSkillDetailPanel(skill, categoryName) {
     toolsContainer.innerHTML = tools
         .map(t => `<span class="year-badge-v2" style="background: var(--accent-v3); font-size: 10px;">${t}</span>`).join('');
 
-    panel.classList.add('open');
+    panel.classList.add('active');
 }
 
 // displayRoadmapMarkdown - handles markdown content when JSON parsing fails
@@ -2861,31 +2937,87 @@ async function sendMentorMessage(overrideText = null) {
     // Add user message
     const userMsg = { role: 'user', text: userText };
     appState.mentorChat.push(userMsg);
+    saveState();
     addChatMessage(userMsg);
     
     if (elements.mentorInput) {
         elements.mentorInput.value = '';
+        elements.mentorInput.style.height = 'auto'; // Reset auto-expansion
     }
     elements.sendMentorBtn.disabled = true;
     
     try {
-        // Call backend API for mentor chat
-        const data = await callBackendAPI('/api/mentor-chat', {
-            message: userText,
-            context: {
-                level: appState.assessment?.level,
-                weaknesses: appState.assessment?.weaknesses,
-                cert: CERTIFICATIONS.find(c => c.id === appState.selectedCert)?.name
-            }
+        const context = {
+            level: appState.assessment?.level,
+            weaknesses: appState.assessment?.weaknesses,
+            cert: CERTIFICATIONS.find(c => c.id === appState.selectedCert)?.name
+        };
+
+        const response = await fetch('/api/mentor-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Groq-API-Key': localStorage.getItem('groqKey') || ''
+            },
+            body: JSON.stringify({
+                message: userText,
+                context: context,
+                stream: true
+            })
         });
-        
-        const mentorMsg = { role: 'mentor', text: data.reply };
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Failed to get mentor response');
+        }
+
+        // Initialize mentor message
+        const mentorMsg = { role: 'mentor', text: '' };
         appState.mentorChat.push(mentorMsg);
-        addChatMessage(mentorMsg);
+        const bubble = addChatMessage(mentorMsg);
+        const contentEl = bubble.querySelector('.chat-bubble-content');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep last incomplete line in buffer
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed === 'data: [DONE]') continue;
+
+                if (trimmed.startsWith('data: ')) {
+                    try {
+                        const json = JSON.parse(trimmed.substring(6));
+                        const content = json.choices[0]?.delta?.content || '';
+                        if (content) {
+                            mentorMsg.text += content;
+                            if (contentEl) {
+                                contentEl.textContent = mentorMsg.text;
+                                scrollToBottom('auto'); // Use auto during streaming for better performance
+                            }
+                        }
+                    } catch (e) {
+                        // Incomplete JSON or other error, ignore and continue
+                    }
+                }
+            }
+        }
+
+        saveState();
     } catch (error) {
-        console.error('Error getting mentor response:', error);
+        console.error('Error in streaming chat:', error);
         const errorMsg = { role: 'mentor', text: 'I encountered an error. Please try again.' };
         appState.mentorChat.push(errorMsg);
+        saveState();
         addChatMessage(errorMsg);
     } finally {
         elements.sendMentorBtn.disabled = false;
@@ -2894,7 +3026,7 @@ async function sendMentorMessage(overrideText = null) {
 
 function addChatMessage(msg) {
     const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${msg.role}`;
+    bubble.className = `chat-bubble ${msg.role} animate__animated animate__fadeInUp animate__faster`;
     
     if (msg.role === 'mentor') {
         const header = document.createElement('div');
@@ -2912,7 +3044,17 @@ function addChatMessage(msg) {
     }
     
     elements.chatHistory.appendChild(bubble);
-    elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
+    scrollToBottom();
+    return bubble;
+}
+
+function scrollToBottom(behavior = 'smooth') {
+    if (elements.chatHistory) {
+        elements.chatHistory.scrollTo({
+            top: elements.chatHistory.scrollHeight,
+            behavior: behavior
+        });
+    }
 }
 
 // ============================================================================
@@ -2924,6 +3066,9 @@ function resetAndRetake() {
     appState.questions = [];
     appState.answers = {};
     appState.assessment = null;
+    appState.roadmap = null;
+    appState.mentorChat = [];
+    saveState();
     
     hideAllSections();
     startAssessment();
