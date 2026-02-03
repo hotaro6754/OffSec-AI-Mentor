@@ -2743,8 +2743,12 @@ async function downloadRoadmapPDF() {
     try {
         // Loading state
         downloadPdfBtn.disabled = true;
-        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Generating PDF...';
+        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Initializing...';
         showNotification('Preparing your roadmap for high-quality PDF export...', 'info');
+
+        // Ensure skill tree and other dynamic elements are fully rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Capturing Content...';
 
         const isDarkMode = document.body.classList.contains('mode-oscp');
 
@@ -2868,6 +2872,8 @@ async function downloadRoadmapPDF() {
         if (ilovepdfPublic) headers['X-ILovePDF-Public-Key'] = ilovepdfPublic;
         if (ilovepdfSecret) headers['X-ILovePDF-Secret-Key'] = ilovepdfSecret;
 
+        downloadPdfBtn.innerHTML = '<span class="spinner-small"></span> Converting via API...';
+
         // Step 2: Send to backend API
         const response = await fetch('/api/generate-pdf', {
             method: 'POST',
@@ -2881,15 +2887,20 @@ async function downloadRoadmapPDF() {
         if (!response.ok) {
             // Robust error parsing for non-JSON responses
             let errorMsg = 'Failed to generate PDF';
-            const responseText = await response.text();
 
             try {
-                const errorData = JSON.parse(responseText);
-                errorMsg = errorData.details ? `${errorData.error} (${errorData.details})` : (errorData.error || errorMsg);
-            } catch (e) {
-                // Fallback for HTML error pages or other non-JSON content
-                console.error('Non-JSON error from PDF API:', responseText.substring(0, 200));
-                errorMsg = `Server Error (${response.status}): The PDF service is temporarily unavailable.`;
+                // Read response as text first so we don't consume the stream twice
+                const responseText = await response.text();
+                try {
+                    const errorData = JSON.parse(responseText);
+                    errorMsg = errorData.details ? `${errorData.error} (${errorData.details})` : (errorData.error || errorMsg);
+                } catch (parseError) {
+                    // Fallback for non-JSON content
+                    console.error('API Error Response (not JSON):', responseText.substring(0, 500));
+                    errorMsg = `Server Error (${response.status}): The PDF service is temporarily unavailable.`;
+                }
+            } catch (readError) {
+                console.error('Could not read error response:', readError);
             }
             throw new Error(errorMsg);
         }

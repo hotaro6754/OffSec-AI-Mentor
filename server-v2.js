@@ -2023,7 +2023,17 @@ app.post('/api/generate-pdf', async (req, res) => {
                 html = html.replace('<head>', '<head>\n    <meta charset="UTF-8">');
             }
         }
-        console.log('✅ HTML structure validated');
+
+        // Clean HTML: Remove scripts, buttons, and inputs to reduce complexity for PDF engine
+        console.log('🧹 Cleaning HTML for PDF generation...');
+        const originalSize = html.length;
+        html = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+            .replace(/<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi, '') // Remove buttons
+            .replace(/<input\b[^>]*>/gi, '')                                   // Remove inputs
+            .replace(/<textarea\b[^<]*(?:(?!<\/textarea>)<[^<]*)*<\/textarea>/gi, ''); // Remove textareas
+
+        console.log(`✅ HTML structure validated and cleaned (Size: ${originalSize} -> ${html.length} bytes)`);
 
         // High-fidelity rendering: Inject local style.css content directly into HTML
         try {
@@ -2057,29 +2067,43 @@ app.post('/api/generate-pdf', async (req, res) => {
         console.log('📄 [3/7] Initializing iLovePDF API...');
         const instance = new ILovePDFApi(publicKey, secretKey);
         
-        console.log('📄 [4/7] Packaging HTML into ZIP buffer...');
+        console.log('📄 [4/7] Packaging HTML and assets into ZIP buffer...');
         // iLovePDF htmlpdf tool requires local files to be uploaded as ZIP containing index.html
         const zip = new AdmZip();
         zip.addFile('index.html', Buffer.from(html, 'utf8'));
+
+        // Include local assets if they exist
+        const qrPath = path.join(__dirname, 'qr-code.svg');
+        if (fs.existsSync(qrPath)) {
+            zip.addLocalFile(qrPath);
+            console.log('🖼️  Added qr-code.svg to ZIP bundle');
+        }
+
         const zipBuffer = zip.toBuffer();
+        console.log(`✅ ZIP package created (${zipBuffer.length} bytes)`);
         
         console.log('📄 [5/7] Starting iLovePDF task...');
         const task = instance.newTask('htmlpdf');
         await task.start();
+        console.log(`✅ Task started: ${task.id} on server ${task.server}`);
         
         // Use ILovePDFFile.fromArray to upload the ZIP buffer
         const file = ILovePDFFile.fromArray(zipBuffer, 'roadmap.zip');
         await task.addFile(file);
+        console.log('✅ ZIP file uploaded successfully');
         
         console.log('📄 [6/7] Processing HTML to PDF conversion...');
+        // Increase delay to 5000ms for better asset loading (fonts, etc)
         await task.process({
-            view_width: 1024,
-            delay: 3000, // Slightly more delay for asset loading
+            view_width: 1280,
+            delay: 5000,
             single_page: false,
             page_size: 'A4',
             page_orientation: 'portrait',
-            page_margin: 10
+            page_margin: 10,
+            remove_popups: true
         });
+        console.log('✅ Processing completed');
         
         console.log('📄 [7/7] Downloading generated PDF buffer...');
         const pdfBuffer = await task.download();
