@@ -1325,6 +1325,83 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 
         let certSpecificInstructions = '';
         if (certContent) {
+            // Determine certification-specific mindset and key points
+            let certMindset = '';
+            const certName = certContent.name.toUpperCase();
+            
+            if (certName.includes('OSCP')) {
+                certMindset = `
+**OSCP MINDSET & KEY POINTS FOR LABS**:
+- "Try Harder" mentality: Manual enumeration is king, no auto-pwn shortcuts
+- Think systematically: Service enumeration → Exploitation → Privilege Escalation
+- Time management: Practice under time pressure, know when to move on from rabbit holes
+- Documentation: Screenshot everything, maintain detailed notes for the report
+- Manual exploitation: Understand exploits, don't just run them blindly
+- Methodology over tools: Develop a repeatable process that works under stress`;
+            } else if (certName.includes('OSWE')) {
+                certMindset = `
+**OSWE MINDSET & KEY POINTS FOR LABS**:
+- Code review first: Read the source code, understand the application flow
+- Think like a developer: Identify common coding mistakes and insecure patterns
+- Exploit chains: Look for ways to chain multiple vulnerabilities for impact
+- Custom exploit development: Write your own PoCs, don't rely on existing exploits
+- Language-specific: Deep dive into PHP, Python, Java, Node.js security flaws
+- Deserialization focus: Master Java/PHP/Python deserialization attacks`;
+            } else if (certName.includes('OSEP')) {
+                certMindset = `
+**OSEP MINDSET & KEY POINTS FOR LABS**:
+- Evasion first: Every action should consider AV/EDR detection
+- Custom payloads: Develop your own C# tools and shellcode loaders
+- OPSEC awareness: Living off the land, minimize forensic artifacts
+- In-memory execution: Avoid writing to disk when possible
+- Process injection: Master multiple injection techniques for different scenarios
+- Active Directory mastery: Advanced AD attacks, delegation abuse, trust exploitation`;
+            } else if (certName.includes('OSDA')) {
+                certMindset = `
+**OSDA MINDSET & KEY POINTS FOR LABS**:
+- Log analysis first: Start with logs, correlate events across multiple sources
+- False positive reduction: Learn to distinguish real threats from noise
+- MITRE ATT&CK mapping: Always map TTPs to the framework
+- Detection engineering: Think like an attacker to build better detections
+- Incident response workflow: Follow NIST framework - preparation, detection, containment, eradication, recovery
+- Threat hunting: Proactive searching for IOCs and behavioral anomalies`;
+            } else if (certName.includes('OSWP')) {
+                certMindset = `
+**OSWP MINDSET & KEY POINTS FOR LABS**:
+- 802.11 fundamentals: Deeply understand wireless protocol internals
+- Packet analysis: Wireshark is your best friend for understanding frames
+- Hardware considerations: Know your adapter capabilities (monitor mode, injection)
+- Capture methodology: Efficient handshake capture, deauth attack timing
+- Wordlist optimization: Smart dictionary attacks, rule-based cracking
+- Real-world scenarios: Practice on actual hardware, not just VMs`;
+            } else if (certName.includes('OSED') || certName.includes('OSEE')) {
+                certMindset = `
+**OSED/OSEE MINDSET & KEY POINTS FOR LABS**:
+- Debugging mindset: Step through code instruction by instruction
+- Assembly reading: Become fluent in x86/x64 assembly
+- Exploit primitives: Understand memory corruption fundamentals
+- Mitigation bypass: DEP, ASLR, CFG - learn to work around protections
+- Shellcode development: Write custom shellcode for specific scenarios
+- Fuzzing methodology: Systematic approach to finding crashes and exploitable conditions`;
+            } else if (certName.includes('OSMR')) {
+                certMindset = `
+**OSMR MINDSET & KEY POINTS FOR LABS**:
+- macOS internals: XNU kernel architecture is fundamentally different from Windows/Linux
+- Objective-C patterns: Understand method swizzling and runtime manipulation
+- Entitlements: Privilege escalation through entitlement abuse
+- Sandbox escapes: macOS sandbox is strict - learn bypass techniques
+- TCC bypasses: Transparency, Consent, and Control database exploitation
+- SIP awareness: System Integrity Protection - know when it's bypassable`;
+            } else {
+                certMindset = `
+**GENERAL PENTESTING MINDSET**:
+- Systematic enumeration: Always start with thorough reconnaissance
+- Document everything: Good notes are essential for reporting
+- Methodology over tools: Develop a repeatable process
+- Think creatively: Look for unconventional attack paths
+- Practice under pressure: Simulate exam conditions regularly`;
+            }
+            
             certSpecificInstructions = `
 CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
 - Focus: ${certContent.focus}
@@ -1332,7 +1409,11 @@ CERTIFICATION-SPECIFIC GUIDANCE FOR ${certContent.name}:
 - Syllabus to cover: ${certContent.syllabus?.join(', ')}
 - MUST USE THESE LABS: ${certContent.specificLabs.map(l => l.name).join(', ')}
 - MUST USE THESE TOOLS: ${certContent.coreTools.join(', ')}
-- YT RESOURCES: ${certContent.youtubeChannels.map(y => `${y.name} (${y.url})`).join(', ')}`;
+- YT RESOURCES: ${certContent.youtubeChannels.map(y => `${y.name} (${y.url})`).join(', ')}
+
+${certMindset}
+
+**IMPORTANT**: Include the mindset tips above in the "key_points" field for labs in EVERY phase.`;
         }
         
         // Add preparation recommendations for beginner mode
@@ -1372,9 +1453,24 @@ REQUIREMENTS:
    - Tools needed for THIS phase (INCLUDE ALL APPLICABLE)
    - Mandatory Labs with WORKING URLs and brief "Mentor Key Points"
    - Resources (YouTube, Web, Books) with CLICKABLE LINKS
-3. **Skill Tree**: A concise tree of skills learned, grouped by categories.
-4. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
-5. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+3. **RESOURCE DIVERSITY ENFORCEMENT (CRITICAL)**:
+   - EACH phase MUST include AT LEAST 1 HTB lab (Hack The Box)
+   - EACH phase MUST include AT LEAST 1 THM lab (TryHackMe)
+   - EACH phase MUST include AT LEAST 1 YouTube resource from the certification's recommended channels
+   - Additional resources (OverTheWire, PortSwigger, books) are encouraged
+   - Resources must be relevant to the phase's learning outcomes
+4. **CONTEXTUAL GUIDANCE - Certification-Specific Mindset**:
+   - For OSCP: Focus on "Manual enumeration", "Try Harder mindset", "No auto-pwn", "Time management"
+   - For OSWE: Focus on "Code review", "Source code analysis", "Exploit development from scratch"
+   - For OSEP: Focus on "AV/EDR evasion", "Custom payload development", "Stealth operations"
+   - For OSDA: Focus on "Log analysis first", "False positive reduction", "MITRE ATT&CK mapping"
+   - For OSWP: Focus on "802.11 fundamentals", "Packet analysis", "Hardware considerations"
+   - For OSED/OSEE: Focus on "Debugging mindset", "Assembly reading", "Exploit primitives"
+   - For OSMR: Focus on "macOS internals", "XNU kernel", "Objective-C patterns"
+   - Include this mindset in "key_points" for each lab
+5. **Skill Tree**: A concise tree of skills learned, grouped by categories.
+6. **Tools Mastery Guide**: Deep dive into 5-8 critical tools with commands.
+7. **Mentor's Final Gift**: Include a "special_resource" section which is a Rickroll (https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 STRICT RULES:
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
