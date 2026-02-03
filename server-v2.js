@@ -651,16 +651,18 @@ QUESTION STYLE FOR OSCP MODE:
 - Methodology-focused, not exploit code.`;
 
         const beginnerTopics = `
-BEGINNER-LEVEL TOPICS (foundational):
-1. Computer Basics: RAM vs CPU, Operating Systems, File Systems.
-2. Networking: What is an IP, what is a port, basic TCP/UDP.
-3. Linux: Basic commands (ls, cd, cat), absolute vs relative paths.
-4. Web: What is a URL, what is a browser, basics of HTTP.
-5. Security: What is a password, basic CIA triad (Confidentiality, Integrity, Availability).`;
+MODERATE BEGINNER-LEVEL TOPICS (intermediate foundational):
+1. System Internals: Process management, basic memory concepts, file permissions (chmod/chown).
+2. Networking Depth: Subnet masks, common service ports (SSH, FTP, SMB, HTTP/S), basic routing.
+3. Linux/Windows: Grep/find usage, PowerShell vs Bash basics, environment variables.
+4. Web Security Basics: How cookies work, HTTP methods (GET/POST), basic injection concepts.
+5. Security Methodology: Enumeration vs Exploitation, least privilege principle, reconnaissance basics.`;
 
-        return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'absolute beginner cybersecurity learners (ZERO KNOWLEDGE)'}.
+        const randomSeed = Math.floor(Math.random() * 1000000);
 
-CRITICAL: Generate COMPLETELY NEW questions. EVERY question must be different from any you have generated before. This is retake #${retakeCount + 1}.
+        return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'moderate-level cybersecurity learners'}.
+
+CRITICAL: Generate COMPLETELY NEW questions. EVERY question must be different from any you have generated before. This is retake #${retakeCount + 1}. Random seed: ${randomSeed}.
 ${usedHashes.length > 0 ? `\nAVOID these previously used question patterns and topics at all costs - create entirely different scenarios and test different edge cases: ${usedHashes.join(', ')}` : ''}
 
 ${isOscp ? oscpTopics : beginnerTopics}
@@ -668,7 +670,7 @@ ${isOscp ? oscpTopics : beginnerTopics}
 REQUIREMENTS:
 - 10 questions total: 5 multiple choice, 5 short answer.
 - Each question must be UNIQUE and appropriate for the level.
-- BEGINNER MODE: Questions must be GENTLE, FOUNDATIONAL, and EASY. NO ADVANCED jargon.
+- BEGINNER MODE: Questions must be MODERATE, challenging but approachable. NO absolute basic "what is RAM" questions.
 - OSCP MODE: Questions must be BRUTAL, EXAM-LEVEL, UNFORGIVING, and SCENARIO-BASED.
 - Test understanding and methodology.
 
@@ -823,7 +825,7 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 2. **TIMELINE**: Generate an optimized **1-YEAR roadmap** (${phaseCount} phases). Focus on quality over quantity.
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
-5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus provided. The generated roadmap MUST cover EVERY SINGLE technical topic and element listed in the respective syllabus without exception.
+5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus provided. The generated roadmap MUST cover EVERY SINGLE technical topic and element listed in the respective syllabus without exception. Ensure comprehensive coverage of all concepts required for the certification.
 6. **RESOURCE DIVERSITY**: Each phase MUST contain at least 1 HTB lab, 1 THM lab, and 1 YouTube resource.
 7. **CONTEXTUAL GUIDANCE**: Tailor "Mentor Key Points" to the specific certification's mindset (e.g., "Manual enumeration" for OSCP vs "Code review" for OSWE).
 8. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.

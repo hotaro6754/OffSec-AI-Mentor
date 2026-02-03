@@ -2607,6 +2607,36 @@ body.mode-oscp .chat-bubble-header {
     margin-left: auto;
     transform: rotate(0.5deg);
 }
+.chat-history {
+    height: 500px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border: var(--border);
+    background: var(--cream);
+}
+body.mode-oscp .chat-history {
+    background: #0d1117;
+}
+.mentor-container.fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    margin: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+.mentor-container.fullscreen .chat-history {
+    flex: 1;
+    height: auto;
+}
 .chat-input-area {
     display: flex;
     gap: 10px;
