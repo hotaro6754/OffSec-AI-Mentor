@@ -6,6 +6,20 @@
 
 ---
 
+### 🧠 Meet KaliGuru: Not Just Another Chatbot
+
+Unlike generic AI assistants, **KaliGuru** is the heart of this platform—a specialized mentor designed with a "Lab-First" philosophy.
+
+**What Makes KaliGuru Unique?**
+- **Strict Ethical Guardrails**: Refuses real-world targeting and mandates authorized lab confirmation (THM, HTB, Proving Grounds).
+- **Mentor-Style Interaction**: Doesn't just give answers; it coaches you on the "why" behind every tool and technique.
+- **MITRE ATT&CK Integration**: Every technique is mapped to the ATT&CK framework with detection and mitigation insights.
+- **Modern Kali Linux Expertise**: Fully aware of Kali 2025.2 updates, new tools, and safer defaults.
+- **Shorthand Reporting Aesthetic**: Uses professional pentester markers (`[+]`, `[-]`, `[!]`, `[*]`, `[>]`) in responses.
+- **Certification Tailoring**: Adjusts guidance depth and complexity based on your target (OSCP, OSEP, OSWE, OSDA, OSED).
+
+---
+
 ## 💡 Project Impact: Who Does This Help?
 
 - **Absolute Zeroes**: Those with no IT background get a gentle "Stage 0" foundation path.
@@ -23,12 +37,18 @@
     - **Beginner Mode**: Encouraging, foundational, and jargon-free.
     - **OSCP Mode**: Brutal, exam-level scenarios that test methodology, not just facts.
 
-### 2. **Personalized Neural Roadmaps**
+### 2. **KaliGuru Mentor Chat**
+- **Terminal Interface**: A specialized chat experience with a `KALIGURU@OFFSEC:~$` terminal aesthetic.
+- **Intelligent Tool Guidance**: Step-by-step guidance for 15+ core Kali Linux tools including Nmap, Metasploit, Burp Suite, and the Impacket suite.
+- **Lab Strategy**: Helps plan reconnaissance, enumeration, and exploitation logic for authorized labs.
+- **MITRE Mapping**: Automatically bridges red ↔ blue understanding by showing relevant ATT&CK IDs.
+
+### 3. **Personalized Neural Roadmaps**
 - **Gap Analysis**: AI analyzes assessment performance to identify strengths, weaknesses, and "Confidence Gaps".
-- **Certification Segregation**: Generates unique paths for different certs, ensuring the syllabus alignment is 100% accurate.
+- **Certification Segregation**: Generates unique paths for 13+ certifications, ensuring the syllabus alignment is 100% accurate.
 - **Clickable Resource Engine**: Automatically curates working links for YouTube channels, technical books, and lab environments.
 
-### 3. **Progress Persistence & Database Integration**
+### 4. **Progress Persistence & Database Integration**
 - Automatically saves assessment results, chat history, and multiple roadmap versions to a local SQLite database for continuous learning tracking.
 
 ---
