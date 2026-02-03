@@ -1438,13 +1438,6 @@ async function proceedToEvaluation() {
         showEvaluation();
         showSection('evaluationSection');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // 10% chance to show easter egg after assessment completion
-        if (Math.random() < 0.1) {
-            setTimeout(() => {
-                showRandomEasterEgg();
-            }, 2000);
-        }
     } catch (error) {
         console.error('Error evaluating assessment:', error);
         showError('Failed to evaluate assessment. Please try again.');
@@ -2442,29 +2435,6 @@ function displayRoadmap(roadmapData) {
         container.appendChild(guideGrid);
     }
 
-    // 7. Special Resource (Rickroll Easter Egg)
-    if (roadmapObj.special_resource) {
-        const randomQuote = getRandomQuote();
-
-        const motivationalSection = document.createElement('div');
-        motivationalSection.className = 'motivational-section';
-        motivationalSection.innerHTML = `
-            <blockquote class="cyber-quote">
-                "${randomQuote}"
-            </blockquote>
-            <div class="secret-wisdom-container">
-                <p class="wisdom-prompt">🎯 Completed your roadmap? Here's a special gift...</p>
-                <button class="btn-reveal-secret" onclick="revealSecret('secret-content-roadmap')">
-                    🎁 Reveal Cyber Wisdom
-                </button>
-                <div id="secret-content-roadmap" class="hidden">
-                    <!-- QR Code and link will be generated here -->
-                </div>
-            </div>
-        `;
-        container.appendChild(motivationalSection);
-    }
-
     // 8. Create Skill Tree (Relocated to end)
     if (roadmapObj.skill_tree) {
         const skillTreeSection = document.getElementById('skillTreeSection');
@@ -2476,16 +2446,27 @@ function displayRoadmap(roadmapData) {
         }
     }
 
-    // 9. Add QR Code Section with Neo-Brutalist Styling
+        // 9. Cyber Wisdom Section (Always at the end)
+    const randomQuote = getRandomQuote();
     const qrSection = document.createElement('div');
     qrSection.className = 'neo-qr-container';
     qrSection.innerHTML = `
+        <blockquote class="cyber-quote" style="margin-bottom: 30px; border-left: 10px solid var(--black-v3); background: rgba(0,0,0,0.05); padding: 20px; font-style: italic; font-size: 1.2rem;">
+            "${randomQuote}"
+        </blockquote>
         <div class="neo-qr-title">
-            🎯 SCAN FOR BONUS MENTOR WISDOM
+            🎯 CYBER WISDOM AWAITS
         </div>
-        <img src="qr-code.svg" alt="QR code linking to exclusive cybersecurity insights and advanced tips" class="neo-qr-image" />
-        <div class="neo-qr-subtitle">
-            Unlock exclusive cybersecurity insights and advanced tips!
+        <div class="qr-fallback-wrapper" style="margin: 0 auto; max-width: 400px;">
+            <img src="qr-code.svg" alt="QR code" class="neo-qr-image" />
+            <div class="neo-qr-subtitle">
+                Unlock exclusive cybersecurity insights and advanced tips!
+            </div>
+            <div class="fallback-box"
+                 onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')"
+                 style="margin-top: 25px; padding: 20px; border: 4px solid var(--black-v3); background: var(--primary-v3); color: white; font-weight: 900; text-align: center; text-transform: uppercase; cursor: pointer; transition: all 0.2s; box-shadow: 6px 6px 0px var(--black-v3);">
+                QR NOT WORKING? CLICK HERE FOR WISDOM 🎵
+            </div>
         </div>
     `;
     container.appendChild(qrSection);
