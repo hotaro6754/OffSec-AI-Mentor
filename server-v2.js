@@ -189,9 +189,7 @@ const RESOURCES = {
         ],
         macOSiOS: [
             { name: 'Objective-See', url: 'https://www.youtube.com/@ObjectiveSee', focus: 'macOS security tools, malware analysis' },
-            { name: 'Patrick Wardle', url: 'https://objective-see.org/', focus: 'macOS internals, security research' },
-            { name: 'BlackHat macOS talks', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Advanced macOS exploitation' },
-            { name: 'WWDC Security sessions', url: 'https://developer.apple.com/videos/', focus: 'Apple platform security features' }
+            { name: 'BlackHat macOS talks', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Advanced macOS exploitation' }
         ],
         conferenceTalks: [
             { name: 'DEF CON Conference', url: 'https://www.youtube.com/@DEFCONConference', focus: 'Cutting-edge security research' },
@@ -707,8 +705,8 @@ const CERTIFICATION_CONTENT = {
             { name: 'Cybernetics Pro Lab', platform: 'HTB', url: 'https://app.hackthebox.com/prolabs', skills: ['Active Directory exploitation'] },
             { name: 'Red Teaming Path', platform: 'THM', url: 'https://tryhackme.com/path/outline/redteaming', skills: ['Red team TTPs', 'Evasion'] },
             { name: 'Holo (Wreath)', platform: 'THM', url: 'https://tryhackme.com/room/wreath', skills: ['Red team simulation', 'AV evasion'] },
-            { name: 'Sektor7 RTO Course', platform: 'Sektor7', url: 'https://institute.sektor7.net/rto-maldev-beginner', skills: ['Malware development', 'C/C++'] },
-            { name: 'ZeroPoint CRTO', platform: 'ZeroPoint Security', url: 'https://training.zeropointsecurity.co.uk/courses/red-team-ops', skills: ['C2 operations', 'Cobalt Strike'] }
+            { name: 'Sektor7 RTO Course ($$)', platform: 'Sektor7', url: 'https://institute.sektor7.net/rto-maldev-beginner', skills: ['Malware development', 'C/C++', 'NOTE: Premium paid course'] },
+            { name: 'ZeroPoint CRTO ($$)', platform: 'ZeroPoint', url: 'https://training.zeropointsecurity.co.uk/courses/red-team-ops', skills: ['C2 operations', 'Cobalt Strike', 'NOTE: Premium paid course'] }
         ],
         coreTools: ['Sliver', 'Mythic', 'Empire', 'Covenant', 'Donut', 'SharpSploit', 'ScareCrow', 'Mimikatz', 'BloodHound', 'Custom C# tools'],
         keySkills: ['AV/EDR evasion', 'Custom payload development', 'Advanced AD persistence', 'Lateral movement', 'C# development']
@@ -783,7 +781,7 @@ const CERTIFICATION_CONTENT = {
             { name: 'Sherlock Challenges', platform: 'HTB', url: 'https://app.hackthebox.com/sherlocks', skills: ['Incident investigation', 'Forensics'] },
             { name: 'Splunk Boss of the SOC (BOTS)', platform: 'Splunk', url: 'https://www.splunk.com/en_us/blog/conference/boss-of-the-soc.html', skills: ['SIEM challenges', 'Log analysis'] },
             { name: 'Security Onion', platform: 'Self-Hosted', url: 'https://securityonionsolutions.com/', skills: ['Full SOC stack', 'ELK/Suricata/Zeek'] },
-            { name: 'SANS SEC401 Course', platform: 'SANS', url: 'https://www.sans.org/cyber-security-courses/security-essentials-network-endpoint-cloud/', skills: ['Defensive fundamentals'] }
+            { name: 'SANS SEC401 Course ($$)', platform: 'SANS', url: 'https://www.sans.org/cyber-security-courses/security-essentials-network-endpoint-cloud/', skills: ['Defensive fundamentals', 'NOTE: Premium paid course'] }
         ],
         coreTools: ['Splunk', 'Elastic Stack (ELK)', 'Sysmon', 'Sigma Rules', 'YARA', 'Wireshark', 'Zeek', 'Suricata'],
         keySkills: ['SIEM mastery', 'Log analysis', 'Incident Response', 'Threat hunting', 'Detection engineering']
@@ -1329,7 +1327,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
             let certMindset = '';
             const certName = certContent.name.toUpperCase();
             
-            if (certName.includes('OSCP')) {
+            if (certName === 'OSCP - OFFENSIVE SECURITY CERTIFIED PROFESSIONAL' || certKey === 'oscp') {
                 certMindset = `
 **OSCP MINDSET & KEY POINTS FOR LABS**:
 - "Try Harder" mentality: Manual enumeration is king, no auto-pwn shortcuts
@@ -1338,7 +1336,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - Documentation: Screenshot everything, maintain detailed notes for the report
 - Manual exploitation: Understand exploits, don't just run them blindly
 - Methodology over tools: Develop a repeatable process that works under stress`;
-            } else if (certName.includes('OSWE')) {
+            } else if (certName === 'OSWE - OFFENSIVE SECURITY WEB EXPERT' || certKey === 'oswe') {
                 certMindset = `
 **OSWE MINDSET & KEY POINTS FOR LABS**:
 - Code review first: Read the source code, understand the application flow
@@ -1347,7 +1345,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - Custom exploit development: Write your own PoCs, don't rely on existing exploits
 - Language-specific: Deep dive into PHP, Python, Java, Node.js security flaws
 - Deserialization focus: Master Java/PHP/Python deserialization attacks`;
-            } else if (certName.includes('OSEP')) {
+            } else if (certName === 'OSEP - OFFENSIVE SECURITY EXPERIENCED PENETRATION TESTER' || certKey === 'osep') {
                 certMindset = `
 **OSEP MINDSET & KEY POINTS FOR LABS**:
 - Evasion first: Every action should consider AV/EDR detection
@@ -1356,7 +1354,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - In-memory execution: Avoid writing to disk when possible
 - Process injection: Master multiple injection techniques for different scenarios
 - Active Directory mastery: Advanced AD attacks, delegation abuse, trust exploitation`;
-            } else if (certName.includes('OSDA')) {
+            } else if (certName === 'OSDA - OFFENSIVE SECURITY DEFENSE ANALYST' || certKey === 'osda') {
                 certMindset = `
 **OSDA MINDSET & KEY POINTS FOR LABS**:
 - Log analysis first: Start with logs, correlate events across multiple sources
@@ -1365,7 +1363,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - Detection engineering: Think like an attacker to build better detections
 - Incident response workflow: Follow NIST framework - preparation, detection, containment, eradication, recovery
 - Threat hunting: Proactive searching for IOCs and behavioral anomalies`;
-            } else if (certName.includes('OSWP')) {
+            } else if (certName === 'OSWP - OFFENSIVE SECURITY WIRELESS PROFESSIONAL' || certKey === 'oswp') {
                 certMindset = `
 **OSWP MINDSET & KEY POINTS FOR LABS**:
 - 802.11 fundamentals: Deeply understand wireless protocol internals
@@ -1374,7 +1372,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - Capture methodology: Efficient handshake capture, deauth attack timing
 - Wordlist optimization: Smart dictionary attacks, rule-based cracking
 - Real-world scenarios: Practice on actual hardware, not just VMs`;
-            } else if (certName.includes('OSED') || certName.includes('OSEE')) {
+            } else if (certName === 'OSED - OFFENSIVE SECURITY EXPLOIT DEVELOPER' || certName === 'OSEE - OFFENSIVE SECURITY EXPLOITATION EXPERT' || certKey === 'osed' || certKey === 'osee') {
                 certMindset = `
 **OSED/OSEE MINDSET & KEY POINTS FOR LABS**:
 - Debugging mindset: Step through code instruction by instruction
@@ -1383,7 +1381,7 @@ Phases 9-10: Certification Mastery, Reporting, & Mock Exams` : ''}`;
 - Mitigation bypass: DEP, ASLR, CFG - learn to work around protections
 - Shellcode development: Write custom shellcode for specific scenarios
 - Fuzzing methodology: Systematic approach to finding crashes and exploitable conditions`;
-            } else if (certName.includes('OSMR')) {
+            } else if (certName === 'OSMR - OFFENSIVE SECURITY MACOS RESEARCHER' || certKey === 'osmr') {
                 certMindset = `
 **OSMR MINDSET & KEY POINTS FOR LABS**:
 - macOS internals: XNU kernel architecture is fundamentally different from Windows/Linux
