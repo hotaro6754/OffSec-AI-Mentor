@@ -1,8 +1,8 @@
-# 🤖 OffSec AI Mentor & KaliGuru - Community MCP
+# 🛡️ KaliGuru - Your Senior OffSec AI Mentor
 
-## 🏆 Submission for the OffSec "Build with AI" Challenge
+## 🏆 Official Community Submission for the OffSec "Build with AI" Challenge
 
-**OffSec AI Mentor** is a specialized, AI-powered platform designed to guide cybersecurity aspirants from absolute zero to elite certification readiness. At its heart lies **KaliGuru**, a senior-level technical mentor that bridges the gap between generic AI chat and a real-world OffSec instructor.
+**KaliGuru** is a specialized, AI-powered platform designed to guide cybersecurity aspirants from absolute zero to elite certification readiness. It transforms the learning experience by providing a senior-level technical mentor that bridges the gap between generic AI and a real-world OffSec instructor.
 
 ---
 
@@ -12,13 +12,10 @@ Unlike standard AI models (ChatGPT, etc.), KaliGuru is precision-tuned for the O
 
 1. **🛡️ Real-World Lab Hardstop**: KaliGuru strictly requires an authorized lab context (THM, HTB, Proving Grounds). It refuses to discuss targeting real systems, ensuring 100% ethical compliance.
 2. **🧑‍🏫 Coach, Not a Tool**: It won't just hand you a script. It mentors you through the *logic* of enumeration and the *why* behind exploitation.
-3. **📝 Professional Shorthand**: Responses use technical pentester notation:
-    - `[+]` Success/Findings
-    - `[-]` Risks/Mistakes
-    - `[!]` Critical Warnings
-    - `[>]` Commands/Actions
+3. **📝 Professional Shorthand**: Responses use technical pentester notation (`[+]` Success, `[-]` Risks, `[!]` Warnings, `[*]` Info, `[>]` Commands).
 4. **🧠 OffSec Mindset DNA**: Precision-aligned with the "Try Harder" philosophy and current syllabi for **OSCP, OSEP, OSWE, OSDA, and OSED**.
-5. **📱 Specialized Domains**: Expertise includes Kali NetHunter, Mobile Security (Android/iOS), Bluetooth Recon, and CAN bus (Car Hacking) theory.
+5. **📱 Specialized Domains**: Deep expertise in Kali NetHunter, Mobile Security, Bluetooth Recon, and CAN bus theory.
+6. **🧭 MITRE ATT&CK Integration**: Automatically maps techniques to tactics and detection strategies.
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * OffSec AI Mentor - Frontend Application v2.0
+ * KaliGuru - Senior OffSec Mentor
  * 
  * FEATURES:
  * - User authentication (login/register)
@@ -287,7 +287,7 @@ const elements = {
 // ============================================================================
 
 function init() {
-    console.log('🎓 OffSec AI Mentor - Initializing...');
+    console.log('🎓 KaliGuru - Initializing...');
     setupEventListeners();
     setupAuthListeners();
     setupSkillPanel();
@@ -320,11 +320,11 @@ function runBootAnimation() {
     bootScreen.classList.remove('hidden');
 
     const logs = [
-        { type: 'ok', msg: "Initializing OFFSEC_MENTOR Kernel v3.0..." },
-        { type: 'ok', msg: "Loading AI Mentor Modules..." },
-        { type: 'warn', msg: "Neural Network: Optimizing for OSCP mindset..." },
+        { type: 'ok', msg: "Initializing KALIGURU_KERNEL v2025.2..." },
+        { type: 'ok', msg: "Loading Ethical Hacking Modules..." },
+        { type: 'warn', msg: "Neural Network: Enforcing Lab-First Hardstop..." },
         { type: 'ok', msg: "Establishing secure connection to Groq API..." },
-        { type: 'ok', msg: "ACCESS GRANTED. MENTOR ONLINE." }
+        { type: 'ok', msg: "ACCESS GRANTED. KALI GURU ONLINE." }
     ];
 
     let delay = 0;

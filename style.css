@@ -1,5 +1,5 @@
 /* ============================================================
-   OffSec AI Mentor - Enhanced Neobrutalist UI v3.0
+   KaliGuru - Senior OffSec Mentor UI v2025.2
    ============================================================ */
 
 :root {
@@ -2566,9 +2566,23 @@ body.mode-oscp .chat-area { background: #0d1117; }
     color: var(--success-v3);
     margin-right: auto;
     transform: rotate(-0.5deg);
-    border: 3px solid var(--secondary-v3);
-    box-shadow: 4px 4px 0px var(--secondary-v3);
+    border: 3px solid var(--success-v3);
+    box-shadow: 6px 6px 0px var(--black-v3);
     font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    position: relative;
+    padding: 20px;
+}
+.chat-bubble.mentor::before {
+    content: "KALIGURU@OFFSEC:~$";
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+    opacity: 0.7;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    padding-bottom: 5px;
 }
 body.mode-oscp .chat-bubble.mentor {
     background: #0a0a0a;
