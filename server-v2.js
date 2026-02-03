@@ -120,6 +120,94 @@ app.use((req, res, next) => {
 
 const RESOURCES = {
     youtube: {
+        coreFoundations: [
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals, IT careers, Linux basics, Wireless' },
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HackTheBox walkthroughs, advanced methodology, exploitation, AD' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'CTFs, Malware Analysis, General Hacking, Scripting, AD, Defensive' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance, Networking, PrivEsc, AD' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training, Kali Linux tools, OSCP' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Networking, Cisco, Python, Certifications, Wireless' },
+            { name: 'Computerphile', url: 'https://www.youtube.com/@Computerphile', focus: 'Computer Science concepts, Security theory' },
+            { name: 'PowerCert Animated Videos', url: 'https://www.youtube.com/@PowerCertAnimatedVideos', focus: 'Networking fundamentals, IT concepts visualization' },
+            { name: 'Practical Networking', url: 'https://www.youtube.com/@PracticalNetworking', focus: 'Networking fundamentals, TCP/IP deep dive' },
+            { name: 'freeCodeCamp.org', url: 'https://www.youtube.com/@freecodecamp', focus: 'Programming, Web development, Full courses' }
+        ],
+        networkingEnumeration: [
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'Networking fundamentals' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Advanced networking, Cisco' },
+            { name: 'Practical Networking', url: 'https://www.youtube.com/@PracticalNetworking', focus: 'OSI model, TCP/IP protocols' },
+            { name: 'Network Direction', url: 'https://www.youtube.com/@NetworkDirection', focus: 'Network engineering, protocols' },
+            { name: 'PowerCert Animated Videos', url: 'https://www.youtube.com/@PowerCertAnimatedVideos', focus: 'Network concepts visualization' },
+            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Subdomain enumeration, reconnaissance' }
+        ],
+        webApplicationSecurity: [
+            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', focus: 'Web exploitation, OSWA, OSWE prep, PortSwigger labs' },
+            { name: 'STÖK', url: 'https://www.youtube.com/@STOKfredrik', focus: 'Bug Bounty, Web Security, Mindset, creative exploitation' },
+            { name: 'NahamSec', url: 'https://www.youtube.com/@NahamSec', focus: 'Bug Bounty, Web Application Security, reconnaissance' },
+            { name: 'InsiderPhD', url: 'https://www.youtube.com/@InsiderPhD', focus: 'Web security, Bug Bounty, beginner-friendly' },
+            { name: 'BugCrowd', url: 'https://www.youtube.com/@Bugcrowd', focus: 'Bug bounty webinars, vulnerability research' },
+            { name: 'OWASP Foundation', url: 'https://www.youtube.com/@OWASPGLOBAL', focus: 'Web security standards, OWASP Top 10' },
+            { name: 'PortSwigger', url: 'https://www.youtube.com/@PortSwiggerTV', focus: 'Burp Suite, web security research' }
+        ],
+        generalPentestingOSCP: [
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'HackTheBox walkthroughs - THE OSCP resource' },
+            { name: 'TJ Null', url: 'https://www.youtube.com/@TJNull', focus: 'OSCP prep guidance, practice machine lists' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Practical techniques, methodology' },
+            { name: 'S1REN', url: 'https://www.youtube.com/@S1REN', focus: 'OSCP-style machine walkthroughs' },
+            { name: 'Rana Khalil', url: 'https://www.youtube.com/@RanaKhalil101', focus: 'Web exploitation techniques' },
+            { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Tool tutorials, pentesting methodology' },
+            { name: 'zSecurity', url: 'https://www.youtube.com/@zSecurity', focus: 'Ethical Hacking courses, WiFi Security' }
+        ],
+        activeDirectoryEnterprise: [
+            { name: 'IppSec', url: 'https://www.youtube.com/@ippsec', focus: 'AD machines, Kerberos attacks, pivoting' },
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'AD attack demonstrations' },
+            { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'PNPT prep, AD methodology' },
+            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Malware development, evasion for AD' },
+            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Red team training, CRTO' },
+            { name: 'Pentester Academy', url: 'https://www.youtube.com/@PentesterAcademy', focus: 'AD security, CRTP/CRTE prep' }
+        ],
+        redTeamEvasion: [
+            { name: 'ZeroPoint Security', url: 'https://www.zeropointsecurity.co.uk/', focus: 'Red team operations, C2, CRTO' },
+            { name: 'Sektor7', url: 'https://institute.sektor7.net/', focus: 'Malware development, AV/EDR evasion' },
+            { name: 'Red Team Village', url: 'https://www.youtube.com/@RedTeamVillage', focus: 'Community red teaming, DEF CON content' },
+            { name: 'Black Hills Information Security', url: 'https://www.youtube.com/@BlackHillsInformationSecurity', focus: 'Red team TTPs, Webcasts' },
+            { name: 'Ired.team', url: 'https://www.ired.team/', focus: 'Red team technique blog and talks' }
+        ],
+        exploitDevelopment: [
+            { name: 'LiveOverflow', url: 'https://www.youtube.com/@LiveOverflow', focus: 'Binary exploitation, Reverse Engineering, CTFs - essential for OSED/OSEE' },
+            { name: 'Corelan Team', url: 'https://www.corelan.be/', focus: 'Classic exploit development tutorials' },
+            { name: 'OpenSecurityTraining', url: 'https://opensecuritytraining.info/', focus: 'Free exploit dev courses, x86 assembly' },
+            { name: 'OpenSecurityTraining2', url: 'https://p.ost2.fyi/', focus: 'Advanced security architecture courses' },
+            { name: 'OALabs', url: 'https://www.youtube.com/@OALabs', focus: 'Reverse engineering, malware analysis' },
+            { name: 'FuzzySecurity', url: 'http://www.fuzzysecurity.com/', focus: 'Exploit development tutorials, Windows' }
+        ],
+        wireless: [
+            { name: 'Hak5', url: 'https://www.youtube.com/@hak5', focus: 'Hardware hacking, WiFi Pineapple, wireless security' },
+            { name: 'NetworkChuck', url: 'https://www.youtube.com/@NetworkChuck', focus: 'WiFi security basics' },
+            { name: 'David Bombal', url: 'https://www.youtube.com/@davidbombal', focus: 'Wireless networking, Cisco wireless' },
+            { name: 'Vivek Ramachandran', url: 'https://www.youtube.com/@securitytube', focus: 'WiFu wireless security training' }
+        ],
+        defensiveBlueTeam: [
+            { name: 'John Hammond', url: 'https://www.youtube.com/@_JohnHammond', focus: 'IR, log analysis, malware triage' },
+            { name: 'Security Onion', url: 'https://www.youtube.com/@SecurityOnion', focus: 'Defensive security, SOC operations' },
+            { name: 'Elastic Security', url: 'https://www.youtube.com/@OfficialElasticVideos', focus: 'Elastic Stack, SIEM tutorials' },
+            { name: 'Blue Team Village', url: 'https://www.youtube.com/@BlueTeamVillage', focus: 'Community defensive security, DEF CON blue team' },
+            { name: 'Detection Engineering', url: 'https://www.youtube.com/@DetectionEngineering', focus: 'Detection rules, Sigma, threat hunting' }
+        ],
+        macOSiOS: [
+            { name: 'Objective-See', url: 'https://www.youtube.com/@ObjectiveSee', focus: 'macOS security tools, malware analysis' },
+            { name: 'Patrick Wardle', url: 'https://objective-see.org/', focus: 'macOS internals, security research' },
+            { name: 'BlackHat macOS talks', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Advanced macOS exploitation' },
+            { name: 'WWDC Security sessions', url: 'https://developer.apple.com/videos/', focus: 'Apple platform security features' }
+        ],
+        conferenceTalks: [
+            { name: 'DEF CON Conference', url: 'https://www.youtube.com/@DEFCONConference', focus: 'Cutting-edge security research' },
+            { name: 'Black Hat', url: 'https://www.youtube.com/@BlackHatOfficialYT', focus: 'Advanced security research' },
+            { name: 'OffensiveCon', url: 'https://www.youtube.com/@OffensiveCon', focus: 'Offensive security research' },
+            { name: 'BlueHat', url: 'https://www.microsoft.com/en-us/security/blog/bluehat/', focus: 'Microsoft security conference' },
+            { name: 'Virus Bulletin', url: 'https://www.youtube.com/@virusbtn', focus: 'Malware research, antivirus' }
+        ],
+        // Legacy flat list for backward compatibility
         channels: [
             { name: 'The Cyber Mentor', url: 'https://www.youtube.com/@TCMSecurityAcademy', focus: 'Pentesting, Practical Ethical Hacking, Career Guidance, Networking, PrivEsc' },
             { name: 'HackerSploit', url: 'https://www.youtube.com/@HackerSploit', focus: 'Pentesting tutorials, Cyber Security training, Kali Linux tools' },
@@ -175,6 +263,29 @@ const RESOURCES = {
             name: 'PicoCTF',
             url: 'https://picoctf.org',
             focus: 'Beginner CTF challenges'
+        },
+        provingGrounds: {
+            name: 'Proving Grounds',
+            url: 'https://www.offensive-security.com/labs/',
+            focus: 'OffSec official practice labs for OSCP, OSEP, OSWE',
+            practiceLabs: ['Play (Free)', 'Practice (Paid)', 'Boxes aligned with PEN-200/300/301']
+        },
+        portSwigger: {
+            name: 'PortSwigger Web Security Academy',
+            url: 'https://portswigger.net/web-security',
+            focus: 'Free comprehensive web security training',
+            labs: ['SQL Injection', 'XSS', 'CSRF', 'XXE', 'SSRF', 'Deserialization', 'Access Control', 'Authentication', 'Business Logic', 'Information Disclosure', 'Path Traversal', 'File Upload', 'OS Command Injection', 'Server-side Template Injection', 'Web Cache Poisoning', 'HTTP Request Smuggling', 'OAuth', 'JWT', 'Prototype Pollution']
+        },
+        vulnHub: {
+            name: 'VulnHub',
+            url: 'https://www.vulnhub.com/',
+            focus: 'Downloadable vulnerable VMs for offline practice'
+        },
+        exploitEducation: {
+            name: 'Exploit Education',
+            url: 'https://exploit.education/',
+            focus: 'Binary exploitation learning platform',
+            wargames: ['Phoenix', 'Fusion', 'Nebula']
         }
     },
     tools: {
@@ -200,15 +311,60 @@ const RESOURCES = {
         misc: ['tmux', 'zsh', 'Oh-My-Zsh', 'Terminator', 'Obsidian (notes)', 'CherryTree', 'Flameshot']
     },
     books: [
+        { title: "The Web Application Hacker's Handbook", author: "Dafydd Stuttard & Marcus Pinto", focus: "Web Security - Essential for OSWE" },
+        { title: "Real-World Bug Hunting", author: "Peter Yaworski", focus: "Bug Bounty practical guide" },
+        { title: "Penetration Testing: A Hands-On Introduction to Hacking", author: "Georgia Weidman", focus: "Beginner pentesting" },
+        { title: "Red Team Field Manual (RTFM)", author: "Ben Clark", focus: "Quick reference for red team ops" },
+        { title: "Blue Team Field Manual (BTFM)", author: "Alan J White", focus: "Quick reference for blue team ops" },
+        { title: "Windows Internals (Part 1 & 2)", author: "Pavel Yosifovich, Mark Russinovich", focus: "OS Internals - Essential for OSEP/OSED" },
+        { title: "Linux Basics for Hackers", author: "OccupyTheWeb", focus: "Linux fundamentals for security" },
         { title: "TCP/IP Illustrated", author: "W. Richard Stevens", focus: "Networking Fundamentals" },
         { title: "Black Hat Python", author: "Justin Seitz", focus: "Python for Hackers" },
         { title: "Red Team Development and Operations", author: "Joe Vest", focus: "Red Teaming Strategy" },
         { title: "Penetration Testing Azure for Ethical Hackers", author: "David Okeyode", focus: "Cloud Security" },
-        { title: "Windows Internals", author: "Pavel Yosifovich", focus: "OS Internals" },
-        { title: "The Web Application Hacker's Handbook", author: "Dafydd Stuttard", focus: "Web Security" },
         { title: "Practical Malware Analysis", author: "Sikorski & Honig", focus: "Malware Analysis" },
         { title: "The Hacker Playbook 3", author: "Peter Kim", focus: "Red Team Methodology" }
     ],
+    webResources: {
+        officialDocs: [
+            { name: 'OWASP Top 10', url: 'https://owasp.org/www-project-top-ten/', focus: 'Web application security risks' },
+            { name: 'OWASP WebGoat', url: 'https://owasp.org/www-project-webgoat/', focus: 'Interactive web security learning' },
+            { name: 'Nmap Documentation', url: 'https://nmap.org/book/', focus: 'Network scanning reference' },
+            { name: 'Metasploit Documentation', url: 'https://docs.metasploit.com/', focus: 'Exploitation framework' },
+            { name: 'Microsoft Learn', url: 'https://learn.microsoft.com/', focus: 'Windows and cloud documentation' },
+            { name: 'Linux man pages', url: 'https://man7.org/linux/man-pages/', focus: 'Linux command reference' }
+        ],
+        blogsKnowledgeBases: [
+            { name: 'IppSec Notes', url: 'https://ippsec.rocks/', focus: 'HTB machine search by technique' },
+            { name: '0xdf Blog', url: 'https://0xdf.gitlab.io/', focus: 'HTB walkthroughs and CTF writeups' },
+            { name: 'PayloadsAllTheThings', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings', focus: 'Comprehensive payload repository' },
+            { name: 'HackTricks', url: 'https://book.hacktricks.xyz/', focus: 'Pentesting techniques encyclopedia' },
+            { name: 'GTFOBins', url: 'https://gtfobins.github.io/', focus: 'Unix binaries for privilege escalation' },
+            { name: 'LOLBAS', url: 'https://lolbas-project.github.io/', focus: 'Living Off The Land Binaries (Windows)' },
+            { name: 'Red Canary Atomic Red Team', url: 'https://github.com/redcanaryco/atomic-red-team', focus: 'Adversary emulation tests mapped to MITRE ATT&CK' }
+        ],
+        exploitDevReverseEngineering: [
+            { name: 'Corelan Team Blog', url: 'https://www.corelan.be/', focus: 'Exploit development tutorials' },
+            { name: 'OpenSecurityTraining.info', url: 'https://opensecuritytraining.info/', focus: 'Free exploit dev courses' },
+            { name: 'Azeria Labs', url: 'https://azeria-labs.com/', focus: 'ARM exploitation tutorials' },
+            { name: 'Malware Unicorn RE101', url: 'https://malwareunicorn.org/#/workshops', focus: 'Reverse engineering 101' },
+            { name: 'Nightmares.re', url: 'https://guyinatuxedo.github.io/', focus: 'Binary exploitation course' }
+        ],
+        defensiveDetection: [
+            { name: 'SigmaHQ', url: 'https://github.com/SigmaHQ/sigma', focus: 'Generic signature format for SIEM systems' },
+            { name: 'Elastic Security Blog', url: 'https://www.elastic.co/security-labs', focus: 'Threat research and detections' },
+            { name: 'Splunk Security Blog', url: 'https://www.splunk.com/en_us/blog/security.html', focus: 'SIEM and security analytics' },
+            { name: 'Detection Engineering Blog', url: 'https://detect.fyi/', focus: 'Detection engineering best practices' },
+            { name: 'MITRE ATT&CK', url: 'https://attack.mitre.org/', focus: 'Adversary tactics and techniques knowledge base' }
+        ],
+        cloudModernSecurity: [
+            { name: 'AWS Security Blog', url: 'https://aws.amazon.com/blogs/security/', focus: 'AWS cloud security' },
+            { name: 'Google Cloud Security', url: 'https://cloud.google.com/security', focus: 'GCP security best practices' },
+            { name: 'Azure Security Documentation', url: 'https://docs.microsoft.com/en-us/azure/security/', focus: 'Azure security features' },
+            { name: 'Wiz Research Blog', url: 'https://www.wiz.io/blog', focus: 'Cloud security research' },
+            { name: 'Rhino Security Labs', url: 'https://rhinosecuritylabs.com/blog/', focus: 'Cloud penetration testing' }
+        ]
+    },
     reporting: {
         guides: [
             { name: "TCM Security Report Writing Guide", url: "https://tcm-sec.com/report-writing-for-penetration-testers/" },
