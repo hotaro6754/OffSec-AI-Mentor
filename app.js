@@ -235,7 +235,8 @@ function restoreUI() {
         if (mentor) {
             mentor.classList.remove('hidden');
             elements.chatHistory.innerHTML = '';
-            appState.mentorChat.forEach(msg => addChatMessage(msg));
+            appState.mentorChat.forEach(msg => addChatMessage(msg, false));
+            if (appState.mentorChat.length > 0) scrollToBottom("auto");
         }
     } else if (appState.assessment) {
         showEvaluation();
@@ -1868,6 +1869,11 @@ function selectCertOption(option) {
 }
 
 async function generateRoadmapForCert(certId) {
+    if (!appState.assessment) {
+        showError('Please complete your skill assessment first!');
+        showSection('assessmentSection');
+        return;
+    }
     // Store in window state
     window.selectedCertification = certId;
     window.assessmentResult = appState.assessment;
@@ -2980,6 +2986,8 @@ async function sendMentorMessage(overrideText = null) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let lastUpdateTime = 0;
+        const throttleMs = 80;
 
         while (true) {
             const { done, value } = await reader.read();
@@ -2988,7 +2996,7 @@ async function sendMentorMessage(overrideText = null) {
             buffer += decoder.decode(value, { stream: true });
 
             const lines = buffer.split('\n');
-            buffer = lines.pop(); // Keep last incomplete line in buffer
+            buffer = lines.pop();
 
             for (const line of lines) {
                 const trimmed = line.trim();
@@ -3000,18 +3008,24 @@ async function sendMentorMessage(overrideText = null) {
                         const content = json.choices[0]?.delta?.content || '';
                         if (content) {
                             mentorMsg.text += content;
-                            if (contentEl) {
-                                contentEl.textContent = mentorMsg.text;
-                                scrollToBottom('auto'); // Use auto during streaming for better performance
+
+                            const now = Date.now();
+                            if (now - lastUpdateTime > throttleMs) {
+                                if (contentEl) {
+                                    contentEl.textContent = mentorMsg.text;
+                                    scrollToBottom('auto');
+                                }
+                                lastUpdateTime = now;
                             }
                         }
-                    } catch (e) {
-                        // Incomplete JSON or other error, ignore and continue
-                    }
+                    } catch (e) {}
                 }
             }
         }
-
+        if (contentEl) {
+            contentEl.textContent = mentorMsg.text;
+            scrollToBottom('auto');
+        }
         saveState();
     } catch (error) {
         console.error('Error in streaming chat:', error);
@@ -3024,7 +3038,7 @@ async function sendMentorMessage(overrideText = null) {
     }
 }
 
-function addChatMessage(msg) {
+function addChatMessage(msg, shouldScroll = true) {
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${msg.role} animate__animated animate__fadeInUp animate__faster`;
     
@@ -3044,7 +3058,9 @@ function addChatMessage(msg) {
     }
     
     elements.chatHistory.appendChild(bubble);
-    scrollToBottom();
+    if (shouldScroll) {
+        scrollToBottom(shouldScroll === 'auto' ? 'auto' : 'smooth');
+    }
     return bubble;
 }
 
@@ -3070,6 +3086,10 @@ function resetAndRetake() {
     appState.mentorChat = [];
     saveState();
     
+    // UI Cleanup
+    document.getElementById("lastRoadmapBtn")?.classList.add("hidden");
+    document.getElementById("roadmapActionsDiv")?.classList.add("hidden");
+
     hideAllSections();
     startAssessment();
     window.scrollTo({ top: 0, behavior: 'smooth' });
