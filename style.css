@@ -4154,3 +4154,140 @@ body.mode-oscp .transition-container-v3 {
     transform: scale(1.05) translateY(-3px);
     box-shadow: 6px 6px 0px #2d3436;
 }
+
+/* Inline Markdown Links */
+.res-link-inline {
+    color: var(--primary-v3);
+    text-decoration: underline;
+    font-weight: 700;
+}
+.res-link-inline:hover {
+    color: var(--black-v3);
+    background: var(--accent-v3);
+}
+body.mode-oscp .res-link-inline {
+    color: var(--primary-v3);
+}
+body.mode-oscp .res-link-inline:hover {
+    color: #fff;
+    background: var(--primary-v3);
+}
+
+/* Improved Chat Scroll & Input */
+.chat-history {
+    max-height: 60vh;
+    height: 500px;
+    scroll-behavior: smooth;
+}
+
+.mentor-input {
+    min-height: 45px;
+    max-height: 200px;
+    resize: none;
+    overflow-y: hidden;
+    transition: height 0.1s ease;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.chat-bubble-content {
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+/* OSCP Mode V3 Visibility Fixes */
+body.mode-oscp .roadmap-v3-container {
+    color: #c9d1d9;
+}
+
+body.mode-oscp .phase-card-v3,
+body.mode-oscp .resource-card-v3,
+body.mode-oscp .lab-mini-card,
+body.mode-oscp .align-card-v3,
+body.mode-oscp .tool-mastery-card-v3,
+body.mode-oscp .gap-card,
+body.mode-oscp .mentor-philosophy-section-v3 {
+    background: #161b22 !important;
+    border-color: #30363d !important;
+    color: #c9d1d9 !important;
+    box-shadow: 6px 6px 0px #30363d !important;
+}
+
+body.mode-oscp .card-title-v2,
+body.mode-oscp h1, body.mode-oscp h2, body.mode-oscp h3, body.mode-oscp h4 {
+    color: #fff !important;
+}
+
+body.mode-oscp strong {
+    color: var(--primary-v3) !important;
+}
+
+body.mode-oscp .phase-badge-v3 {
+    background: var(--primary-v3);
+    color: #fff;
+}
+
+body.mode-oscp .phase-meta-tag {
+    background: #30363d;
+    color: #c9d1d9;
+}
+
+body.mode-oscp .step-content-v3,
+body.mode-oscp .outcomes-list-v3 li,
+body.mode-oscp .mentor-tips-list-v3 li {
+    color: #b0b0b0;
+}
+
+body.mode-oscp .phase-mentor-perspective-v3 {
+    background: #0d1117;
+    border-left-color: var(--primary-v3);
+    color: #c9d1d9;
+}
+
+body.mode-oscp .lab-platform-tag {
+    background: var(--primary-v3);
+    color: #fff;
+}
+
+body.mode-oscp .res-type-tag {
+    background: #21262d;
+    color: #8b949e;
+}
+
+body.mode-oscp .command-item code {
+    background: #0d1117;
+    color: #ff79c6; /* Dracula-ish pink for commands */
+}
+
+body.mode-oscp .cyber-wisdom-section-v3 blockquote {
+    background: #0d1117 !important;
+    border-left-color: #30363d !important;
+    color: #8b949e !important;
+}
+
+body.mode-oscp .skill-panel-v3 {
+    background: #161b22;
+    border-left: 5px solid #30363d;
+    color: #c9d1d9;
+}
+
+body.mode-oscp .skill-panel-header {
+    background: #0d1117;
+    border-bottom: 2px solid #30363d;
+}
+
+body.mode-oscp .skill-panel-header h2 {
+    color: #fff;
+}
+
+body.mode-oscp .skill-panel-content h3 {
+    color: var(--primary-v3);
+}
+
+body.mode-oscp .close-panel-btn {
+    color: #fff;
+}
