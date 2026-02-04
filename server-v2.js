@@ -663,7 +663,7 @@ MODERATE BEGINNER-LEVEL TOPICS (intermediate foundational):
         return `You are creating a FRESH assessment for ${isOscp ? 'OSCP-prep learners (ADVANCED)' : 'moderate-level cybersecurity learners'}.
 
 CRITICAL: Generate COMPLETELY NEW questions. EVERY question must be different from any you have generated before. This is retake #${retakeCount + 1}. Random seed: ${randomSeed}.
-${usedHashes.length > 0 ? `\nAVOID these previously used question patterns and topics at all costs - create entirely different scenarios and test different edge cases: ${usedHashes.join(', ')}` : ''}
+${usedHashes.length > 0 ? `\nAVOID these specific question topics and scenarios (previously used): ${usedHashes.join('; ')}. DO NOT repeat these scenarios.` : ''}
 
 ${isOscp ? oscpTopics : beginnerTopics}
 
@@ -910,7 +910,7 @@ REQUIREMENTS (STRICT):
 STRICT RULES:
 - EVERY certification roadmap MUST be distinct and unique. Do not use a generic template.
 - Use the following MASTER_SKILLS for technical grounding: ${JSON.stringify(MASTER_SKILLS)}
-- Use the following RESOURCES for verified links: ${JSON.stringify(resources)}
+- Use the following RESOURCES for verified links. PRIORITIZE these URLs over any you might hallucinate: ${JSON.stringify(resources)}
 - SYLLABUS ALIGNMENT IS MANDATORY: Map specific syllabus items for ${cert} to roadmap phases.
 - RESOURCE DIVERSITY IS MANDATORY: 1 HTB, 1 THM, 1 YouTube resource per phase.
 - RESPOND WITH PURE JSON ONLY.
@@ -1052,12 +1052,20 @@ async function callAI(prompt, options = {}) {
 
     // Groq ONLY
     let currentApiKey = customKeys.groq || AI_API_KEY;
+    const isCustom = !!customKeys.groq;
 
     if (!currentApiKey) {
         throw new Error("Groq API key is missing");
     }
 
-    console.log(`📤 Calling GROQ API (stream=${stream})...`);
+    if (isCustom) {
+        const maskedKey = currentApiKey.substring(0, 4) + '...' + currentApiKey.substring(currentApiKey.length - 4);
+        console.log(`🔑 Using custom user-provided Groq API key: ${maskedKey}`);
+    } else {
+        console.log(`🤖 Using system-wide Groq API key`);
+    }
+
+    console.log(`📤 Calling GROQ API (stream=${stream}, isCustom=${isCustom})...`);
     
     const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries, maxTokens, stream);
     
@@ -1069,7 +1077,16 @@ async function callAI(prompt, options = {}) {
 }
 
 async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 5000, stream = false) {
+    const startTime = Date.now();
     for (let attempt = 1; attempt <= retries; attempt++) {
+        const elapsed = (Date.now() - startTime) / 1000;
+
+        // Render timeout is 30s. If we're already past 25s, don't even try another call.
+        if (elapsed > 25 && attempt > 1) {
+            console.log(`⚠️  Approaching Render 30s timeout (${elapsed.toFixed(1)}s elapsed). Aborting retries.`);
+            return { success: false, rateLimit: true, error: `AI Rate Limited (Timeout approaching)`, retryAfter: 30 };
+        }
+
         try {
             let response, data;
             
@@ -1119,23 +1136,31 @@ async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retr
                 let waitTime = 0;
 
                 if (retryAfter) {
-                    // retry-after can be in seconds or a date string
                     waitTime = isNaN(retryAfter)
                         ? (new Date(retryAfter).getTime() - Date.now()) / 1000
                         : parseInt(retryAfter);
                 }
 
                 if (attempt < retries) {
-                    // If no retry-after header, use optimized backoff: 2s, 5s, 10s, 15s, 20s
+                    // If no retry-after header, use optimized backoff: 2s, 5s, 8s
                     if (!waitTime || waitTime <= 0) {
-                        const waitTimes = [2, 5, 10, 15, 20];
+                        const waitTimes = [2, 5, 8];
                         waitTime = waitTimes[Math.min(attempt - 1, waitTimes.length - 1)];
                     }
 
-                    // Cap wait time to 30s to avoid Render timeout if possible
-                    waitTime = Math.min(waitTime, 30);
+                    // Strict budget check for Render (30s limit)
+                    const totalElapsed = (Date.now() - startTime) / 1000;
+                    const remainingBudget = 26 - totalElapsed; // Leave 4s for the final call
 
-                    console.log(`⏳ GROQ rate limited, waiting ${waitTime}s before retry ${attempt + 1}/${retries}...`);
+                    if (remainingBudget <= 0) {
+                        console.log(`⚠️  No time budget left for retry. Aborting.`);
+                        return { success: false, rateLimit: true, error: `GROQ rate limit exceeded`, retryAfter: waitTime };
+                    }
+
+                    // Cap wait time to remaining budget or 10s max
+                    waitTime = Math.min(waitTime, remainingBudget, 10);
+
+                    console.log(`⏳ GROQ rate limited, waiting ${waitTime.toFixed(1)}s before retry ${attempt + 1}/${retries}...`);
                     await new Promise(r => setTimeout(r, waitTime * 1000));
                     continue;
                 }
@@ -1274,23 +1299,39 @@ function attemptFix(content) {
 function validateAndCleanResources(resources) {
     if (!Array.isArray(resources)) return [];
     
+    // Flatten known resources for lookup
+    const known = [];
+    if (typeof RESOURCES !== 'undefined') {
+        Object.values(RESOURCES).forEach(cat => {
+            if (Array.isArray(cat)) known.push(...cat);
+            else Object.values(cat).forEach(sub => {
+                if (Array.isArray(sub)) known.push(...sub);
+            });
+        });
+    }
+
     return resources
-        .filter(res => {
-            // Keep resource if it has at least one valid field
-            return res && (res.name || res.channel || res.title || res.url);
-        })
+        .filter(res => res && (res.name || res.url))
         .map(res => {
-            // Ensure resource has a name
-            const name = res.name || res.channel || res.title || 'Resource';
-            const type = res.type || 'Resource';
-            const url = res.url || '#';
-            const description = res.why || res.description || res.recommended || '';
+            let name = res.name || res.title || res.channel || 'Resource';
+            let url = res.url || '#';
+
+            // Try to fix invalid/hallucinated links
+            if (url === '#' || !url.startsWith('http')) {
+                const match = known.find(k => k.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(k.name.toLowerCase()));
+                if (match) {
+                    url = match.url;
+                    name = match.name;
+                } else if (url === '#') {
+                    url = `https://www.google.com/search?q=${encodeURIComponent(name + ' cybersecurity resource')}`;
+                }
+            }
             
             return {
-                type,
+                type: res.type || 'Resource',
                 name,
                 url,
-                description
+                description: res.description || res.why || res.recommended || ''
             };
         });
 }
@@ -1301,14 +1342,22 @@ function validateRoadmapData(roadmapObj) {
         return roadmapObj;
     }
     
-    // Clean phases if they exist
-    if (Array.isArray(roadmapObj.phases)) {
-        roadmapObj.phases = roadmapObj.phases.map(phase => {
+    // Check both 'roadmap' and 'phases' keys
+    const phases = roadmapObj.roadmap || roadmapObj.phases;
+
+    if (Array.isArray(phases)) {
+        const cleanedPhases = phases.map(phase => {
             if (phase.resources) {
                 phase.resources = validateAndCleanResources(phase.resources);
             }
+            if (phase.mandatory_labs) {
+                phase.mandatory_labs = validateAndCleanResources(phase.mandatory_labs);
+            }
             return phase;
         });
+
+        if (roadmapObj.roadmap) roadmapObj.roadmap = cleanedPhases;
+        if (roadmapObj.phases) roadmapObj.phases = cleanedPhases;
     }
     
     return roadmapObj;
