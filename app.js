@@ -565,6 +565,18 @@ function setupEventListeners() {
             sendMentorMessage();
         }
     });
+
+    elements.mentorInput?.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        // Limit max height
+        if (this.scrollHeight > 200) {
+            this.style.height = '200px';
+            this.style.overflowY = 'auto';
+        } else {
+            this.style.overflowY = 'hidden';
+        }
+    });
     
     // Intent buttons
     if (elements.mentorIntentButtons) {
@@ -2334,7 +2346,7 @@ function displayRoadmap(roadmapData) {
                 <h2>Mentor's Philosophy</h2>
             </div>
             <div class="philosophy-content-v3">
-                ${roadmapObj.mentor_philosophy}
+                ${formatMarkdown(roadmapObj.mentor_philosophy)}
             </div>
         `;
         container.appendChild(philosophySection);
@@ -2390,12 +2402,12 @@ function displayRoadmap(roadmapData) {
                 <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
                     <h3><i data-lucide="list-checks"></i> What You Will Do</h3>
                 </div>
-                <div class="step-content-v3">${phase.what_you_will_do}</div>
+                <div class="step-content-v3">${formatMarkdown(phase.what_you_will_do)}</div>
 
                 <div class="section-header-v3" style="margin-top: 20px; font-size: 14px;">
                     <h3><i data-lucide="trending-up"></i> What You Will Gain</h3>
                 </div>
-                <div class="step-content-v3">${phase.what_you_will_gain}</div>
+                <div class="step-content-v3">${formatMarkdown(phase.what_you_will_gain)}</div>
             </div>
 
             ${phase.mentor_tips && phase.mentor_tips.length > 0 ? `
@@ -3012,7 +3024,7 @@ async function sendMentorMessage(overrideText = null) {
                             const now = Date.now();
                             if (now - lastUpdateTime > throttleMs) {
                                 if (contentEl) {
-                                    contentEl.textContent = mentorMsg.text;
+                                    contentEl.innerHTML = formatMarkdown(mentorMsg.text);
                                     scrollToBottom('auto');
                                 }
                                 lastUpdateTime = now;
@@ -3023,7 +3035,7 @@ async function sendMentorMessage(overrideText = null) {
             }
         }
         if (contentEl) {
-            contentEl.textContent = mentorMsg.text;
+            contentEl.innerHTML = formatMarkdown(mentorMsg.text);
             scrollToBottom('auto');
         }
         saveState();
@@ -3050,7 +3062,7 @@ function addChatMessage(msg, shouldScroll = true) {
 
         const content = document.createElement('div');
         content.className = 'chat-bubble-content';
-        content.textContent = msg.text;
+        content.innerHTML = formatMarkdown(msg.text);
         bubble.appendChild(content);
     } else {
         // Use textContent to safely render all messages as plain text
@@ -3066,10 +3078,13 @@ function addChatMessage(msg, shouldScroll = true) {
 
 function scrollToBottom(behavior = 'smooth') {
     if (elements.chatHistory) {
-        elements.chatHistory.scrollTo({
-            top: elements.chatHistory.scrollHeight,
-            behavior: behavior
-        });
+        // Use a small timeout to ensure DOM is updated
+        setTimeout(() => {
+            elements.chatHistory.scrollTo({
+                top: elements.chatHistory.scrollHeight,
+                behavior: behavior
+            });
+        }, 50);
     }
 }
 
@@ -3356,6 +3371,30 @@ document.head.appendChild(style);
 // ============================================================================
 // EASTER EGG FUNCTIONS
 // ============================================================================
+
+function formatMarkdown(text) {
+    if (!text) return '';
+
+    // Basic HTML escaping for safety
+    let escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Convert links: [text](url)
+    let html = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="res-link-inline">$1</a>');
+
+    // Convert bold: **text** or __text__
+    html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+
+    // Convert code: `text`
+    html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+    // Convert newlines to <br>
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
+}
 
 function getRandomQuote() {
     return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
