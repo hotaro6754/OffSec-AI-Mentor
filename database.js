@@ -321,9 +321,11 @@ function saveUsedQuestions(userId, questions, mode) {
     
     const insert = db.transaction((questions) => {
         for (const q of questions) {
-            // Create a simple hash from question text
-            const hash = Buffer.from(q.question).toString('base64').substring(0, 50);
-            stmt.run(uuidv4(), userId, hash, q.question, mode);
+            if (!q || !q.question) continue;
+            // Store the first 100 chars of the question as the "hash"
+            // This is actually a plain-text summary the AI can read
+            const summary = q.question.substring(0, 100).replace(/["']/g, '');
+            stmt.run(uuidv4(), userId, summary, q.question, mode);
         }
     });
     
