@@ -667,9 +667,9 @@ ${usedHashes.length > 0 ? `\nAVOID these previously used question patterns and t
 
 ${isOscp ? oscpTopics : beginnerTopics}
 
-REQUIREMENTS:
-- 10 questions total: 5 multiple choice, 5 short answer.
-- Each question must be UNIQUE and appropriate for the level.
+REQUIREMENTS (STRICT):
+- EXACTLY 10 questions total: 5 multiple choice and 5 short answer. NO MORE, NO LESS.
+- Each question must be UNIQUE, appropriate for the level, and CONCISE to fit in the response.
 - BEGINNER MODE: Questions must be MODERATE, challenging but approachable. NO absolute basic "what is RAM" questions.
 - OSCP MODE: Questions must be BRUTAL, EXAM-LEVEL, UNFORGIVING, and SCENARIO-BASED.
 - Test understanding and methodology.
@@ -826,18 +826,20 @@ CRITICAL INSTRUCTIONS FOR AI MENTOR:
 3. **OFFSEC ONLY**: This tool is for OFFSEC certifications. ONLY suggest OffSec paths (OSCP, OSEP, OSWE, etc.).
 4. **TAILORING**: Prioritize addressing the user's identified weaknesses: ${weaknesses.join(', ')}.
 5. **SYLLABUS-DRIVEN**: Deeply analyze the ${cert} syllabus provided. The generated roadmap MUST cover EVERY SINGLE technical topic and element listed in the respective syllabus without exception. Ensure comprehensive coverage of all concepts required for the certification.
-6. **RESOURCE DIVERSITY**: Each phase MUST contain at least 1 HTB lab, 1 THM lab, and 1 YouTube resource.
-7. **CONTEXTUAL GUIDANCE**: Tailor "Mentor Key Points" to the specific certification's mindset (e.g., "Manual enumeration" for OSCP vs "Code review" for OSWE).
-8. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
-9. **CLICKABLE LINKS**: For YouTube, Web resources, and Books, you MUST provide working clickable links in the "url" field. If a specific URL is unknown, use a high-quality search URL or the primary site.
-10. **LAB GUIDANCE**: For labs, include brief "Mentor Key Points" - specific mindset tips or enumeration focus.
-11. **WORKING LINKS**: Use verified platform URLs (THM: /room/[name], HTB: /machines/[name]).
-12. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
-13. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
-14. **API KEY MANAGEMENT**: Include specific guidance on generating and safely segregating API keys for platforms like HTB, THM, and other suggested resources within the relevant roadmap phases.
-15. **STEP-BY-STEP LADDER**: Each phase must clearly lead into the next. Explain the transition.
-16. **MENTOR TIPS**: Include 3-5 "Senior Mentor Tips" for each phase, sharing real-world insights that aren't in books.
-17. **DETAILED GAINS**: For "What You Will Gain", be specific about technical commands, methodology nuances, and professional soft skills.
+6. **RESOURCE DIVERSITY & SPECIFICITY**: Each phase MUST contain at least 1 HTB lab, 1 THM lab, 1 YouTube resource, and 1 Book recommendation.
+7. **SPECIFIC LAB NAMES**: Do NOT just say "TryHackMe lab". You MUST name a specific room (e.g., "THM: Pickle Rick", "THM: Blue", "THM: Advent of Cyber"). For HTB, name a specific machine (e.g., "HTB: Lame", "HTB: Netmon").
+8. **SPECIFIC YOUTUBE VIDEOS**: Do NOT just say "Watch IppSec". You MUST specify a video title or specific machine walkthrough (e.g., "IppSec: HTB Lame Walkthrough", "IppSec: OSCP Methodology and Mindset").
+9. **SPECIFIC BOOKS**: Include at least one relevant book per phase with its full title (e.g., "The Web Application Hacker's Handbook", "Black Hat Python", "The Hacker Playbook 3").
+10. **CLICKABLE LINKS**: For ALL resources (Labs, YouTube, Web, Books), you MUST provide working clickable links in the "url" field. For books, link to a major bookstore or a high-quality summary page.
+11. **CONTEXTUAL GUIDANCE**: Tailor "Mentor Key Points" to the specific certification's mindset (e.g., "Manual enumeration" for OSCP vs "Code review" for OSWE).
+12. **ALL TOOLS**: In each phase, include ALL tools required for that specific stage of the certification. Don't limit to 2 or 3.
+13. **WORKING LINKS**: Use verified platform URLs (THM: https://tryhackme.com/room/[name], HTB: https://app.hackthebox.com/machines/[name]).
+14. **SKILL TREE**: Generate a concise Neo-Brutalist Skill Tree in the JSON.
+15. **GROUNDING**: Reference provided MASTER_SKILLS for technical depth.
+16. **API KEY MANAGEMENT**: Include specific guidance on generating and safely segregating API keys for platforms like HTB, THM, and other suggested resources within the relevant roadmap phases.
+17. **STEP-BY-STEP LADDER**: Each phase must clearly lead into the next. Explain the transition.
+18. **MENTOR TIPS**: Include 3-5 "Senior Mentor Tips" for each phase, sharing real-world insights that aren't in books.
+19. **DETAILED GAINS**: For "What You Will Gain", be specific about technical commands, methodology nuances, and professional soft skills.
 ${modeSpecificInstructions}
 
 ${!modeSpecificInstructions ? `PHASE STRUCTURE (${phaseCount} Phases):
@@ -890,7 +892,7 @@ ${instructions}
 ${certSpecificInstructions}
 ${prepRecommendations}
 
-REQUIREMENTS:
+REQUIREMENTS (STRICT):
 1. **Mentor's Philosophy**: A section where you express your ideas on the ${cert} mindset.
 2. **Gap Analysis**: Detailed missing skills vs requirements.
 3. **Dynamic Phases**: MUST generate exactly ${phaseCount} phases. Each phase MUST have:
@@ -1042,10 +1044,10 @@ async function callAI(prompt, options = {}) {
         expectJson = options;
         retries = arguments[2] || 3;
         customKeys = arguments[3] || {};
-        maxTokens = 4000;
+        maxTokens = 5000;
         stream = false;
     } else {
-        ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 4000, stream = false } = options);
+        ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 5000, stream = false } = options);
     }
 
     // Groq ONLY
@@ -1066,7 +1068,7 @@ async function callAI(prompt, options = {}) {
     throw new Error(result.error || "AI call failed");
 }
 
-async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 4000, stream = false) {
+async function tryCallAI(apiKey, model, apiUrl, prompt, expectJson = false, retries = 3, maxTokens = 5000, stream = false) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             let response, data;
@@ -1409,7 +1411,7 @@ app.post('/api/generate-questions', async (req, res) => {
             
             console.log('📤 Calling AI API for question generation...');
             // Use retries=3 to improve success rate
-            const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys });
+            const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys, maxTokens: 5000 });
             console.log('📄 AI response received, length:', response?.length || 0);
             const parsed = parseJsonResponse(response);
             
