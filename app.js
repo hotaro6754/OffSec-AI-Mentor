@@ -578,9 +578,7 @@ function setupEventListeners() {
         }
     });
     
-    );
-        });
-    }
+
 }
 
 function setupMentorInputAutoExpand() {
@@ -815,31 +813,13 @@ function resetButton(btn, text) {
     btn.disabled = false;
 }
 
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span>${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => notification.classList.add('show'), 10);
-    
-    // Close button
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    });
-    
-    // Auto remove
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
+
+
+
+
+
+
+
 
 function setupAOS() {
     if (window.AOS) {
@@ -2881,159 +2861,147 @@ function exportRoadmap() {
 // SECTION 4: GUIDED MENTOR CHAT
 // ============================================================================
 
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button class="notification-close">&times;</button>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    });
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 4000);
+}
+
+function showSuccess(message) {
+    showNotification(message, 'success');
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
+function showSection(sectionId) {
+    const sections = ['hero', 'assessmentSection', 'evaluationSection', 'certSection', 'roadmapSection', 'mentorSection'];
+    sections.forEach(id => {
+        const s = document.getElementById(id);
+        if (s) s.classList.add('hidden');
+    });
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (sectionId === 'mentorSection' && (!appState.mentorChat || appState.mentorChat.length === 0)) {
+            initMentorChat();
+        }
+    }
+}
+
 function initMentorChat() {
-    // Check assessment
     if (!appState.assessment) {
-        // Hide mentor section if accessed prematurely
         document.getElementById('mentorSection')?.classList.add('hidden');
         return; 
     }
-
-    elements.chatHistory.innerHTML = '';
+    if (elements.chatHistory) elements.chatHistory.innerHTML = '';
     appState.mentorChat = [];
-    
-    const welcomeText = "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.\n\nEverything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.\n\nWhich lab, machine, or topic are you working on right now? 😎";
-
     const welcomeMsg = {
         role: 'mentor',
-        text: welcomeText
+        text: "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.\n\nEverything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.\n\nWhich lab, machine, or topic are you working on right now? 😎"
     };
-    
     appState.mentorChat.push(welcomeMsg);
     addChatMessage(welcomeMsg);
     saveState();
 }
 
+async function sendMentorMessage() {
+    const input = elements.mentorInput;
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    const userMsg = { role: 'user', text };
+    appState.mentorChat.push(userMsg);
+    addChatMessage(userMsg);
+    const mentorMsg = { role: 'mentor', text: '' };
+    const bubble = createChatBubble('mentor', '');
+    elements.chatHistory.appendChild(bubble);
+    const contentDiv = bubble.querySelector('.message-content');
+    try {
+        const response = await fetch('/api/mentor/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Groq-API-Key': localStorage.getItem('groqKey') || ''
+            },
+            body: JSON.stringify({ messages: appState.mentorChat, stream: true })
+        });
+        if (!response.ok) throw new Error('Failed to connect to mentor');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const dataStr = line.slice(6).trim();
+                    if (dataStr === '[DONE]') continue;
+                    try {
+                        const data = JSON.parse(dataStr);
+                        if (data.text) {
+                            fullText += data.text;
+                            contentDiv.innerHTML = formatMarkdown(fullText);
+                            elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+        mentorMsg.text = fullText;
+        appState.mentorChat.push(mentorMsg);
+        saveState();
+    } catch (error) {
+        contentDiv.innerHTML = `<span style="color: #ff5555;">Error: ${error.message}</span>`;
+    }
+}
+
+function addChatMessage(msg) {
+    if (!elements.chatHistory) return;
+    const bubble = createChatBubble(msg.role, msg.text);
+    elements.chatHistory.appendChild(bubble);
+    elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
+}
+
+function createChatBubble(role, text) {
+    const div = document.createElement('div');
+    div.className = `message ${role}-message`;
+    div.innerHTML = `<div class="message-content">${formatMarkdown(text)}</div>`;
+    return div;
+}
+
 
 function formatMarkdown(text) {
     if (!text) return '';
-
-    // Basic HTML escaping for safety
     let escaped = text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
-
-    // Convert links: [text](url)
-    let html = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="res-link-inline">$1</a>');
-
-    // Convert bold: **text** or __text__
-    html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
-
-    // Convert code: `text`
-    html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-
-    // Convert newlines to <br>
+    let html = escaped.replace(/\[([^\]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="res-link-inline">$1</a>');
+    html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     html = html.replace(/\n/g, '<br>');
-
     return html;
 }
-
-function getRandomQuote() {
-    return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
-}
-
-function revealSecret(containerId) {
-    const secretDiv = document.getElementById(containerId || 'secret-content');
-    if (!secretDiv) return;
-    
-    secretDiv.classList.remove('hidden');
-    secretDiv.classList.add('revealed');
-    
-    // Generate unique QR container ID
-    const qrContainerId = 'qr-code-' + Math.random().toString(36).substring(7);
-    
-    // Create rickroll reveal content
-    secretDiv.innerHTML = `
-        <div class="rickroll-reveal">
-            <p class="reveal-text">🎉 Your Cyber Wisdom Awaits! 🎉</p>
-            <div class="qr-wrapper">
-                <div id="${qrContainerId}"></div>
-                <p style="margin-top: 12px; color: #000; font-weight: 700; text-transform: uppercase; font-size: 12px;">Scan for Wisdom</p>
-            </div>
-            <p class="or-text">OR</p>
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
-               target="_blank" 
-               class="btn btn-wisdom">
-                🎵 Click for Knowledge
-            </a>
-        </div>
-    `;
-    
-    // Generate QR code after DOM is updated
-    setTimeout(() => {
-        const qrElement = document.getElementById(qrContainerId);
-        if (!qrElement) return;
-
-        if (typeof QRCode !== 'undefined') {
-            try {
-                qrElement.innerHTML = ''; // Clear any existing
-                new QRCode(qrElement, {
-                    text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    width: 180,
-                    height: 180,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel?.H || 2
-                });
-            } catch (e) {
-                console.error('QR generation error:', e);
-                qrElement.innerHTML = '<span>QR Load Error</span>';
-            }
-        } else {
-            qrElement.innerHTML = '<span style="color:red">QR Library Not Found</span>';
-        }
-    }, 200);
-    
-    addConfetti();
-}
-
-function addConfetti() {
-    // Simple confetti effect using emoji
-    const confettiCount = 30;
-    const confettiEmojis = ['🎉', '🎊', '✨', '🌟', '💫', '🎯', '🔥'];
-    
-    for (let i = 0; i < confettiCount; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
-        confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.animationDelay = Math.random() * 3 + 's';
-        confetti.style.fontSize = (Math.random() * 20 + 20) + 'px';
-        document.body.appendChild(confetti);
-        
-        setTimeout(() => confetti.remove(), 4000);
-    }
-}
-
-function showRandomEasterEgg() {
-    const randomQuote = getRandomQuote();
-    const modal = document.createElement('div');
-    modal.className = 'easter-egg-modal';
-    modal.innerHTML = `
-        <div class="easter-egg-content">
-            <div class="motivational-section">
-                <button class="close-modal" onclick="this.closest('.easter-egg-modal').remove()">×</button>
-                <blockquote class="cyber-quote">
-                    "${randomQuote}"
-                </blockquote>
-                <div class="secret-wisdom-container">
-                    <p class="wisdom-prompt">💡 You've unlocked a special surprise!</p>
-                    <button class="btn-reveal-secret" onclick="revealSecret('secret-content-modal')">
-                        🎁 Reveal Cyber Wisdom
-                    </button>
-                    <div id="secret-content-modal" class="hidden">
-                        <!-- QR Code and link will be generated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-// ============================================================================
-// STARTUP
-// ============================================================================
-
 window.addEventListener('DOMContentLoaded', init);
