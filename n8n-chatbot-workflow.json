@@ -57,7 +57,7 @@
     {
       "parameters": {
         "model": "dolphin-llama3",
-        "prompt": "={{ $node[\"Chat Trigger\"].json[\"body\"][\"message\"] }}\n\nContext from URL:\n{{ $node[\"Firecrawl Scraper\"].json[\"data\"][\"markdown\"] }}",
+        "prompt": "={{ $node[\"Chat Trigger\"].json[\"body\"][\"message\"] + (($node[\"Firecrawl Scraper\"] && $node[\"Firecrawl Scraper\"].json && $node[\"Firecrawl Scraper\"].json[\"data\"] && $node[\"Firecrawl Scraper\"].json[\"data\"][\"markdown\"]) ? \"\\n\\nContext from URL:\\n\" + $node[\"Firecrawl Scraper\"].json[\"data\"][\"markdown\"] : \"\") }}",
         "options": {}
       },
       "id": "9b9b9b9b-9b9b-9b9b-9b9b-9b9b9b9b9b9b",
