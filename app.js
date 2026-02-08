@@ -577,10 +577,22 @@ function setupEventListeners() {
             this.style.overflowY = 'hidden';
         }
     });
-    
-    );
+
+    // Back to Top Button
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            elements.backToTop?.classList.remove('hidden');
+        } else {
+            elements.backToTop?.classList.add('hidden');
+        }
+    });
+
+    elements.backToTop?.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
-    }
+    });
 }
 
 function setupMentorInputAutoExpand() {
@@ -3037,3 +3049,156 @@ function showRandomEasterEgg() {
 // ============================================================================
 
 window.addEventListener('DOMContentLoaded', init);
+
+// ============================================================================
+// RESTORED CORE FUNCTIONS
+// ============================================================================
+
+function showSuccess(message) {
+    showNotification(message, "success");
+}
+
+function showError(message) {
+    showNotification(message, "error");
+}
+
+function showSection(sectionId) {
+    console.log("Showing section:", sectionId);
+
+    // Elements mapping
+    const sections = {
+        'assessmentSection': elements.assessmentSection,
+        'evaluationSection': elements.evaluationSection,
+        'certSection': elements.certSection,
+        'roadmapSection': elements.roadmapSection,
+        'mentorSection': elements.mentorSection,
+        'actionsSection': elements.actionsSection,
+        'reviewSection': elements.reviewSection,
+        'checklistSection': elements.checklistSection,
+        'homeSection': document.getElementById('heroSection')
+    };
+
+    // Hide all
+    Object.values(sections).forEach(s => {
+        if (s) s.classList.add('hidden');
+    });
+
+    // Show target
+    const target = sections[sectionId] || document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        console.warn("Section not found:", sectionId);
+    }
+}
+
+function resetAndRetake() {
+    if (!confirm('Are you sure you want to retake the assessment? Your current progress will be lost.')) {
+        return;
+    }
+
+    appState.currentQuestion = 0;
+    appState.questions = [];
+    appState.answers = {};
+    appState.assessment = null;
+    appState.selectedCert = null;
+    appState.roadmap = null;
+    appState.mentorChat = [];
+
+    saveState();
+    startAssessment();
+}
+
+function addChatMessage(msg, scroll = true) {
+    if (!elements.chatHistory) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = "chat-bubble " + msg.role;
+
+    // Add header
+    const header = document.createElement('div');
+    header.className = 'chat-bubble-header';
+    header.innerHTML = `
+        <span class="bubble-role">${msg.role === 'mentor' ? '🧠 KaliGuru' : '👤 You'}</span>
+        <span class="bubble-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+    `;
+    bubble.appendChild(header);
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'chat-bubble-content';
+    contentDiv.innerHTML = formatMarkdown(msg.text);
+    bubble.appendChild(contentDiv);
+
+    elements.chatHistory.appendChild(bubble);
+
+    if (scroll) {
+        scrollToBottom();
+    }
+}
+
+async function sendMentorMessage() {
+    const input = elements.mentorInput;
+    if (!input) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Clear input
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Add user message to state and UI
+    const userMsg = { role: 'user', text: text };
+    appState.mentorChat.push(userMsg);
+    addChatMessage(userMsg);
+    saveState();
+
+    // Show typing indicator
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'chat-bubble mentor typing';
+    typingBubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+    elements.chatHistory.appendChild(typingBubble);
+    scrollToBottom();
+
+    try {
+        const response = await callBackendAPI('/api/mentor-chat', {
+            message: text,
+            context: {
+                level: appState.assessment?.readinessStatus || 'Unknown',
+                weaknesses: appState.assessment?.weaknesses || [],
+                cert: appState.selectedCert || 'General Security'
+            },
+            stream: false
+        });
+
+        // Remove typing indicator
+        if (typingBubble.parentNode) typingBubble.remove();
+
+        const mentorText = response.userMessage || response.message || response.reply || "I couldn't process that request.";
+        const mentorMsg = { role: 'mentor', text: mentorText };
+        appState.mentorChat.push(mentorMsg);
+        addChatMessage(mentorMsg);
+        saveState();
+
+    } catch (error) {
+        if (typingBubble.parentNode) typingBubble.remove();
+        console.error('Chat error:', error);
+
+        const errorMsg = {
+            role: 'mentor',
+            text: "I'm having trouble connecting to the neural network. Please check your API key or try again in a moment. 🛠️"
+        };
+        addChatMessage(errorMsg);
+    }
+}
+
+function scrollToBottom(behavior = 'smooth') {
+    if (!elements.chatHistory) return;
+    setTimeout(() => {
+        elements.chatHistory.scrollTo({
+            top: elements.chatHistory.scrollHeight,
+            behavior: behavior
+        });
+    }, 100);
+}
