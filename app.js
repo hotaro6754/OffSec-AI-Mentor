@@ -578,9 +578,6 @@ function setupEventListeners() {
         }
     });
     
-    );
-        });
-    }
 }
 
 function setupMentorInputAutoExpand() {

@@ -23,6 +23,9 @@ const path = require('path');
 const db = require('./database');
 const fs = require('fs');
 const os = require('os');
+const axios = require('axios');
+const TurndownService = require('turndown');
+const turndownService = new TurndownService();
 
 // ============================================================================
 // CONFIGURATION
