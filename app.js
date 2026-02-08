@@ -1199,6 +1199,9 @@ function showSettingsModal() {
 
     // Load existing keys
     document.getElementById('groqKey').value = localStorage.getItem('groqKey') || '';
+    document.getElementById('ollamaUrl').value = localStorage.getItem('ollamaUrl') || '';
+    document.getElementById('ollamaModel').value = localStorage.getItem('ollamaModel') || '';
+    document.getElementById('firecrawlKey').value = localStorage.getItem('firecrawlKey') || '';
 }
 
 function hideSettingsModal() {
@@ -1207,6 +1210,9 @@ function hideSettingsModal() {
 
 function saveSettings() {
     localStorage.setItem('groqKey', document.getElementById('groqKey').value.trim());
+    localStorage.setItem('ollamaUrl', document.getElementById('ollamaUrl').value.trim());
+    localStorage.setItem('ollamaModel', document.getElementById('ollamaModel').value.trim());
+    localStorage.setItem('firecrawlKey', document.getElementById('firecrawlKey').value.trim());
 
     showNotification('Settings saved successfully', 'success');
     hideSettingsModal();
@@ -1220,8 +1226,14 @@ function saveSettings() {
 
 function clearSettings() {
     localStorage.removeItem('groqKey');
+    localStorage.removeItem('ollamaUrl');
+    localStorage.removeItem('ollamaModel');
+    localStorage.removeItem('firecrawlKey');
 
     document.getElementById('groqKey').value = '';
+    document.getElementById('ollamaUrl').value = '';
+    document.getElementById('ollamaModel').value = '';
+    document.getElementById('firecrawlKey').value = '';
 
     showNotification('API key cleared', 'info');
 }
@@ -1242,8 +1254,14 @@ async function callBackendAPI(endpoint, data = {}) {
         
         // Add custom API keys if present
         const groqKey = localStorage.getItem('groqKey');
+        const ollamaUrl = localStorage.getItem('ollamaUrl');
+        const ollamaModel = localStorage.getItem('ollamaModel');
+        const firecrawlKey = localStorage.getItem('firecrawlKey');
 
         if (groqKey) headers['X-Groq-API-Key'] = groqKey;
+        if (ollamaUrl) headers['X-Ollama-URL'] = ollamaUrl;
+        if (ollamaModel) headers['X-Ollama-Model'] = ollamaModel;
+        if (firecrawlKey) headers['X-Firecrawl-Key'] = firecrawlKey;
 
         // Add authorization header if logged in
         if (appState.sessionId) {
@@ -2885,6 +2903,42 @@ function initMentorChat() {
         document.getElementById('mentorSection')?.classList.add('hidden');
         return; 
     }
+
+function addChatMessage(msg, shouldSave = true) {
+    if (!elements.chatHistory) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${msg.role}`;
+
+    const header = document.createElement('div');
+    header.className = 'chat-bubble-header';
+    header.innerHTML = msg.role === 'mentor' ? '🛡️ KaliGuru Mentor' : '👤 You';
+
+    const content = document.createElement('div');
+    content.className = 'chat-bubble-content';
+    content.innerHTML = formatMarkdown(msg.text);
+
+    bubble.appendChild(header);
+    bubble.appendChild(content);
+
+    elements.chatHistory.appendChild(bubble);
+    scrollToBottom();
+}
+
+function scrollToBottom(behavior = 'smooth') {
+    if (elements.chatHistory) {
+        setTimeout(() => {
+            elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
+            // Also try smooth scroll for newer browsers
+            try {
+                elements.chatHistory.scrollTo({
+                    top: elements.chatHistory.scrollHeight,
+                    behavior: behavior
+                });
+            } catch (e) {}
+        }, 50);
+    }
+}
 
     elements.chatHistory.innerHTML = '';
     appState.mentorChat = [];

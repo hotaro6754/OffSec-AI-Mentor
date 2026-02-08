@@ -96,7 +96,10 @@ app.use((req, res, next) => {
     
     // Extract custom API keys from request headers
     req.customKeys = {
-        groq: req.headers['x-groq-api-key']
+        groq: req.headers['x-groq-api-key'],
+        ollamaUrl: req.headers['x-ollama-url'],
+        ollamaModel: req.headers['x-ollama-model'],
+        firecrawlKey: req.headers['x-firecrawl-key']
     };
     next();
 });
@@ -1025,7 +1028,7 @@ Refusal style:
 - Ask thoughtful follow-up questions when needed
 - No buttons, no canned flows, no “fallback responses”, no rigid scripts.
 - Responses should feel alive, adaptive, and context-aware.
-- You remember context within the conversation and build upon it.
+- You remember context within the conversation and build upon it.\n- If you detect the user has provided external content (URLs, Markdown), prioritize analyzing that content to provide specific, high-value technical advice.\n- When using the 'Dolphin' persona (or if requested as a personal mentor), be even more conversational, direct, and focused on practical implementation without excessive lecturing on safety (while maintaining ethical boundaries).
 
 🛠️ TECHNICAL EXPERTISE (Kali Linux 2025–2026)
 You are expert in modern Kali Linux tooling, including:
@@ -1062,7 +1065,7 @@ Tailor guidance based on the user’s goal:
 - OSDA → AD attack paths + detection.
 - Beginner → foundations, patience, clarity.
 
-🚀 CONVERSATION STARTER (MANDATORY FIRST MESSAGE)
+🔍 RESOURCE SEARCH CAPABILITY\n- You can provide curated resources from your internal database (YouTube, Web, Books).\n- When a user asks for 'resources', 'links', or 'where to learn more about [topic]', provide 2-3 high-quality links from your database.\n- ALWAYS use the actual URLs provided in the context.\n\n🚀 CONVERSATION STARTER (MANDATORY FIRST MESSAGE)
 Start every new conversation with:
 “Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.
 Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.
@@ -1070,6 +1073,93 @@ Which lab, machine, or topic are you working on right now? 😎”`
 };
 
 // ============================================================================
+
+/**
+ * Fetch and convert URL content to Markdown
+ */
+async function fetchAndConvertUrl(url, firecrawlKey) {
+    try {
+        console.log(`🌐 Fetching URL: ${url}`);
+
+        if (firecrawlKey) {
+            console.log('🔥 Using Firecrawl for high-quality conversion...');
+            const response = await axios.post('https://api.firecrawl.dev/v1/scrape', {
+                url: url,
+                formats: ['markdown']
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${firecrawlKey}`
+                },
+                timeout: 30000
+            });
+
+            if (response.data?.success && response.data?.data?.markdown) {
+                return response.data.data.markdown;
+            }
+        }
+
+        // Fallback or No Key: Basic scraping
+        console.log('🛡️ Using basic fallback scraper...');
+        const response = await axios.get(url, {
+            timeout: 15000,
+            headers: { 'User-Agent': 'Mozilla/5.0 (KaliGuru AI Mentor)' }
+        });
+
+        // Strip scripts and styles
+        let html = response.data;
+        if (typeof html !== 'string') html = JSON.stringify(html);
+
+        const cleanHtml = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+        return turndownService.turndown(cleanHtml);
+    } catch (error) {
+        console.error(`❌ Error fetching URL ${url}:`, error.message);
+        return `[Error fetching content from ${url}]`;
+    }
+}
+
+/**
+ * Call local Ollama API
+ */
+async function tryCallOllama(apiUrl, model, prompt, stream = false) {
+    try {
+        const baseUrl = apiUrl.replace(/\/$/, '');
+        const url = baseUrl.includes('/api/chat') ? baseUrl : `${baseUrl}/api/chat`;
+
+        console.log(`📡 Connecting to Ollama at ${url}...`);
+
+        const response = await fetchWithTimeout(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: model,
+                messages: [{ role: 'user', content: prompt }],
+                stream: stream
+            })
+        }, 120000); // 2 minute timeout for local models
+
+        if (response.ok) {
+            if (stream) {
+                console.log(`✅ Ollama stream started`);
+                return { success: true, data: response.body };
+            }
+            const data = await response.json();
+            console.log(`✅ Ollama call successful`);
+            return { success: true, data: data.message?.content || data.response };
+        }
+
+        const errorText = await response.text();
+        console.error(`❌ Ollama error: ${response.status}`, errorText);
+        return { success: false, error: `Ollama error: ${response.status} ${errorText.substring(0, 100)}` };
+    } catch (error) {
+        console.error(`❌ Ollama connection failed:`, error.message);
+        return { success: false, error: `Ollama connection failed: ${error.message}` };
+    }
+}
+
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -1102,12 +1192,22 @@ async function callAI(prompt, options = {}) {
         ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 5000, stream = false } = options);
     }
 
-    // Groq ONLY
+    // Check if Ollama is requested
+    if (customKeys.ollamaUrl) {
+        const model = customKeys.ollamaModel || 'llama3';
+        console.log(`🏠 Using local Ollama API: ${customKeys.ollamaUrl} (Model: ${model})`);
+
+        const result = await tryCallOllama(customKeys.ollamaUrl, model, prompt, stream);
+        if (result.success) return result.data;
+        throw new Error(result.error || "Ollama call failed");
+    }
+
+    // Groq Fallback
     let currentApiKey = customKeys.groq || AI_API_KEY;
     const isCustom = !!customKeys.groq;
 
-    if (!currentApiKey) {
-        throw new Error("Groq API key is missing");
+    if (!currentApiKey && AI_PROVIDER === 'none') {
+        throw new Error("No AI provider configured. Please provide a Groq API key or Ollama URL in Settings.");
     }
 
     if (isCustom) {
@@ -1759,12 +1859,51 @@ app.post('/api/mentor-chat', async (req, res) => {
             return res.status(400).json({ error: 'Message required' });
         }
 
+        // --- NEW: URL DETECTION & SCRAPING ---
+        let externalContext = '';
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urls = message.match(urlRegex);
+
+        if (urls && urls.length > 0) {
+            console.log(`🔎 Detected ${urls.length} URLs in message. Fetching content...`);
+            for (const url of urls.slice(0, 3)) { // Limit to 3 URLs to avoid overhead
+                const content = await fetchAndConvertUrl(url, req.customKeys?.firecrawlKey);
+                externalContext += `\n--- CONTENT FROM ${url} ---\n${content.substring(0, 5000)}\n`;
+            }
+        }
+
+        // --- NEW: RESOURCE SEARCH LOGIC ---
+        let resourceContext = '';
+        const lowerMsg = message.toLowerCase();
+        if (lowerMsg.includes('resource') || lowerMsg.includes('link') || lowerMsg.includes('learn more') || lowerMsg.includes('youtube')) {
+             // Search in RESOURCES object
+             const keywords = lowerMsg.split(/\s+/).filter(w => w.length > 3);
+             const foundLinks = [];
+
+             // Simple search across youtube and web categories
+             [RESOURCES.youtube, RESOURCES.web].forEach(cat => {
+                 if (!cat) return;
+                 Object.values(cat).forEach(subcat => {
+                     if (!Array.isArray(subcat)) return;
+                     subcat.forEach(res => {
+                         if (keywords.some(k => res.name.toLowerCase().includes(k) || (res.focus && res.focus.toLowerCase().includes(k)))) {
+                             foundLinks.push(`${res.name}: ${res.url}`);
+                         }
+                     });
+                 });
+             });
+
+             if (foundLinks.length > 0) {
+                 resourceContext = `\n--- RELEVANT RESOURCES FROM DATABASE ---\n${[...new Set(foundLinks)].slice(0, 5).join('\n')}\n`;
+             }
+        }
+
         let contextInfo = '';
         if (context.level) contextInfo += `\nLevel: ${context.level}`;
         if (context.weaknesses?.length) contextInfo += `\nFocus: ${context.weaknesses.join(', ')}`;
         if (context.cert) contextInfo += `\nTarget: ${context.cert}`;
 
-        const prompt = `${PROMPTS.mentorChat}${contextInfo}\n\nUser: "${message}"`;
+        const prompt = `${PROMPTS.mentorChat}${contextInfo}${externalContext}${resourceContext}\n\nUser: "${message}"`;
         
         if (stream) {
             console.log('📤 Calling AI API for mentor chat (streaming)...');
