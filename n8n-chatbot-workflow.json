@@ -37,7 +37,7 @@
         "url": "https://api.firecrawl.dev/v1/scrape",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={ \"url\": \"{{ $node[\"Chat Trigger\"].json[\"body\"][\"url\"] }}\", \"formats\": [\"markdown\"] }",
+        "jsonBody": "={ \"url\": \"{{ $node['Chat Trigger'].json['body']['message'].match(/https?:\\/\\/\\S+/)?.[0] }}\", \"formats\": [\"markdown\"] }",
         "headerParameters": {
           "parameters": [
             {
