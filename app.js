@@ -210,15 +210,22 @@ function loadState() {
 }
 
 function restoreUI() {
+    console.log("🔄 Restoring session...");
     elements.bootScreen.classList.add('hidden');
+
     if (appState.mode === "cli") {
         switchMode("cli");
         return;
     }
+
+    // Ensure main container is visible for web mode
+    elements.containerMain.classList.remove("hidden");
+
     if (elements.modeCheckbox) {
         elements.modeCheckbox.checked = appState.learningMode === "oscp";
         updateLearningModeUI();
     }
+
     if (appState.roadmap) {
         displayRoadmap(appState.roadmap);
         showSection("roadmapSection");
@@ -229,6 +236,8 @@ function restoreUI() {
         renderQuestion();
         updateProgress();
         showSection("assessmentSection");
+    } else {
+        showSection("homeSection");
     }
 }
 
@@ -370,7 +379,9 @@ const elements = {
     terminalOutput: document.getElementById("terminal-output"),
     terminalBody: document.getElementById("terminal-body"),
     terminalInput: document.getElementById("terminal-input"),
-    containerMain: document.getElementById("container-main"),
+    containerMain: document.querySelector(".container-main"),
+    chooseWebMode: document.getElementById("chooseWebMode"),
+    chooseTerminalMode: document.getElementById("chooseTerminalMode"),
     downloadsList: document.getElementById("downloadsList"),
     navResources: document.getElementById('navResources')
 };
@@ -389,6 +400,7 @@ function init() {
     setupParticles();
     setupNavbarScroll();
     setupCertFilters();
+    setupTypedText();
     
     document.getElementById("switchToTerminalBtn")?.addEventListener("click", () => switchMode("cli"));
     document.getElementById("switchToWebBtn")?.addEventListener("click", () => switchMode("web"));
@@ -453,6 +465,8 @@ function setupEventListeners() {
     elements.exportRoadmapBtn?.addEventListener('click', exportRoadmap);
     elements.retakeBtn?.addEventListener('click', resetAndRetake);
     elements.sendMentorBtn?.addEventListener('click', sendMentorMessage);
+    elements.chooseWebMode?.addEventListener("click", () => choosePrimaryMode("web"));
+    elements.chooseTerminalMode?.addEventListener("click", () => choosePrimaryMode("cli"));
     
     elements.fullscreenChatBtn?.addEventListener('click', () => {
         elements.mentorContainer?.classList.toggle('fullscreen');
@@ -3189,13 +3203,6 @@ function showBootScreen() {
     });
 
     setTimeout(() => {
-        elements.bootOptions.innerHTML = `
-            <div class="boot-menu">
-                <p>Select Operation Mode:</p>
-                <button class="btn btn-primary" onclick="choosePrimaryMode('web')">1. Web Mentor Interface</button>
-                <button class="btn btn-secondary" onclick="choosePrimaryMode('cli')">2. KaliGuru CLI (Simulation)</button>
-            </div>
-        `;
         elements.bootOptions.classList.remove('hidden');
     }, delay + 500);
 }
