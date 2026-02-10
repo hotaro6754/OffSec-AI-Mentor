@@ -1629,7 +1629,7 @@ app.post('/api/generate-questions', async (req, res) => {
             
             console.log('📤 Calling AI API for question generation...');
             // Use retries=3 to improve success rate
-            const response = await callAI(messages, { expectJson: true, retries: 3, customKeys: req.customKeys, maxTokens: 5000 });
+            const response = await callAI(prompt, { expectJson: true, retries: 3, customKeys: req.customKeys, maxTokens: 5000 });
             console.log('📄 AI response received, length:', response?.length || 0);
             const parsed = parseJsonResponse(response);
             
@@ -1701,7 +1701,7 @@ app.post('/api/evaluate-assessment', async (req, res) => {
         const prompt = `${PROMPTS.evaluation}\n\nAssessment:\n${answersText}`;
         
         console.log('📤 Calling AI API for evaluation...');
-        const response = await callAI(messages, { expectJson: true, retries: 5, customKeys: req.customKeys });
+        const response = await callAI(prompt, { expectJson: true, retries: 5, customKeys: req.customKeys });
         console.log('📄 AI response received, length:', response?.length || 0);
         const parsed = parseJsonResponse(response);
         
@@ -1772,7 +1772,7 @@ app.post('/api/generate-roadmap', async (req, res) => {
         console.log(`📤 Calling AI API for roadmap generation...`);
         // Increased retries (5) with optimized backoff
         // Roadmap can be long, so we use a higher maxTokens
-        const response = await callAI(messages, {
+        const response = await callAI(prompt, {
             expectJson: true,
             retries: 5,
             customKeys: req.customKeys,
