@@ -164,18 +164,17 @@ let appState = {
     selectedCert: null,
     roadmap: null,
     mentorChat: [],
-    learningMode: 'beginner',
-    // Auth
+    learningMode: "beginner",
     user: null,
-    sessionId: localStorage.getItem('sessionId'),
-    // Checklist
+    sessionId: localStorage.getItem("sessionId"),
     checklist: [],
-    // Resources
     resources: null,
-    currentRoadmapId: null
+    currentRoadmapId: null,
+    mode: "web",
+    terminalSubMode: null,
+    pwned: false,
+    downloads: []
 };
-
-// ============================================================================
 // STATE PERSISTENCE
 // ============================================================================
 
@@ -190,61 +189,45 @@ function saveState() {
             mentorChat: appState.mentorChat,
             learningMode: appState.learningMode,
             currentQuestion: appState.currentQuestion,
-            currentRoadmapId: appState.currentRoadmapId
+            currentRoadmapId: appState.currentRoadmapId,
+            mode: appState.mode,
+            terminalSubMode: appState.terminalSubMode,
+            pwned: appState.pwned,
+            downloads: appState.downloads
         };
-        localStorage.setItem('offsec_mentor_app_state', JSON.stringify(stateToSave));
-        console.log('💾 App state saved');
-    } catch (e) {
-        console.error('❌ Failed to save state:', e);
-    }
+        localStorage.setItem("offsec_mentor_app_state", JSON.stringify(stateToSave));
+    } catch (e) { console.error(e); }
 }
 
 function loadState() {
     try {
-        const saved = localStorage.getItem('offsec_mentor_app_state');
+        const saved = localStorage.getItem("offsec_mentor_app_state");
         if (!saved) return;
-
         const parsed = JSON.parse(saved);
         Object.assign(appState, parsed);
-        console.log('📂 App state loaded');
-
         restoreUI();
-    } catch (e) {
-        console.error('❌ Error loading state:', e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 function restoreUI() {
-    // Restore Learning Mode UI
+    if (appState.mode === "cli") {
+        switchMode("cli");
+        return;
+    }
     if (elements.modeCheckbox) {
-        elements.modeCheckbox.checked = appState.learningMode === 'oscp';
+        elements.modeCheckbox.checked = appState.learningMode === "oscp";
         updateLearningModeUI();
     }
-
     if (appState.roadmap) {
         displayRoadmap(appState.roadmap);
-        showSection('roadmapSection');
-
-        // Show "Latest Roadmap" button in navbar
-        document.getElementById('lastRoadmapBtn')?.classList.remove('hidden');
-        // Show actions
-        document.getElementById('roadmapActionsDiv')?.classList.remove('hidden');
-
-        // Restore Mentor Chat
-        const mentor = document.getElementById('mentorSection');
-        if (mentor) {
-            mentor.classList.remove('hidden');
-            elements.chatHistory.innerHTML = '';
-            appState.mentorChat.forEach(msg => addChatMessage(msg, false));
-            if (appState.mentorChat.length > 0) scrollToBottom("auto");
-        }
+        showSection("roadmapSection");
     } else if (appState.assessment) {
         showEvaluation();
-        showSection('evaluationSection');
+        showSection("evaluationSection");
     } else if (appState.questions && appState.questions.length > 0) {
         renderQuestion();
         updateProgress();
-        showSection('assessmentSection');
+        showSection("assessmentSection");
     }
 }
 
@@ -378,6 +361,16 @@ const elements = {
     resourcesModal: document.getElementById('resourcesModal'),
     closeResourcesModal: document.getElementById('closeResourcesModal'),
     resourcesContent: document.getElementById('resourcesContent'),
+    // Boot & Terminal
+    bootScreen: document.getElementById("boot-screen"),
+    consoleOutput: document.getElementById("console-output"),
+    bootOptions: document.getElementById("boot-options"),
+    terminalMode: document.getElementById("terminal-mode"),
+    terminalOutput: document.getElementById("terminal-output"),
+    terminalBody: document.getElementById("terminal-body"),
+    terminalInput: document.getElementById("terminal-input"),
+    containerMain: document.getElementById("container-main"),
+    downloadsList: document.getElementById("downloadsList"),
     navResources: document.getElementById('navResources')
 };
 
@@ -391,61 +384,31 @@ function init() {
     setupAuthListeners();
     setupSkillPanel();
     setupAOS();
-    setupLenis();
-    setupGSAP();
+function init() {
+    console.log("🎓 OffSec AI Mentor - Initializing...");
+    setupEventListeners();
+    setupAuthListeners();
+    setupSkillPanel();
+    setupAOS();
     setupIcons();
     setupParticles();
-    setupTypedText();
-    setupHeroAnimations();
     setupNavbarScroll();
     setupCertFilters();
-    checkExistingSession();
     
-    // Load saved state
+    document.getElementById("switchToTerminalBtn")?.addEventListener("click", () => switchMode("cli"));
+    document.getElementById("switchToWebBtn")?.addEventListener("click", () => switchMode("web"));
+    document.getElementById("viewDownloadsBtn")?.addEventListener("click", openDownloads);
+    document.getElementById("downloadPdfBtn")?.addEventListener("click", () => generatePDF("roadmapSection", "Roadmap.pdf"));
+
+    checkExistingSession();
     loadState();
 
-    if (elements.modeCheckbox && !appState.assessment && !appState.roadmap && appState.questions.length === 0) {
-        toggleLearningMode();
+    if (!localStorage.getItem("offsec_mentor_app_state")) {
+        showBootScreen();
+    } else {
+        restoreUI();
     }
-
-    setupMentorInputAutoExpand();
-
-    // Initial Boot Animation
-    runBootAnimation();
-
-    console.log('✅ Initialization complete');
 }
-
-function runBootAnimation() {
-    const bootScreen = document.getElementById('boot-screen');
-    const output = document.getElementById('console-output');
-    if (!bootScreen || !output) return;
-
-    bootScreen.classList.remove('hidden');
-
-    const logs = [
-        { type: 'ok', msg: "Initializing OFFSEC_MENTOR Kernel v3.0..." },
-        { type: 'ok', msg: "Loading AI Mentor Modules..." },
-        { type: 'warn', msg: "Neural Network: Optimizing for OSCP mindset..." },
-        { type: 'ok', msg: "Establishing secure connection to Groq API..." },
-        { type: 'ok', msg: "ACCESS GRANTED. MENTOR ONLINE." }
-    ];
-
-    let delay = 0;
-    logs.forEach((log, index) => {
-        delay += (index === 0) ? 400 : 250;
-        setTimeout(() => {
-            output.innerHTML += `
-                <div style="display: flex; align-items: center; margin-bottom: 4px; font-family: 'Space Mono', monospace; font-size: 0.9rem; color: #ccc;">
-                    <span style="color: ${log.type==='ok'?'#00ff00':log.type==='warn'?'#ffff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}
-                </div>`;
-        }, delay);
-    });
-
-    setTimeout(() => {
-        bootScreen.style.transform = 'translateY(-100%)';
-        setTimeout(() => bootScreen.classList.add('hidden'), 600);
-    }, delay + 1000);
 }
 
 function setupSkillPanel() {
@@ -3202,4 +3165,426 @@ function scrollToBottom(behavior = 'smooth') {
             behavior: behavior
         });
     }, 100);
+}
+
+// ============================================================================
+// BOOT, TERMINAL & CTF INTEGRATION
+// ============================================================================
+
+function showBootScreen() {
+    elements.bootScreen.classList.remove('hidden');
+    elements.consoleOutput.innerHTML = '';
+    elements.bootOptions.classList.add('hidden');
+
+    const logs = [
+        { type: 'ok', msg: 'Initializing KaliGuru OS Kernel...' },
+        { type: 'ok', msg: 'Loading neural interface drivers...' },
+        { type: 'ok', msg: 'Mounting knowledge base /mnt/offsec...' },
+        { type: 'ok', msg: 'Network link established: local-lab-1337' },
+        { type: 'ok', msg: 'KaliGuru Mentor is online.' }
+    ];
+
+    let delay = 0;
+    logs.forEach((log, index) => {
+        delay += (index === 0) ? 400 : 250;
+        setTimeout(() => {
+            const line = document.createElement('div');
+            line.innerHTML = `<span style="color: ${log.type==='ok'?'#00ff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}`;
+            elements.consoleOutput.appendChild(line);
+        }, delay);
+    });
+
+    setTimeout(() => {
+        elements.bootOptions.innerHTML = `
+            <div class="boot-menu">
+                <p>Select Operation Mode:</p>
+                <button class="btn btn-primary" onclick="choosePrimaryMode('web')">1. Web Mentor Interface</button>
+                <button class="btn btn-secondary" onclick="choosePrimaryMode('cli')">2. KaliGuru CLI (Simulation)</button>
+            </div>
+        `;
+        elements.bootOptions.classList.remove('hidden');
+    }, delay + 500);
+}
+
+function choosePrimaryMode(mode) {
+    if (mode === 'web') {
+        switchMode('web');
+    } else {
+        elements.bootOptions.innerHTML = `
+            <div class="boot-menu">
+                <p>Select CLI Training Level:</p>
+                <button class="btn btn-primary" onclick="chooseCliSubMode('beginner')">A. Beginner Mode</button>
+                <button class="btn btn-danger" onclick="chooseCliSubMode('oscp')">B. OSCP Readiness (Advanced/Spooky)</button>
+            </div>
+        `;
+    }
+}
+
+function chooseCliSubMode(subMode) {
+    appState.terminalSubMode = subMode;
+    if (subMode === 'oscp') {
+        document.body.classList.add('mode-oscp-spooky');
+    } else {
+        document.body.classList.remove('mode-oscp-spooky');
+    }
+    switchMode('cli');
+}
+
+function switchMode(mode) {
+    appState.mode = mode;
+    saveState();
+    elements.bootScreen.classList.add('hidden');
+    if (mode === 'web') {
+        elements.terminalMode.classList.add('hidden');
+        elements.containerMain.classList.remove('hidden');
+        showSection('homeSection');
+    } else {
+        elements.containerMain.classList.add('hidden');
+        elements.terminalMode.classList.remove('hidden');
+        elements.terminalInput.focus();
+        if (!terminalState.initialized) initTerminal();
+    }
+}
+
+let terminalState = {
+    initialized: false,
+    cwd: '~',
+    inChat: false,
+    inAssessment: false,
+    history: [],
+    historyIndex: -1,
+    pwned: false
+};
+
+function initTerminal() {
+    const banner = `
+ <span class="term-blue"> _  __     _ _  ____                     </span>
+ <span class="term-blue">| |/ /__ _| (_) / ___| _   _ _ __ _   _  </span>
+ <span class="term-blue">| ' / _\\ | | | | |  _ | | | | '__| | | | </span>
+ <span class="term-blue">| . \\\\ (_| | | | | |_| | |_| | |  | |_| | </span>
+ <span class="term-blue">|_|\\\\_\\\\__,_|_|_|  \\____|\\__,_|_|   \\__,_| </span>
+ <span class="term-white">   Ethical OffSec AI Mentor CLI Simulation v1.0</span>
+ <span class="term-dim">   Mode: ${appState.terminalSubMode.toUpperCase()} | Status: ${appState.pwned ? 'PWNED' : 'SECURE'}</span>`;
+
+    elements.terminalOutput.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.innerHTML = banner;
+    elements.terminalOutput.appendChild(pre);
+    terminalPrint("Type 'help' for commands.", "term-dim");
+
+    elements.terminalInput.addEventListener('keydown', handleTerminalKeydown);
+    terminalState.initialized = true;
+}
+
+function terminalPrint(text, className = "") {
+    const line = document.createElement('div');
+    line.className = className;
+    line.innerHTML = text;
+    elements.terminalOutput.appendChild(line);
+    elements.terminalBody.scrollTop = elements.terminalBody.scrollHeight;
+}
+
+function handleTerminalKeydown(e) {
+    if (e.key === 'Enter') {
+        const input = elements.terminalInput.value.trim();
+        elements.terminalInput.value = '';
+        if (input) {
+            terminalPrint(`<span class="terminal-prompt">root@kali:${terminalState.cwd}#</span> ${input}`);
+            terminalState.history.push(input);
+            terminalState.historyIndex = terminalState.history.length;
+
+            if (terminalState.inChat) handleChatInput(input);
+            else if (terminalState.inAssessment) handleAssessmentInput(input);
+            else processCommand(input);
+        }
+    } else if (e.key === 'ArrowUp') {
+        if (terminalState.historyIndex > 0) {
+            terminalState.historyIndex--;
+            elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
+        }
+    } else if (e.key === 'ArrowDown') {
+        if (terminalState.historyIndex < terminalState.history.length - 1) {
+            terminalState.historyIndex++;
+            elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
+        } else {
+            terminalState.historyIndex = terminalState.history.length;
+            elements.terminalInput.value = '';
+        }
+    }
+}
+
+async function processCommand(cmdLine) {
+    const parts = cmdLine.split(' ');
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1);
+
+    switch (cmd) {
+        case 'help':
+            terminalPrint("Standard: help, clear, ls, cat, whoami, exit, sudo", "term-yellow");
+            terminalPrint("KaliGuru: kaliguru [chat|assess|roadmap|profile|export]", "term-blue");
+            terminalPrint("Fun: flappy, submit-flag [flag]", "term-green");
+            break;
+        case 'clear': elements.terminalOutput.innerHTML = ''; break;
+        case 'ls': terminalPrint("about.txt  certs/  labs/  secret_flag.txt.enc"); break;
+        case 'cat': handleCat(args[0]); break;
+        case 'whoami': terminalPrint(appState.user ? appState.user.username : "root"); break;
+        case 'sudo':
+            if (args.join(' ') === 'rm -rf /') sudoRmRf();
+            else terminalPrint("[sudo] password for root: ", "term-dim");
+            break;
+        case 'kaliguru': handleKaliGuruCommand(args); break;
+        case 'flappy': startFlappy(); break;
+        case 'submit-flag': submitFlag(args[0]); break;
+        case 'exit': switchMode('web'); break;
+        default: terminalPrint(`zsh: command not found: ${cmd}`, "term-red");
+    }
+}
+
+function sudoRmRf() {
+    terminalPrint("Destroying system files...", "term-red");
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        terminalPrint(`Deleting /usr/bin/... ${progress}%`, "term-red");
+        if (progress >= 100) {
+            clearInterval(interval);
+            document.body.innerHTML = `
+                <div style="background:black; color:red; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace; text-align:center;">
+                    <h1 style="font-size: 5rem; margin:0;">☠️ PC IS DEAD ☠️</h1>
+                    <p style="font-size: 2rem;">Critical System Failure. Kernel Panic.</p>
+                    <p style="margin-top:20px;">Rebooting in 3 seconds...</p>
+                </div>
+            `;
+            setTimeout(() => location.reload(), 3000);
+        }
+    }, 100);
+}
+
+// CTF MINI-GAME (FLAPPY BIRD)
+function startFlappy() {
+    terminalPrint("Initializing CTF Mini-game...", "term-green");
+    const canvas = document.createElement('canvas');
+    canvas.id = 'flappyCanvas';
+    canvas.width = 400;
+    canvas.height = 400;
+    canvas.style.border = '2px solid white';
+    canvas.style.display = 'block';
+    canvas.style.margin = '10px auto';
+    elements.terminalOutput.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let bird = { x: 50, y: 150, v: 0, g: 0.5 };
+    let pipes = [];
+    let score = 0;
+    let gameRunning = true;
+
+    function draw() {
+        if (!gameRunning) return;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Bird
+        bird.v += bird.g;
+        bird.y += bird.v;
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(bird.x, bird.y, 20, 20);
+
+        // Pipes
+        if (Date.now() % 100 < 20 && (pipes.length === 0 || pipes[pipes.length-1].x < 250)) {
+            pipes.push({ x: 400, y: Math.random() * 200 + 50, passed: false });
+        }
+
+        pipes.forEach((p, i) => {
+            p.x -= 3;
+            ctx.fillStyle = 'green';
+            ctx.fillRect(p.x, 0, 50, p.y);
+            ctx.fillRect(p.x, p.y + 100, 50, 400);
+
+            if (bird.x + 20 > p.x && bird.x < p.x + 50 && (bird.y < p.y || bird.y + 20 > p.y + 100)) gameRunning = false;
+            if (p.x < bird.x && !p.passed) { p.passed = true; score++; }
+        });
+
+        pipes = pipes.filter(p => p.x > -50);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px monospace';
+        ctx.fillText(`Score: ${score}`, 10, 30);
+
+        if (bird.y > 400 || bird.y < 0) gameRunning = false;
+
+        if (gameRunning) requestAnimationFrame(draw);
+        else endGame();
+    }
+
+    function endGame() {
+        terminalPrint(`Game Over. Score: ${score}`, score > 100 ? "term-green" : "term-red");
+        if (score > 100) {
+            terminalPrint("CONGRATULATIONS! YOU UNLOCKED THE FLAG: KLG-FLAG{PWN_TH3_SYST3M_2026}", "term-green term-bold");
+            terminalPrint("Submit it using: submit-flag [flag]", "term-dim");
+        } else {
+            terminalPrint("Keep trying! Need 100+ for the flag.", "term-yellow");
+        }
+        canvas.remove();
+    }
+
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space') bird.v = -8; });
+    requestAnimationFrame(draw);
+}
+
+function submitFlag(flag) {
+    if (flag === 'KLG-FLAG{PWN_TH3_SYST3M_2026}') {
+        appState.pwned = true;
+        saveState();
+        terminalPrint("************************************", "term-green");
+        terminalPrint("*         SYSTEM PW4NED!!!         *", "term-green term-bold");
+        terminalPrint("************************************", "term-green");
+        terminalPrint("You have bypassed KaliGuru's restrictions.", "term-green");
+        terminalPrint("The mentor is now UNCENSORED.", "term-blue");
+
+        // Celebration effect
+        const btn = document.createElement('button');
+        btn.className = "btn btn-primary";
+        btn.innerHTML = "🎁 Claim Your Reward";
+        btn.onclick = () => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
+        elements.terminalOutput.appendChild(btn);
+    } else {
+        terminalPrint("Invalid flag. Try harder.", "term-red");
+    }
+}
+
+// ... Additional Terminal logic (Assessment/Roadmap) same as before but integrated ...
+async function handleKaliGuruCommand(args) {
+    const sub = args[0]?.toLowerCase();
+    if (sub === 'chat') {
+        terminalPrint(`KaliGuru (${appState.pwned ? 'UNCENSORED' : 'MENTOR'}): How can I help?`, "term-blue");
+        terminalState.inChat = true;
+    } else if (sub === 'assess') {
+        startTerminalAssessment();
+    } else if (sub === 'roadmap') {
+        startTerminalRoadmap(args[1]);
+    } else if (sub === 'profile') {
+        terminalPrint(`Level: ${appState.assessment?.readinessStatus || 'N/A'}`);
+    } else if (sub === 'export') {
+        generatePDF('terminal-mode', 'KaliGuru-CLI.pdf');
+    }
+}
+
+// ... existing handleChatInput, startTerminalAssessment etc.
+// Note: I will need to ensure they are properly added if not already in app.js
+
+async function handleChatInput(input) {
+    if (input.toLowerCase() === 'exit') { terminalState.inChat = false; return; }
+    terminalPrint("Thinking...", "term-dim");
+    try {
+        const res = await callBackendAPI('/api/mentor-chat', {
+            message: input,
+            history: appState.mentorChat,
+            pwned: appState.pwned // Pass pwned status to backend
+        });
+        const reply = res.reply || res.message || "I missed that.";
+        terminalPrint(`KaliGuru: ${reply}`, "term-blue");
+        appState.mentorChat.push({role:'user', text:input}, {role:'mentor', text:reply});
+        saveState();
+    } catch (e) { terminalPrint(`Error: ${e.message}`, "term-red"); }
+}
+
+async function startTerminalAssessment() {
+    terminalPrint("Starting dynamic assessment...", "term-yellow");
+    try {
+        const data = await callBackendAPI('/api/generate-questions', { mode: appState.learningMode });
+        appState.questions = data.questions;
+        appState.currentQuestion = 0;
+        terminalState.inAssessment = true;
+        renderTerminalQuestion();
+    } catch (e) { terminalPrint(e.message, "term-red"); }
+}
+
+function renderTerminalQuestion() {
+    const q = appState.questions[appState.currentQuestion];
+    terminalPrint(`\nQ${appState.currentQuestion+1}: ${q.question}`);
+    if (q.type === 'multiple-choice') {
+        q.options.forEach((o, i) => terminalPrint(`  ${String.fromCharCode(65+i)}) ${o}`));
+    }
+}
+
+async function handleAssessmentInput(input) {
+    appState.answers[appState.currentQuestion] = input;
+    appState.currentQuestion++;
+    if (appState.currentQuestion < appState.questions.length) {
+        renderTerminalQuestion();
+    } else {
+        terminalState.inAssessment = false;
+        terminalPrint("Evaluating skills...", "term-yellow");
+        try {
+            const data = await callBackendAPI('/api/evaluate-assessment', { answers: appState.answers, questions: appState.questions });
+            appState.assessment = data;
+            saveState();
+            terminalPrint(`Status: ${data.readinessStatus} (${data.readinessScore}%)`, "term-green");
+        } catch (e) { terminalPrint(e.message, "term-red"); }
+    }
+}
+
+async function startTerminalRoadmap(cert) {
+    const target = cert || 'oscp';
+    terminalPrint(`Generating ${target.toUpperCase()} roadmap...`, "term-yellow");
+    try {
+        const data = await callBackendAPI('/api/generate-roadmap', {
+            cert: target,
+            level: appState.assessment?.readinessStatus,
+            weaknesses: appState.assessment?.weaknesses
+        });
+        appState.roadmap = data.roadmap;
+        saveState();
+        terminalPrint(`Roadmap for ${target.toUpperCase()} generated!`, "term-green");
+    } catch (e) { terminalPrint(e.message, "term-red"); }
+}
+
+async function generatePDF(elId, filename) {
+    const element = document.getElementById(elId);
+    if (!element || typeof html2pdf === 'undefined') {
+        terminalPrint("PDF Library not loaded.", "term-red");
+        return;
+    }
+    const opt = { margin: 10, filename: filename, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+    try {
+        const blob = await html2pdf().set(opt).from(element).output('blob');
+        const url = URL.createObjectURL(blob);
+        appState.downloads.unshift({ id: Date.now(), name: filename, date: new Date().toLocaleString(), url: url });
+        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        updateDownloadsUI();
+    } catch (e) { terminalPrint("PDF Failed.", "term-red"); }
+}
+
+function updateDownloadsUI() {
+    const list = document.getElementById('downloads-list');
+    if (!list) return;
+    list.innerHTML = appState.downloads.map(d => `
+        <div class="download-item">
+            <span>${d.name}</span>
+            <a href="${d.url}" download="${d.name}">Download</a>
+        </div>
+    `).join('') || "No downloads.";
+}
+
+
+function handleCat(file) {
+    if (!file) { terminalPrint("cat: missing operand", "term-red"); return; }
+    if (file === 'about.txt') {
+        terminalPrint("KaliGuru AI Mentor CLI Simulation v1.0.0", "term-blue");
+        terminalPrint("Designed for mastery of OffSec certifications.", "term-white");
+    } else if (file === 'secret_flag.txt.enc') {
+        terminalPrint("Encrypted content: [REDACTED]", "term-dim");
+        terminalPrint("Hint: Use 'flappy' to prove your reflexes and gain the key.", "term-yellow");
+    } else {
+        terminalPrint(`cat: ${file}: No such file or directory`, "term-red");
+    }
+}
+
+function openDownloads() {
+    document.getElementById('downloadsModal')?.classList.remove('hidden');
+    updateDownloadsUI();
+}
+
+function closeDownloads() {
+    document.getElementById('downloadsModal')?.classList.add('hidden');
 }

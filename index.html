@@ -14,9 +14,6 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
     
-    <!-- Marked.js removed - using pure JSON rendering instead -->
-    
-    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -25,20 +22,61 @@
             integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" 
             crossorigin="anonymous"></script>
 
+    <!-- HTML to PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Boot Screen -->
-    <div id="boot-screen" class="hidden">
+    <div id="boot-screen">
         <div class="console-container">
             <div id="console-output"></div>
-            <div class="cursor-line">
+            <div id="boot-options" class="hidden">
+                <div class="boot-prompt">CHOOSE YOUR INTERFACE:</div>
+                <div class="boot-buttons">
+                    <button class="boot-btn" id="chooseWebMode">
+                        <span class="btn-num">1</span> Web Mentor Mode
+                    </button>
+                    <button class="boot-btn" id="chooseTerminalMode">
+                        <span class="btn-num">2</span> Terminal Preview Mode
+                    </button>
+                </div>
+                <div class="boot-note">Terminal Preview is a simulation. Real CLI runs locally.</div>
+            </div>
+            <div class="cursor-line" id="boot-cursor-line">
                 <span style="color:#ff3e00;">root@offsec-mentor:~#</span>
                 <span id="typing-cursor"></span>
             </div>
         </div>
     </div>
 
+    <!-- Terminal Mode (CLI Simulation) -->
+    <div id="terminal-mode" class="hidden">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-controls">
+                    <span class="control red"></span>
+                    <span class="control yellow"></span>
+                    <span class="control green"></span>
+                </div>
+                <div class="terminal-title">KaliGuru CLI Simulation - root@kali</div>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+                <div id="terminal-output"></div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">root@kali:~#</span>
+                    <input type="text" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+        <div class="terminal-footer-links">
+            <a href="https://github.com/hotaro6754/Kali-Guru-CLI" target="_blank" class="cli-repo-link">
+                <i data-lucide="github"></i> Install real KaliGuru CLI on Kali Linux
+            </a>
+            <button class="btn btn-outline btn-sm" id="switchToWebBtn">Switch to Web Mode</button>
+        </div>
+    </div>
 
     <!-- Auth Modal -->
     <div id="authModal" class="modal hidden">
@@ -92,16 +130,41 @@
         <div class="modal-content settings-modal">
             <button class="modal-close" id="closeSettingsModal">&times;</button>
             <h3>⚙️ API Settings</h3>
-            <p class="settings-desc">Provide your own Groq API key to bypass global rate limits. Your key is stored locally in your browser.</p>
+            <p class="settings-desc">Provide your own API keys to bypass global rate limits. Your keys are stored locally in your browser.</p>
 
             <div class="form-group">
                 <label for="groqKey">Groq API Key</label>
                 <input type="password" id="groqKey" placeholder="gsk_...">
             </div>
 
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="geminiKey">Gemini API Key (Optional for CLI)</label>
+                <input type="password" id="geminiKey" placeholder="AIza...">
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="openaiKey">ChatGPT API Key (Optional for CLI)</label>
+                <input type="password" id="openaiKey" placeholder="sk-...">
+            </div>
+
             <div class="settings-actions">
                 <button class="btn btn-primary btn-full" id="saveSettingsBtn">Save Settings</button>
                 <button class="btn btn-outline btn-full" id="clearSettingsBtn">Clear Keys</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Downloads Modal -->
+    <div id="downloadsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content downloads-modal">
+            <button class="modal-close" id="closeDownloadsModal">&times;</button>
+            <h3>📥 Your Downloads</h3>
+            <p class="settings-desc">Access your generated roadmaps and assessment reports.</p>
+
+            <div id="downloadsList" class="downloads-list">
+                <!-- Downloads will be listed here -->
+                <p class="empty-msg">No downloads yet. Generate a roadmap to see it here!</p>
             </div>
         </div>
     </div>
@@ -131,7 +194,7 @@
         </div>
     </div>
 
-    <div class="container-main">
+    <div class="container-main hidden">
         <!-- ============================================
              NAVIGATION BAR
              ============================================ -->
@@ -140,8 +203,10 @@
                 <span class="nav-title">OffSec <span class="nav-highlight">AI Mentor</span></span>
             </div>
             <div class="nav-links">
+                <button class="btn btn-outline btn-sm" id="viewDownloadsBtn">📥 Downloads</button>
                 <button class="btn btn-outline btn-sm hidden" id="lastRoadmapBtn">🗺️ Current Roadmap</button>
                 <button class="btn btn-outline btn-sm" id="settingsBtn">⚙️ Settings</button>
+                <button class="btn btn-outline btn-sm" id="switchToTerminalBtn">📟 CLI Mode</button>
                 <div id="navAuth" class="nav-auth">
                     <button class="btn btn-outline btn-sm" id="loginBtn">Login</button>
                 </div>
@@ -155,7 +220,7 @@
         <!-- ============================================
              SECTION 1: HERO - CLEAN NEOBRUTALISM
              ============================================ -->
-        <section class="hero">
+        <section class="hero" id="heroSection">
             <div class="hero-content">
                 <div class="hero-badge">
                     <span class="badge-dot"></span>
@@ -180,7 +245,7 @@
                         <span>Custom Roadmaps</span>
                     </div>
                     <div class="feature-item">
-                        <span>AI Mentor Chat</span>
+                        <span>AI Mentor (CLI Exclusive)</span>
                     </div>
                 </div>
                 
@@ -402,8 +467,6 @@
             </div>
         </div>
 
-        <!-- Certification section removed - now using modal -->
-
         <!-- ============================================
              SECTION 5: PERSONALIZED ROADMAP
              ============================================ -->
@@ -447,6 +510,7 @@
                 <div class="action-buttons-grid">
                     <button class="btn btn-secondary" id="copyRoadmapBtn">📋 Copy Roadmap</button>
                     <button class="btn btn-secondary" id="exportRoadmapBtn">💾 Export as JSON</button>
+                    <button class="btn btn-secondary" id="downloadPdfBtn">📄 Download PDF</button>
                     <button class="btn btn-primary" id="regenerateRoadmapBtn">🔄 Generate New Roadmap</button>
                 </div>
             </div>
@@ -479,45 +543,6 @@
                 </div>
                 <div id="resourcesContent" class="resources-grid">
                     <!-- Resources generated by JS based on cert and level -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================
-             SECTION 6: GUIDED MENTOR CHAT
-             ============================================ -->
-        <section id="mentorSection" class="mentor hidden">
-            <div class="section-header">
-                <h2>KaliGuru Chat</h2>
-                <button id="fullscreenChatBtn" class="btn btn-outline btn-sm" style="margin-top: 10px;">Fullscreen Toggle</button>
-                <p class="section-subtitle">Your Senior OffSec Mentor for ethical labs and certification prep.</p>
-            </div>
-
-            <div class="mentor-container">
-                <!-- Chat History -->
-                <div id="chatHistory" class="chat-history"></div>
-
-                <!-- Chat Input Area -->
-                <div class="chat-input-section">
-
-
-                    <div class="chat-input-area">
-                        <textarea
-                            id="mentorInput" 
-                            class="mentor-input" 
-                            placeholder="Ask KaliGuru about tools, labs, or techniques..."
-                            aria-label="Ask KaliGuru about tools, labs, or techniques"
-                            rows="1"
-                        ></textarea>
-                        <button class="btn btn-primary" id="sendMentorBtn">Send</button>
-                    </div>
-
-                    <!-- Recommendation Bubbles for Beginner Mode -->
-
-                </div>
-
-                <div class="mentor-info">
-                    <p><strong>Note:</strong> KaliGuru provides technical guidance ONLY for authorized lab environments. Real-world targeting is strictly prohibited.</p>
                 </div>
             </div>
         </section>
