@@ -1,0 +1,14 @@
+<<<<<<< SEARCH
+function restoreUI() {
+    if (appState.mode === "cli") {
+        switchMode("cli");
+        return;
+    }
+=======
+function restoreUI() {
+    elements.bootScreen.classList.add('hidden');
+    if (appState.mode === "cli") {
+        switchMode("cli");
+        return;
+    }
+>>>>>>> REPLACE

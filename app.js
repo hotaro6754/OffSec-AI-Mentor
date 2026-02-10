@@ -210,6 +210,7 @@ function loadState() {
 }
 
 function restoreUI() {
+    elements.bootScreen.classList.add('hidden');
     if (appState.mode === "cli") {
         switchMode("cli");
         return;
@@ -379,12 +380,6 @@ const elements = {
 // ============================================================================
 
 function init() {
-    console.log('🎓 OffSec AI Mentor - Initializing...');
-    setupEventListeners();
-    setupAuthListeners();
-    setupSkillPanel();
-    setupAOS();
-function init() {
     console.log("🎓 OffSec AI Mentor - Initializing...");
     setupEventListeners();
     setupAuthListeners();
@@ -408,7 +403,6 @@ function init() {
     } else {
         restoreUI();
     }
-}
 }
 
 function setupSkillPanel() {
