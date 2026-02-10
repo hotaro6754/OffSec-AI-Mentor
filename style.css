@@ -4087,36 +4087,7 @@ body.mode-oscp .transition-container-v3 {
     color: rgba(0, 206, 201, 0.5);
 }
 
-.beginner-mode-ui .mentor-intent-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
 
-.beginner-mode-ui .btn-intent {
-    background: #fdcb6e !important;
-    color: #2d3436 !important;
-    border-radius: 10px !important;
-    padding: 8px 15px !important;
-    font-size: 0.8rem !important;
-    border: 3px solid #2d3436 !important;
-    box-shadow: 4px 4px 0px #2d3436 !important;
-    text-transform: uppercase;
-    font-weight: 900;
-    transition: all 0.1s ease;
-}
-
-.beginner-mode-ui .btn-intent:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #2d3436 !important;
-}
-
-.beginner-mode-ui .btn-intent:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #2d3436 !important;
-}
 
 /* Specific "Small Bubbles" inside search area effect */
 .beginner-mode-ui .recommendation-bubbles-container {

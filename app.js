@@ -325,8 +325,8 @@ const elements = {
     // Mentor
     chatHistory: document.getElementById('chatHistory'),
     mentorInput: document.getElementById('mentorInput'),
-    mentorIntentButtons: document.getElementById('mentorIntentButtons'),
-    beginnerRecommendations: document.getElementById('beginnerRecommendations'),
+
+
     mentorContainer: document.querySelector('.mentor-container'),
     fullscreenChatBtn: document.getElementById('fullscreenChatBtn'),
 
@@ -2904,7 +2904,7 @@ function initMentorChat() {
     elements.chatHistory.innerHTML = '';
     appState.mentorChat = [];
     
-    const welcomeText = "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.\n\nEverything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.\n\nWhich lab, machine, or topic are you working on right now? 😎";
+    const welcomeText = "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.\nEverything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.\nWhich lab, machine, or topic are you working on right now? 😎";
 
     const welcomeMsg = {
         role: 'mentor',
@@ -3164,6 +3164,7 @@ async function sendMentorMessage() {
     try {
         const response = await callBackendAPI('/api/mentor-chat', {
             message: text,
+            history: appState.mentorChat.slice(0, -1), // Send history before this message
             context: {
                 level: appState.assessment?.readinessStatus || 'Unknown',
                 weaknesses: appState.assessment?.weaknesses || [],
