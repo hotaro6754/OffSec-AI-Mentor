@@ -9,7 +9,6 @@
 - **README.md** — Comprehensive documentation
 
 ### ✅ Supplementary Files
-- **DEPLOYMENT.md** — Setup, testing, deployment guides
 - **start_dev_server.sh** — Quick-start script for local testing
 - **SECURITY.md** — Ethical constraints and security guidelines
 - **ARCHITECTURE.txt** — Technical architecture details
@@ -247,8 +246,7 @@ CDN Libraries: ~500 KB (cached by browser)
 ## 📚 DOCUMENTATION
 
 ### User Documentation:
-- **README.md** — Feature overview, tech stack, getting started
-- **DEPLOYMENT.md** — Setup, testing, deployment guides
+- **README.md** — Feature overview, tech stack, getting started, setup and deployment
 - **Code Comments** — Detailed comments in HTML, CSS, JS
 
 ### Developer Documentation:
@@ -398,10 +396,9 @@ python3 -m http.server 8000
 ## 📞 SUPPORT & FEEDBACK
 
 If judges have questions:
-1. Check README.md for detailed overview
-2. Check DEPLOYMENT.md for setup issues
-3. Check code comments for implementation details
-4. Check SECURITY.md for ethical constraints
+1. Check README.md for detailed overview and setup
+2. Check code comments for implementation details
+3. Check SECURITY.md for ethical constraints
 
 ---
 

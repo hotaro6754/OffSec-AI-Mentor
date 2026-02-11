@@ -435,8 +435,7 @@ The changes only affect:
 ## 📖 Related Documentation
 
 - See `VERIFICATION_REPORT.md` for technical verification details
-- See `README.md` for general usage instructions
-- See `DEPLOYMENT.md` for deployment guidelines
+- See `README.md` for general usage instructions and deployment guidelines
 
 ---
 
