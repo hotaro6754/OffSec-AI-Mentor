@@ -93,7 +93,9 @@ app.use((req, res, next) => {
     
     // Extract custom API keys from request headers
     req.customKeys = {
-        groq: req.headers['x-groq-api-key']
+        groq: req.headers['x-groq-api-key'],
+        gemini: req.headers['x-gemini-api-key'],
+        deepseek: req.headers['x-deepseek-api-key']
     };
     next();
 });
@@ -1333,24 +1335,30 @@ async function callAI(prompt, options = {}) {
         ({ expectJson = false, retries = 3, customKeys = {}, maxTokens = 5000, stream = false } = options);
     }
 
-    // Groq ONLY
-    let currentApiKey = customKeys.groq || AI_API_KEY;
-    const isCustom = !!customKeys.groq;
+    let currentApiKey = customKeys.groq || customKeys.deepseek || AI_API_KEY;
+    let currentModel = AI_MODEL;
+    let currentUrl = AI_API_URL;
+    const isCustom = !!(customKeys.groq || customKeys.deepseek);
+
+    if (customKeys.deepseek) {
+        currentModel = 'deepseek-chat';
+        currentUrl = 'https://api.deepseek.com/v1/chat/completions';
+    }
 
     if (!currentApiKey) {
-        throw new Error("Groq API key is missing");
+        throw new Error("API key is missing");
     }
 
     if (isCustom) {
         const maskedKey = currentApiKey.substring(0, 4) + '...' + currentApiKey.substring(currentApiKey.length - 4);
-        console.log(`🔑 Using custom user-provided Groq API key: ${maskedKey}`);
+        console.log(`🔑 Using custom user-provided API key: ${maskedKey}`);
     } else {
-        console.log(`🤖 Using system-wide Groq API key`);
+        console.log(`🤖 Using system-wide API key`);
     }
 
-    console.log(`📤 Calling GROQ API (stream=${stream}, isCustom=${isCustom})...`);
+    console.log(`📤 Calling AI API (model=${currentModel}, isCustom=${isCustom})...`);
     
-    const result = await tryCallAI(currentApiKey, AI_MODEL, AI_API_URL, prompt, expectJson, retries, maxTokens, stream);
+    const result = await tryCallAI(currentApiKey, currentModel, currentUrl, prompt, expectJson, retries, maxTokens, stream);
     
     if (result.success) {
         return result.data;

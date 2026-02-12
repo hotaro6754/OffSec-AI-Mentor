@@ -25,7 +25,7 @@
     --primary-v3: #ff3e00;
     --secondary-v3: #00e5ff;
     --accent-v3: #ffff00;
-    --success-v3: #00ff00;
+    --success-v3: #ff3e00;
     --error-v3: #ff0000;
     --gray-light-v3: #e0e0e0;
     --gray-dark-v3: #333333;
@@ -2591,7 +2591,7 @@ body.mode-oscp .chat-area { background: #0d1117; }
 }
 body.mode-oscp .chat-bubble.mentor {
     background: #0a0a0a !important;
-    color: #00ff00 !important;
+    color: #ff3e00 !important;
     border-color: var(--primary-v3) !important;
     box-shadow: 6px 6px 0px var(--primary-v3) !important;
 }
@@ -4048,10 +4048,10 @@ body.mode-oscp .transition-container-v3 {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: #00ff00 !important;
+    color: #ff3e00 !important;
     font-family: 'Space Mono', monospace !important;
     font-size: 1.1rem !important;
-    text-shadow: 0 0 5px #00ff00;
+    text-shadow: 0 0 5px #ff3e00;
 }
 
 .beginner-mode-ui .chat-bubble-header {
@@ -4275,7 +4275,7 @@ body.mode-oscp .close-panel-btn {
     flex-direction: column;
     justify-content: center;
     padding: 40px;
-    color: #00ff00;
+    color: #ff3e00;
     font-family: 'Space Mono', monospace;
     overflow-y: auto;
 }
@@ -4288,17 +4288,17 @@ body.mode-oscp .close-panel-btn {
 
 #boot-options {
     margin-top: 30px;
-    border: 3px solid #00ff00;
+    border: 2px solid #ff3e00;
     padding: 30px;
     background: rgba(0, 255, 0, 0.05);
-    box-shadow: 10px 10px 0px #00ff00;
+    box-shadow: 10px 10px 0px #ff3e00;
 }
 
 .boot-prompt {
     font-weight: 900;
     font-size: 1.5rem;
     margin-bottom: 25px;
-    text-shadow: 0 0 5px #00ff00;
+    text-shadow: 0 0 5px #ff3e00;
 }
 
 .boot-buttons {
@@ -4309,8 +4309,8 @@ body.mode-oscp .close-panel-btn {
 
 .boot-btn {
     background: transparent;
-    border: 3px solid #00ff00;
-    color: #00ff00;
+    border: 2px solid #ff3e00;
+    color: #ff3e00;
     padding: 15px 25px;
     font-family: 'Space Mono', monospace;
     font-weight: 700;
@@ -4323,13 +4323,13 @@ body.mode-oscp .close-panel-btn {
 }
 
 .boot-btn:hover {
-    background: #00ff00;
+    background: #ff3e00;
     color: #000;
-    box-shadow: 0 0 20px #00ff00;
+    box-shadow: 0 0 20px #ff3e00;
 }
 
 .btn-num {
-    background: #00ff00;
+    background: #ff3e00;
     color: #000;
     width: 24px;
     height: 24px;
@@ -4341,7 +4341,7 @@ body.mode-oscp .close-panel-btn {
 
 .boot-btn:hover .btn-num {
     background: #000;
-    color: #00ff00;
+    color: #ff3e00;
 }
 
 .boot-note {
@@ -4408,7 +4408,7 @@ body.mode-oscp .close-panel-btn {
     padding: 20px;
     overflow-y: auto;
     font-family: 'Space Mono', monospace;
-    color: #00ff00;
+    color: #ff3e00;
     font-size: 0.95rem;
     line-height: 1.5;
     background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
@@ -4430,7 +4430,7 @@ body.mode-oscp .close-panel-btn {
 #terminal-input {
     background: transparent;
     border: none;
-    color: #00ff00;
+    color: #ff3e00;
     font-family: 'Space Mono', monospace;
     font-size: 0.95rem;
     flex: 1;
@@ -4459,7 +4459,6 @@ body.mode-oscp .close-panel-btn {
 
 /* Terminal Output Styles */
 .term-blue { color: #00e5ff; }
-.term-green { color: #00ff00; }
 .term-red { color: #ff3e00; }
 .term-yellow { color: #ffff00; }
 .term-white { color: #ffffff; }
@@ -4472,7 +4471,7 @@ body.mode-oscp .close-panel-btn {
 }
 
 .term-progress-bar {
-    border: 1px solid #00ff00;
+    border: 1px solid #ff3e00;
     height: 20px;
     position: relative;
     overflow: hidden;
@@ -4480,7 +4479,7 @@ body.mode-oscp .close-panel-btn {
 
 .term-progress-fill {
     height: 100%;
-    background: #00ff00;
+    background: #ff3e00;
     width: 0%;
 }
 
@@ -4542,7 +4541,7 @@ body.mode-oscp .close-panel-btn {
 
 #terminal-mode {
     background: #000;
-    color: #00ff00;
+    color: #ff3e00;
     font-family: 'Space Mono', monospace;
     height: 100vh;
     display: flex;
@@ -4572,7 +4571,7 @@ body.mode-oscp .close-panel-btn {
 }
 
 .terminal-prompt {
-    color: #00ff00;
+    color: #ff3e00;
     font-weight: bold;
     margin-right: 10px;
     white-space: nowrap;
@@ -4581,7 +4580,7 @@ body.mode-oscp .close-panel-btn {
 #terminal-input {
     background: transparent;
     border: none;
-    color: #00ff00;
+    color: #ff3e00;
     font-family: 'Space Mono', monospace;
     font-size: 1rem;
     width: 100%;
@@ -4591,7 +4590,7 @@ body.mode-oscp .close-panel-btn {
 .term-blue { color: #5555ff; }
 .term-red { color: #ff5555; }
 .term-yellow { color: #ffff55; }
-.term-green { color: #55ff55; }
+.term-green { color: #ff3e00; font-weight: bold; }
 .term-dim { opacity: 0.6; }
 .term-bold { font-weight: bold; }
 
@@ -4634,13 +4633,13 @@ body.mode-oscp-spooky #terminal-mode {
     flex: 1;
     overflow: hidden;
     font-family: 'Space Mono', monospace;
-    color: #00ff00;
+    color: #ff3e00;
 }
 
 #boot-options {
     padding: 20px;
     background: #111;
-    border: 2px solid #00ff00;
+    border: 2px solid #ff3e00;
     margin-top: 10px;
 }
 
@@ -4658,7 +4657,7 @@ body.mode-oscp-spooky #terminal-mode {
 
 /* Flappy Canvas */
 #flappyCanvas {
-    box-shadow: 0 0 15px #00ff00;
+    box-shadow: 0 0 15px #ff3e00;
 }
 
 
@@ -4674,4 +4673,340 @@ body.mode-oscp-spooky #terminal-mode {
     60% { transform: translate(2px, 2px); }
     80% { transform: translate(2px, -2px); }
     100% { transform: translate(0); }
+}
+
+/* ============================================================
+   Web OS Desktop UI Styles
+   ============================================================ */
+
+#terminal-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9000;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+}
+
+#matrix-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.desktop-env {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.desktop-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    width: fit-content;
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #ff3e00;
+    transition: transform 0.2s;
+    user-select: none;
+    width: 80px;
+}
+
+.desktop-icon:hover {
+    transform: scale(1.1);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border: 2px solid #ff3e00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 3px 3px 0 #ff3e00;
+}
+
+.icon-label {
+    font-size: 0.8rem;
+    text-shadow: 1px 1px 2px #000;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Draggable Windows */
+.window {
+    position: absolute;
+    min-width: 400px;
+    background: #000;
+    border: 2.5px solid #ff3e00;
+    box-shadow: 8px 8px 0 rgba(255, 62, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.window.hidden {
+    display: none;
+}
+
+.window-header {
+    background: #ff3e00;
+    color: #000;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.window-title {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.window-body {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.terminal-window {
+    width: 700px;
+    height: 500px;
+    top: 50px;
+    left: 200px;
+}
+
+.terminal-body {
+    padding: 15px;
+    color: #ff3e00;
+    font-size: 0.95rem;
+}
+
+/* Controls */
+.terminal-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #000;
+    cursor: pointer;
+}
+
+.control.red { background: #ff5555; }
+.control.yellow { background: #ffff55; }
+.control.green { background: #33ff33; }
+
+/* Taskbar */
+.taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    background: #ff3e00;
+    border-top: 2.5px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 1000;
+    box-sizing: border-box;
+    color: #000;
+}
+
+.start-btn {
+    background: #000;
+    color: #ff3e00;
+    border: 2px solid #000;
+    padding: 5px 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #000;
+}
+
+.start-btn:active {
+    box-shadow: none;
+    transform: translate(2px, 2px);
+}
+
+.taskbar-apps {
+    flex: 1;
+    display: flex;
+    gap: 5px;
+    margin-left: 15px;
+}
+
+.task-app {
+    color: #000; font-weight: bold;
+    background: rgba(0,0,0,0.1);
+    border: 2px solid #000;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.task-app.active {
+    background: #000;
+    color: #ff3e00;
+}
+
+.taskbar-time {
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 0 10px;
+}
+
+/* Start Menu */
+#start-menu {
+    position: absolute;
+    bottom: 45px;
+    left: 0;
+    width: 250px;
+    background: #ff3e00;
+    border: 2.5px solid #000;
+    border-bottom: none;
+    z-index: 1001;
+    box-shadow: 5px -5px 0 rgba(0,0,0,0.5);
+}
+
+.start-menu-header {
+    background: #000;
+    color: #ff3e00;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #000;
+}
+
+.start-menu-items {
+    padding: 5px 0;
+}
+
+.start-item {
+    color: #000;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.1s;
+}
+
+.start-item:hover {
+    background: #000;
+    color: #ff3e00;
+}
+
+.start-item i {
+    width: 18px;
+}
+
+/* Neo Brutalist Card for About Window */
+.neo-brutalist-card {
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    margin: 10px;
+}
+
+/* Refinements to soften CLI UI */
+.desktop-env {
+    padding: 30px;
+}
+
+.desktop-icons {
+    gap: 25px;
+}
+
+.icon-box {
+    border-radius: 8px; /* Slightly rounded for less harshness */
+    box-shadow: 4px 4px 0 rgba(255, 62, 0, 0.4);
+}
+
+.window {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.window-header {
+    padding: 10px 15px;
+}
+
+.start-btn {
+    border-radius: 4px;
+}
+
+/* Icon elegance refinements */
+.desktop-icon .icon-box {
+    background: rgba(255, 62, 0, 0.1);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.desktop-icon:hover .icon-box {
+    background: rgba(255, 62, 0, 0.2);
+    box-shadow: 0 0 15px rgba(255, 62, 0, 0.5);
+    transform: translateY(-5px);
+}
+
+.desktop-icon .icon-label {
+    margin-top: 5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+/* Terminal Window Content Styles */
+.bg-black-v3 {
+    background-color: #000 !important;
+}
+.text-red-v3 {
+    color: #ff3e00 !important;
+}
+.neo-brutalist-card-v3 {
+    border: 1px solid #ff3e00;
+    box-shadow: 4px 4px 0 rgba(255, 62, 0, 0.2);
+}
+.window-body hr {
+    border-color: #ff3e00;
+    opacity: 0.3;
+}
+
+.desktop-env {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff3e00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z'%3E%3C/path%3E%3Cpath d='m13 13 6 6'%3E%3C/path%3E%3C/svg%3E"), auto;
+}
+
+.desktop-icon, .start-btn, .start-item, .control, .task-app {
+    color: #000; font-weight: bold;
+    cursor: pointer;
 }

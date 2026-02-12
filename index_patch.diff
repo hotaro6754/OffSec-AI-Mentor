@@ -1,0 +1,106 @@
+<<<<<<< SEARCH
+    <div id="terminal-mode" class="hidden">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-controls">
+                    <span class="control red"></span>
+                    <span class="control yellow"></span>
+                    <span class="control green"></span>
+                </div>
+                <div class="terminal-title">KaliGuru CLI Simulation - root@kali</div>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+                <div id="terminal-output"></div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">root@kali:~#</span>
+                    <input type="text" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+        <div class="terminal-footer-links">
+            <a href="https://github.com/hotaro6754/Kali-Guru-CLI" target="_blank" class="cli-repo-link">
+                <i data-lucide="github"></i> Install real KaliGuru CLI on Kali Linux
+            </a>
+            <button class="btn btn-outline btn-sm" id="switchToWebBtn">Switch to Web Mode</button>
+        </div>
+    </div>
+=======
+    <div id="terminal-mode" class="hidden">
+        <canvas id="matrix-canvas"></canvas>
+
+        <div class="desktop-env">
+            <div class="desktop-icons">
+                <div class="desktop-icon" data-window="terminal">
+                    <div class="icon-box"><i data-lucide="terminal"></i></div>
+                    <span class="icon-label">Terminal</span>
+                </div>
+                <div class="desktop-icon" data-window="about">
+                    <div class="icon-box"><i data-lucide="user"></i></div>
+                    <span class="icon-label">About Me</span>
+                </div>
+                <div class="desktop-icon" data-window="projects">
+                    <div class="icon-box"><i data-lucide="folder-code"></i></div>
+                    <span class="icon-label">Projects</span>
+                </div>
+                <div class="desktop-icon" data-window="skills">
+                    <div class="icon-box"><i data-lucide="shield-check"></i></div>
+                    <span class="icon-label">Skills</span>
+                </div>
+            </div>
+
+            <div class="window terminal-window" id="window-terminal">
+                <div class="window-header">
+                    <div class="terminal-controls">
+                        <span class="control red" onclick="closeWindow('terminal')"></span>
+                        <span class="control yellow"></span>
+                        <span class="control green"></span>
+                    </div>
+                    <div class="window-title">KaliGuru CLI Simulation - root@kali</div>
+                </div>
+                <div class="window-body terminal-body" id="terminal-body">
+                    <div id="terminal-output"></div>
+                    <div class="terminal-input-line">
+                        <span class="terminal-prompt">root@kali:~#</span>
+                        <input type="text" id="terminal-input" autofocus autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fake Content Windows (Initially Hidden) -->
+            <div class="window hidden" id="window-about">
+                <div class="window-header">
+                    <div class="terminal-controls">
+                        <span class="control red" onclick="closeWindow('about')"></span>
+                    </div>
+                    <div class="window-title">About - Harshith Gangaraju</div>
+                </div>
+                <div class="window-body p-4 bg-white text-black neo-brutalist-card" style="min-height: 200px;">
+                    <h3 class="mb-2">Aspiring OffSec Engineer</h3>
+                    <p>Focused on Red Teaming, Exploit Dev, and building secure systems.</p>
+                    <hr class="my-3">
+                    <p>GitHub: <a href="https://github.com/hotaro6754" target="_blank">hotaro6754</a></p>
+                </div>
+            </div>
+
+            <div class="taskbar">
+                <button class="start-btn" id="start-menu-btn">
+                    <i data-lucide="layout-grid"></i> START
+                </button>
+                <div class="taskbar-apps">
+                    <div class="task-app active" data-window="terminal">Terminal</div>
+                </div>
+                <div class="taskbar-time" id="taskbar-time">00:00:00</div>
+            </div>
+
+            <div id="start-menu" class="hidden">
+                <div class="start-menu-header">KaliGuru OS v3.1</div>
+                <div class="start-menu-items">
+                    <div class="start-item" id="start-switch-web"><i data-lucide="globe"></i> Web Mentor Mode</div>
+                    <div class="start-item" id="start-settings"><i data-lucide="settings"></i> Settings</div>
+                    <div class="start-item"><a href="https://github.com/hotaro6754/Kali-Guru-CLI" target="_blank" style="color:inherit; text-decoration:none;"><i data-lucide="github"></i> Real CLI Repo</a></div>
+                    <div class="start-item" onclick="location.reload()"><i data-lucide="refresh-cw"></i> Reboot</div>
+                </div>
+            </div>
+        </div>
+    </div>
+>>>>>>> REPLACE
