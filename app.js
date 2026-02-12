@@ -402,6 +402,11 @@ function init() {
     setupCertFilters();
     setupTypedText();
     
+    // Web OS Simulation Initializers
+    if (typeof initWindowManagement === "function") initWindowManagement();
+    if (typeof initDesktopInteractions === "function") initDesktopInteractions();
+    if (typeof initMatrix === "function") initMatrix();
+
     document.getElementById("switchToTerminalBtn")?.addEventListener("click", () => switchMode("cli"));
     document.getElementById("switchToWebBtn")?.addEventListener("click", () => switchMode("web"));
     document.getElementById("viewDownloadsBtn")?.addEventListener("click", openDownloads);
@@ -3287,7 +3292,7 @@ function initMatrix() {
         ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
         ctx.fillRect(0, 0, width, height);
 
-        ctx.fillStyle = "#0F0";
+        ctx.fillStyle = "#ff3e00";
         ctx.font = fontSize + "px Space Mono";
 
         for (let i = 0; i < drops.length; i++) {
@@ -3474,7 +3479,7 @@ function initDesktopInteractions() {
         });
     });
 
-    const startBtn = document.getElementById('start-menu-btn');
+    const startBtn = document.getElementById('start-btn');
     const startMenu = document.getElementById('start-menu');
 
     startBtn?.addEventListener('click', (e) => {
@@ -3499,7 +3504,7 @@ function initDesktopInteractions() {
 }
 
 function updateTaskbarTime() {
-    const el = document.getElementById('taskbar-time');
+    const el = document.getElementById('taskbar-clock');
     if (el) {
         const now = new Date();
         el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -3572,8 +3577,6 @@ function handleTerminalKeydown(e) {
         }
     }
 }
-            terminalState.historyIndex = terminalState.history.length;
-            elements.terminalInput.value = '';
 async function processCommand(cmdLine) {
     const parts = cmdLine.split(" ");
     const cmd = parts[0].toLowerCase();
@@ -3604,7 +3607,7 @@ async function processCommand(cmdLine) {
             terminalState.configStep = 0;
             break;
         case "clear": elements.terminalOutput.innerHTML = ""; break;
-        case "ls": terminalPrint("about.txt  roadmap_sample.txt  labs/  pwn_instructions.txt"); break;
+        case "ls": terminalPrint("about.txt  readme.vault  skills.txt  resume.pdf  pwn_instructions.txt  labs/"); break;
         case "cat": handleCat(args[0]); break;
         case "whoami": terminalPrint(appState.user ? appState.user.username : "Guest"); break;
         case "exit": choosePrimaryMode("web"); break;
@@ -3669,7 +3672,7 @@ function startFlappy() {
 
         pipes.forEach((p, i) => {
             p.x -= 3;
-            ctx.fillStyle = 'green';
+            ctx.fillStyle = '#ff3e00';
             ctx.fillRect(p.x, 0, 50, p.y);
             ctx.fillRect(p.x, p.y + 100, 50, 400);
 
@@ -3842,12 +3845,18 @@ function updateDownloadsUI() {
 
 function handleCat(file) {
     if (!file) { terminalPrint("cat: missing operand", "term-red"); return; }
-    if (file === 'about.txt') {
-        terminalPrint("KaliGuru AI Mentor CLI Simulation v1.0.0", "term-blue");
-        terminalPrint("Designed for mastery of OffSec certifications.", "term-white");
-    } else if (file === 'secret_flag.txt.enc') {
-        terminalPrint("Encrypted content: [REDACTED]", "term-dim");
-        terminalPrint("Hint: Use 'flappy' to prove your reflexes and gain the key.", "term-yellow");
+    const files = {
+        'about.txt': "KaliGuru AI Mentor CLI Simulation v1.0.0\nDesigned for mastery of OffSec certifications.",
+        'readme.vault': "SYSTEM ID: KLG-992\nSTATUS: OPERATIONAL\n\nWelcome to the simulation. Use 'assess' to start your journey.",
+        'skills.txt': "# Current Skills\n- Pentesting: Network, Web, AD\n- Languages: Python, C++, Bash\n- Tools: Metasploit, Burp, GDB",
+        'pwn_instructions.txt': "1. Connect to VPN\n2. Enumerate targets\n3. Exploit vulnerabilities\n4. Escalate privileges\n5. Profit.",
+        'resume.pdf': "Error: Cannot display binary file in terminal. Use 'open resume.pdf' or check the 'Projects' window."
+    };
+
+    if (files[file]) {
+        terminalPrint(files[file].replace(/\n/g, '<br>'), "term-white");
+    } else if (file === 'labs') {
+        terminalPrint("cat: labs: Is a directory", "term-white");
     } else {
         terminalPrint(`cat: ${file}: No such file or directory`, "term-red");
     }
@@ -3861,3 +3870,4 @@ function openDownloads() {
 function closeDownloads() {
     document.getElementById('downloadsModal')?.classList.add('hidden');
 }
+init();
