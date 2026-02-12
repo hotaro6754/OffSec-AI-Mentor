@@ -4675,3 +4675,265 @@ body.mode-oscp-spooky #terminal-mode {
     80% { transform: translate(2px, -2px); }
     100% { transform: translate(0); }
 }
+
+/* ============================================================
+   Web OS Desktop UI Styles
+   ============================================================ */
+
+#terminal-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9000;
+    overflow: hidden;
+    font-family: 'Space Mono', monospace;
+}
+
+#matrix-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.desktop-env {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.desktop-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    width: fit-content;
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #00ff00;
+    transition: transform 0.2s;
+    user-select: none;
+    width: 80px;
+}
+
+.desktop-icon:hover {
+    transform: scale(1.1);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border: 3px solid #00ff00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 4px 4px 0 #00ff00;
+}
+
+.icon-label {
+    font-size: 0.8rem;
+    text-shadow: 1px 1px 2px #000;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Draggable Windows */
+.window {
+    position: absolute;
+    min-width: 400px;
+    background: #000;
+    border: 4px solid #00ff00;
+    box-shadow: 10px 10px 0 rgba(0, 255, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.window.hidden {
+    display: none;
+}
+
+.window-header {
+    background: #00ff00;
+    color: #000;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.window-title {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.window-body {
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.terminal-window {
+    width: 700px;
+    height: 500px;
+    top: 50px;
+    left: 200px;
+}
+
+.terminal-body {
+    padding: 15px;
+    color: #00ff00;
+    font-size: 0.95rem;
+}
+
+/* Controls */
+.terminal-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #000;
+    cursor: pointer;
+}
+
+.control.red { background: #ff5555; }
+.control.yellow { background: #ffff55; }
+.control.green { background: #55ff55; }
+
+/* Taskbar */
+.taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    background: #00ff00;
+    border-top: 4px solid #000;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 1000;
+    box-sizing: border-box;
+    color: #000;
+}
+
+.start-btn {
+    background: #000;
+    color: #00ff00;
+    border: 2px solid #000;
+    padding: 5px 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #000;
+}
+
+.start-btn:active {
+    box-shadow: none;
+    transform: translate(2px, 2px);
+}
+
+.taskbar-apps {
+    flex: 1;
+    display: flex;
+    gap: 5px;
+    margin-left: 15px;
+}
+
+.task-app {
+    background: rgba(0,0,0,0.1);
+    border: 2px solid #000;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.task-app.active {
+    background: #000;
+    color: #00ff00;
+}
+
+.taskbar-time {
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 0 10px;
+}
+
+/* Start Menu */
+#start-menu {
+    position: absolute;
+    bottom: 45px;
+    left: 0;
+    width: 250px;
+    background: #00ff00;
+    border: 4px solid #000;
+    border-bottom: none;
+    z-index: 1001;
+    box-shadow: 5px -5px 0 rgba(0,0,0,0.5);
+}
+
+.start-menu-header {
+    background: #000;
+    color: #00ff00;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #000;
+}
+
+.start-menu-items {
+    padding: 5px 0;
+}
+
+.start-item {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.1s;
+}
+
+.start-item:hover {
+    background: #000;
+    color: #00ff00;
+}
+
+.start-item i {
+    width: 18px;
+}
+
+/* Neo Brutalist Card for About Window */
+.neo-brutalist-card {
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    margin: 10px;
+}

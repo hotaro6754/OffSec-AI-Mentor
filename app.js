@@ -1228,8 +1228,12 @@ async function callBackendAPI(endpoint, data = {}) {
         
         // Add custom API keys if present
         const groqKey = localStorage.getItem('groqKey');
+        const geminiKey = localStorage.getItem('geminiKey');
+        const deepseekKey = localStorage.getItem('deepseekKey');
 
         if (groqKey) headers['X-Groq-API-Key'] = groqKey;
+        if (geminiKey) headers['X-Gemini-API-Key'] = geminiKey;
+        if (deepseekKey) headers['X-Deepseek-API-Key'] = deepseekKey;
 
         // Add authorization header if logged in
         if (appState.sessionId) {
@@ -3249,31 +3253,280 @@ function switchMode(mode) {
 
 let terminalState = {
     initialized: false,
-    cwd: '~',
+    cwd: "~",
     inChat: false,
     inAssessment: false,
+    inLogin: false,
+    inConfig: false,
+    loginStep: "user",
+    configStep: 0,
     history: [],
     historyIndex: -1,
-    pwned: false
+    pwned: false,
+    tempUser: null
 };
 
-function initTerminal() {
+function initMatrix() {
+    const canvas = document.getElementById('matrix-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890@%&*()";
+    const fontSize = 16;
+    const columns = width / fontSize;
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) {
+        drops[i] = 1;
+    }
+
+    function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = "#0F0";
+        ctx.font = fontSize + "px Space Mono";
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    setInterval(draw, 33);
+}
+
+
+function initWindowManagement() {
+    const windows = document.querySelectorAll('.window');
+    let activeWindow = null;
+    let offsetX, offsetY;
+
+    windows.forEach(win => {
+        const header = win.querySelector('.window-header');
+        if (!header) return;
+
+        header.addEventListener('mousedown', (e) => {
+            activeWindow = win;
+            offsetX = e.clientX - win.offsetLeft;
+            offsetY = e.clientY - win.offsetTop;
+            bringToFront(win);
+        });
+
+        win.addEventListener('mousedown', () => {
+            bringToFront(win);
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (activeWindow) {
+            activeWindow.style.left = (e.clientX - offsetX) + 'px';
+            activeWindow.style.top = (e.clientY - offsetY) + 'px';
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        activeWindow = null;
+    });
+
+    function bringToFront(win) {
+        document.querySelectorAll('.window').forEach(w => w.style.zIndex = 10);
+        win.style.zIndex = 100;
+
+        const winId = win.id.replace('window-', '');
+        document.querySelectorAll('.task-app').forEach(app => {
+            app.classList.toggle('active', app.dataset.window === winId);
+        });
+    }
+}
+
+function closeWindow(id) {
+    const win = document.getElementById('window-' + id);
+    if (win) {
+        win.classList.add('hidden');
+        const task = document.querySelector(`.task-app[data-window="${id}"]`);
+        if (task) task.remove();
+    }
+}
+
+function openWindow(id) {
+    const win = document.getElementById('window-' + id);
+    if (win) {
+        win.classList.remove('hidden');
+
+        if (!document.querySelector(`.task-app[data-window="${id}"]`)) {
+            const tray = document.querySelector('.taskbar-apps');
+            if (tray) {
+                const app = document.createElement('div');
+                app.className = 'task-app active';
+                app.dataset.window = id;
+                app.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+                app.onclick = () => openWindow(id);
+                tray.appendChild(app);
+            }
+        }
+    }
+}
+
+
+async function handleLoginInput(input) {
+    if (terminalState.loginStep === 'user') {
+        terminalState.tempUser = input;
+        terminalPrint(input);
+        terminalPrint("Password: ", "inline");
+        terminalState.loginStep = 'pass';
+    } else if (terminalState.loginStep === 'pass') {
+        terminalPrint("********");
+        terminalPrint("Authenticating...", "term-dim");
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emailOrUsername: terminalState.tempUser, password: input })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                appState.sessionId = data.sessionId;
+                appState.user = data.user;
+                localStorage.setItem('sessionId', data.sessionId);
+                terminalState.inLogin = false;
+                document.querySelector(".terminal-prompt").style.display = "inline";
+                terminalPrint("ACCESS GRANTED", "term-green term-bold");
+                setTimeout(showTerminalWelcome, 500);
+            } else {
+                terminalPrint("ACCESS DENIED", "term-red term-bold");
+                terminalPrint("Username: ", "inline");
+                terminalState.loginStep = 'user';
+            }
+        } catch (e) {
+            terminalPrint("Connection Error.", "term-red");
+            terminalPrint("Username: ", "inline");
+            terminalState.loginStep = 'user';
+        }
+    }
+}
+
+function handleConfigInput(input) {
+    if (terminalState.configStep === 0) {
+        if (input) localStorage.setItem('groqKey', input);
+        terminalPrint("Groq Key Set.");
+        terminalPrint("Enter Gemini API Key (optional): ", "inline");
+        terminalState.configStep = 1;
+    } else if (terminalState.configStep === 1) {
+        if (input) localStorage.setItem('geminiKey', input);
+        terminalPrint("Gemini Key Set.");
+        terminalPrint("Enter DeepSeek API Key (optional): ", "inline");
+        terminalState.configStep = 2;
+    } else if (terminalState.configStep === 2) {
+        if (input) localStorage.setItem('deepseekKey', input);
+        terminalPrint("Configuration Complete.");
+        terminalState.inConfig = false;
+        document.querySelector(".terminal-prompt").style.display = "inline";
+        terminalPrint("Type 'help' to begin.", "term-dim");
+    }
+}
+
+function showTerminalWelcome() {
     const banner = `
  <span class="term-blue"> _  __     _ _  ____                     </span>
  <span class="term-blue">| |/ /__ _| (_) / ___| _   _ _ __ _   _  </span>
  <span class="term-blue">| ' / _\\ | | | | |  _ | | | | '__| | | | </span>
  <span class="term-blue">| . \\\\ (_| | | | | |_| | |_| | |  | |_| | </span>
- <span class="term-blue">|_|\\\\_\\\\__,_|_|_|  \\____|\\__,_|_|   \\__,_| </span>
- <span class="term-white">   Ethical OffSec AI Mentor CLI Simulation v1.0</span>
- <span class="term-dim">   Mode: ${appState.terminalSubMode.toUpperCase()} | Status: ${appState.pwned ? 'PWNED' : 'SECURE'}</span>`;
+ <span class="term-blue">|_|\\\\_\\\\__,_|_|_|  \____|\\__,_|_|   \__,_| </span>
+ <span class="term-white">   Ethical OffSec AI Mentor CLI Simulation v3.1</span>
+ <span class="term-dim">   User: ${appState.user?.username || 'Guest'} | Status: ${appState.pwned ? 'PWNED' : 'SECURE'}</span>`;
 
-    elements.terminalOutput.innerHTML = '';
     const pre = document.createElement('pre');
     pre.innerHTML = banner;
     elements.terminalOutput.appendChild(pre);
-    terminalPrint("Type 'help' for commands.", "term-dim");
+    terminalPrint("Welcome back, Commander.", "term-green");
 
-    elements.terminalInput.addEventListener('keydown', handleTerminalKeydown);
+    const hasKey = localStorage.getItem('groqKey') || localStorage.getItem('geminiKey') || localStorage.getItem('deepseekKey');
+    if (!hasKey) {
+        terminalPrint("\n[!] WARNING: AI Services not configured.", "term-yellow");
+        terminalPrint("Type 'setup' to configure API keys.", "term-dim");
+    }
+
+    terminalPrint("\nType 'help' for available commands.", "term-dim");
+}
+
+
+function initDesktopInteractions() {
+    document.querySelectorAll('.desktop-icon').forEach(icon => {
+        icon.addEventListener('click', () => {
+            const winId = icon.dataset.window;
+            openWindow(winId);
+        });
+    });
+
+    const startBtn = document.getElementById('start-menu-btn');
+    const startMenu = document.getElementById('start-menu');
+
+    startBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startMenu?.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+        startMenu?.classList.add('hidden');
+    });
+
+    document.getElementById('start-switch-web')?.addEventListener('click', () => {
+        if (typeof choosePrimaryMode === 'function') choosePrimaryMode('web');
+    });
+
+    document.getElementById('start-settings')?.addEventListener('click', () => {
+        if (typeof showSettingsModal === 'function') showSettingsModal();
+    });
+
+    setInterval(updateTaskbarTime, 1000);
+    updateTaskbarTime();
+}
+
+function updateTaskbarTime() {
+    const el = document.getElementById('taskbar-time');
+    if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+}
+
+
+function initTerminal() {
+    initMatrix();
+    initWindowManagement();
+    initDesktopInteractions();
+    elements.terminalOutput.innerHTML = "";
+
+    if (!appState.user) {
+        terminalPrint("SYSTEM ACCESS RESTRICTED", "term-red term-bold");
+        terminalPrint("Please login to continue.", "term-white");
+        terminalPrint("Username: ", "inline");
+        terminalState.inLogin = true;
+        document.querySelector(".terminal-prompt").style.display = "none";
+        terminalState.loginStep = "user";
+    } else {
+        showTerminalWelcome();
+    }
+
+    if (!terminalState.initialized) {
+        elements.terminalInput.addEventListener("keydown", handleTerminalKeydown);
+    }
     terminalState.initialized = true;
 }
 
@@ -3286,58 +3539,77 @@ function terminalPrint(text, className = "") {
 }
 
 function handleTerminalKeydown(e) {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
         const input = elements.terminalInput.value.trim();
-        elements.terminalInput.value = '';
-        if (input) {
-            terminalPrint(`<span class="terminal-prompt">root@kali:${terminalState.cwd}#</span> ${input}`);
-            terminalState.history.push(input);
-            terminalState.historyIndex = terminalState.history.length;
-
-            if (terminalState.inChat) handleChatInput(input);
+        elements.terminalInput.value = "";
+        if (input || terminalState.inLogin) {
+            if (!terminalState.inLogin && !terminalState.inConfig) {
+                terminalPrint(`<span class="terminal-prompt">root@kali:${terminalState.cwd}#</span> ${input}`);
+            }
+            if (terminalState.inLogin) handleLoginInput(input);
+            else if (terminalState.inConfig) handleConfigInput(input);
+            else if (terminalState.inChat) handleChatInput(input);
             else if (terminalState.inAssessment) handleAssessmentInput(input);
             else processCommand(input);
+
+            if (!terminalState.inLogin && !terminalState.inConfig && input) {
+                terminalState.history.push(input);
+                terminalState.historyIndex = terminalState.history.length;
+            }
         }
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
         if (terminalState.historyIndex > 0) {
             terminalState.historyIndex--;
             elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
         }
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
         if (terminalState.historyIndex < terminalState.history.length - 1) {
             terminalState.historyIndex++;
             elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
         } else {
             terminalState.historyIndex = terminalState.history.length;
-            elements.terminalInput.value = '';
+            elements.terminalInput.value = "";
         }
     }
 }
-
+            terminalState.historyIndex = terminalState.history.length;
+            elements.terminalInput.value = '';
 async function processCommand(cmdLine) {
-    const parts = cmdLine.split(' ');
+    const parts = cmdLine.split(" ");
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1);
 
     switch (cmd) {
-        case 'help':
-            terminalPrint("Standard: help, clear, ls, cat, whoami, exit, sudo", "term-yellow");
-            terminalPrint("KaliGuru: kaliguru [chat|assess|roadmap|profile|export]", "term-blue");
-            terminalPrint("Fun: flappy, submit-flag [flag]", "term-green");
+        case "help":
+            terminalPrint("COMMANDS:", "term-blue term-bold");
+            terminalPrint("  assess    - Start dynamic assessment", "term-white");
+            terminalPrint("  roadmap   - Generate roadmap (e.g. 'roadmap oscp')", "term-white");
+            terminalPrint("  chat      - Talk to KaliGuru Mentor", "term-white");
+            terminalPrint("  setup     - Configure API keys", "term-white");
+            terminalPrint("  ls / cat  - File system", "term-white");
+            terminalPrint("  clear     - Clear screen", "term-white");
+            terminalPrint("  exit      - Return to Web UI", "term-white");
             break;
-        case 'clear': elements.terminalOutput.innerHTML = ''; break;
-        case 'ls': terminalPrint("about.txt  certs/  labs/  secret_flag.txt.enc"); break;
-        case 'cat': handleCat(args[0]); break;
-        case 'whoami': terminalPrint(appState.user ? appState.user.username : "root"); break;
-        case 'sudo':
-            if (args.join(' ') === 'rm -rf /') sudoRmRf();
-            else terminalPrint("[sudo] password for root: ", "term-dim");
+        case "assess": startTerminalAssessment(); break;
+        case "roadmap": startTerminalRoadmap(args[0]); break;
+        case "chat":
+            terminalPrint("Chat Mode enabled. Type 'exit' to quit.", "term-dim");
+            terminalState.inChat = true;
             break;
-        case 'kaliguru': handleKaliGuruCommand(args); break;
-        case 'flappy': startFlappy(); break;
-        case 'submit-flag': submitFlag(args[0]); break;
-        case 'exit': switchMode('web'); break;
-        default: terminalPrint(`zsh: command not found: ${cmd}`, "term-red");
+        case "setup":
+            terminalPrint("CONFIGURING API KEYS...", "term-blue");
+            terminalPrint("Enter Groq API Key: ", "inline");
+            terminalState.inConfig = true;
+            document.querySelector(".terminal-prompt").style.display = "none";
+            terminalState.configStep = 0;
+            break;
+        case "clear": elements.terminalOutput.innerHTML = ""; break;
+        case "ls": terminalPrint("about.txt  roadmap_sample.txt  labs/  pwn_instructions.txt"); break;
+        case "cat": handleCat(args[0]); break;
+        case "whoami": terminalPrint(appState.user ? appState.user.username : "Guest"); break;
+        case "exit": choosePrimaryMode("web"); break;
+        case "flappy": startFlappy(); break;
+        default: terminalPrint(`Command not found: ${cmd}. Type 'help' for options.`, "term-red");
     }
 }
 
