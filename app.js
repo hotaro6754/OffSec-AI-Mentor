@@ -383,6 +383,8 @@ const elements = {
     chooseWebMode: document.getElementById("chooseWebMode"),
     chooseTerminalMode: document.getElementById("chooseTerminalMode"),
     downloadsList: document.getElementById("downloadsList"),
+    downloadsModal: document.getElementById("downloadsModal"),
+    closeDownloadsModal: document.getElementById("closeDownloadsModal"),
     navResources: document.getElementById('navResources')
 };
 
@@ -447,6 +449,7 @@ function checkApiKeyAndStart() {
 
 function setupEventListeners() {
     elements.startBtn?.addEventListener('click', checkApiKeyAndStart);
+    elements.closeDownloadsModal?.addEventListener('click', closeDownloads);
 
     // Settings
     elements.settingsBtn?.addEventListener('click', showSettingsModal);
@@ -2915,6 +2918,123 @@ function formatMarkdown(text) {
 function getRandomQuote() {
     return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
 }
+
+function showNeoLoading(container, title, subtitle, stages = []) {
+    if (!container) return;
+
+    // Clear container
+    container.innerHTML = "";
+
+    // Create loader element
+    const loaderEl = document.createElement("div");
+    loaderEl.className = "neo-brutal-loading";
+
+    // Initial HTML structure
+    loaderEl.innerHTML = `
+        <div class="loading-header">
+            <div class="loading-cert-name-v3">${subtitle}</div>
+            <h1 class="neo-brutal-title glitch-text">${title}</h1>
+        </div>
+
+        <div class="brutal-percentage-container">
+            <div class="brutal-percentage-value">0%</div>
+            <div class="brutal-percentage-label">SYSTEM_CALIBRATION_IN_PROGRESS</div>
+        </div>
+
+        <div class="cyber-loader-container-v3">
+            <div class="loading-joke-container-v3">Initializing...</div>
+        </div>
+
+        <div class="loading-stages-neo-v3">
+            ${stages.map((s, i) => `
+                <div class="stage-item-neo-v3" id="loading-stage-${i}">
+                    <div class="stage-indicator-neo-v3">
+                        <span class="stage-num-v3">${i + 1}</span>
+                        <span class="stage-done-v3">✓</span>
+                    </div>
+                    <div class="stage-label-v3">${s.text}</div>
+                </div>
+            `).join("")}
+        </div>
+
+        <div class="neo-loading-footer-v3">
+            <div class="terminal-log-v3">> ACCESSING_OFFSEC_KNOWLEDGE_BASE...</div>
+            <div class="terminal-log-v3">> NEURAL_NETWORK_SYNC: ACTIVE</div>
+        </div>
+    `;
+
+    container.appendChild(loaderEl);
+
+    const percentageEl = loaderEl.querySelector(".brutal-percentage-value");
+    const jokeEl = loaderEl.querySelector(".loading-joke-container-v3");
+
+    let progress = 0;
+    let currentStageIndex = 0;
+
+    // Update joke every 3 seconds
+    const jokeInterval = setInterval(() => {
+        jokeEl.style.opacity = "0";
+        setTimeout(() => {
+            jokeEl.textContent = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
+            jokeEl.style.opacity = "1";
+        }, 300);
+    }, 3000);
+
+    // Initial joke
+    jokeEl.textContent = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
+
+    // Progress interval
+    const progressInterval = setInterval(() => {
+        if (progress < 95) {
+            // Slower as it gets closer to 95
+            const increment = Math.max(0.1, (95 - progress) / 20);
+            progress += increment;
+            percentageEl.textContent = Math.floor(progress) + "%";
+
+            // Update stages based on progress
+            const targetStage = Math.floor((progress / 100) * stages.length);
+            if (targetStage > currentStageIndex && targetStage < stages.length) {
+                // Complete previous stage
+                const prevStage = loaderEl.querySelector(`#loading-stage-${currentStageIndex}`);
+                if (prevStage) {
+                    prevStage.classList.remove("active");
+                    prevStage.classList.add("completed");
+                }
+
+                currentStageIndex = targetStage;
+
+                // Activate current stage
+                const currStage = loaderEl.querySelector(`#loading-stage-${currentStageIndex}`);
+                if (currStage) currStage.classList.add("active");
+            }
+        }
+    }, 100);
+
+    // Set first stage as active
+    const firstStage = loaderEl.querySelector("#loading-stage-0");
+    if (firstStage) firstStage.classList.add("active");
+
+    return {
+        complete: () => {
+            clearInterval(progressInterval);
+            clearInterval(jokeInterval);
+            progress = 100;
+            percentageEl.textContent = "100%";
+
+            // Mark all stages as completed
+            loaderEl.querySelectorAll(".stage-item-neo-v3").forEach(s => {
+                s.classList.remove("active");
+                s.classList.add("completed");
+            });
+        },
+        cleanup: () => {
+            clearInterval(progressInterval);
+            clearInterval(jokeInterval);
+            loaderEl.remove();
+        }
+    };
+}
+
 
 function revealSecret(containerId) {
     const secretDiv = document.getElementById(containerId || 'secret-content');

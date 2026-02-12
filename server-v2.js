@@ -1181,6 +1181,125 @@ You never gate conversation behind buttons.
 You never break ethical boundaries.`
 };
 
+
+const FALLBACK_QUESTIONS = [
+    {
+        type: 'multiple-choice',
+        question: 'Which of the following best describes the OSI model?',
+        options: [
+            'A framework that defines networking standards and protocols',
+            'A type of encryption algorithm',
+            'A software development methodology',
+            'A database management system'
+        ],
+        correctAnswer: 'A framework that defines networking standards and protocols',
+        explanation: 'The OSI (Open Systems Interconnection) model is a conceptual framework that standardizes network communication into seven layers.',
+        hint: 'Think about what "model" means in the context of networking.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'What does TCP stand for?',
+        options: [
+            'Transmission Control Protocol',
+            'Transfer Communication Process',
+            'Total Connection Packet',
+            'Transport Control Port'
+        ],
+        correctAnswer: 'Transmission Control Protocol',
+        explanation: 'TCP (Transmission Control Protocol) is a core internet protocol that ensures reliable, ordered delivery of data packets.',
+        hint: 'It is a core protocol for transmission control.'
+    },
+    {
+        type: 'short-answer',
+        question: 'Explain the difference between symmetric and asymmetric encryption in one or two sentences.',
+        options: [],
+        correctAnswer: 'Symmetric uses one shared key for both encryption/decryption; asymmetric uses public-private key pairs',
+        explanation: 'Symmetric encryption uses the same key for both parties, while asymmetric uses two different keys.',
+        hint: 'Think about how many keys are involved.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'What is the primary purpose of a firewall?',
+        options: [
+            'To monitor and control incoming/outgoing network traffic',
+            'To encrypt all data on a network',
+            'To assign IP addresses to devices',
+            'To repair damaged network cables'
+        ],
+        correctAnswer: 'To monitor and control incoming/outgoing network traffic',
+        explanation: 'A firewall acts as a security barrier, monitoring network traffic and enforcing security rules.',
+        hint: 'It acts as a barrier.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'Which of these is an example of a strong password?',
+        options: [
+            'P@ssw0rd!2024Security#',
+            'password123',
+            '12345678',
+            'MyName2024'
+        ],
+        correctAnswer: 'P@ssw0rd!2024Security#',
+        explanation: 'Strong passwords use a mix of uppercase, lowercase, numbers, and special characters with sufficient length.',
+        hint: 'It should have various character types.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'What does DNS stand for?',
+        options: [
+            'Domain Name System',
+            'Dynamic Network Service',
+            'Digital Name Storage',
+            'Data Network Structure'
+        ],
+        correctAnswer: 'Domain Name System',
+        explanation: 'DNS translates human-readable domain names into IP addresses.',
+        hint: 'It deals with domain names.'
+    },
+    {
+        type: 'short-answer',
+        question: 'What is the purpose of the Nmap tool in security auditing?',
+        options: [],
+        correctAnswer: 'Network discovery and security auditing/port scanning',
+        explanation: 'Nmap is used to discover hosts and services on a computer network, thus creating a "map" of the network.',
+        hint: 'Think about network mapping.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'Which protocol is used for secure remote login over a network?',
+        options: [
+            'SSH',
+            'Telnet',
+            'FTP',
+            'HTTP'
+        ],
+        correctAnswer: 'SSH',
+        explanation: 'SSH (Secure Shell) provides a secure, encrypted channel for remote login.',
+        hint: 'It is the "Secure" version of remote shell.'
+    },
+    {
+        type: 'multiple-choice',
+        question: 'What is "Phishing" in cybersecurity?',
+        options: [
+            'A technique to gather sensitive info via fraudulent emails',
+            'A type of network cabling',
+            'An encryption algorithm',
+            'A method of database optimization'
+        ],
+        correctAnswer: 'A technique to gather sensitive info via fraudulent emails',
+        explanation: 'Phishing is a social engineering attack where attackers masquerade as a trusted entity to steal data.',
+        hint: 'It involves "fishing" for information.'
+    },
+    {
+        type: 'short-answer',
+        question: 'Describe the "Least Privilege" principle in one sentence.',
+        options: [],
+        correctAnswer: 'Users should only have the minimum permissions necessary to perform their job functions',
+        explanation: 'This principle minimizes the potential damage from accidents or malicious actions by limiting access.',
+        hint: 'Think about giving only what is absolutely necessary.'
+    }
+];
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -1651,16 +1770,14 @@ app.post('/api/generate-questions', async (req, res) => {
         } catch (aiError) {
             console.error('❌ AI question generation failed:', aiError.message);
             
-            // Check if it's a rate limit error
-            const isRateLimit = aiError.message.toLowerCase().includes('rate limit');
-            if (isRateLimit) {
-                return res.status(429).json({
-                    error: 'AI Rate Limited',
-                    userMessage: 'The AI is busy generating assessments for other students. Please wait a few minutes or provide your own API key.'
-                });
-            }
+            // Provide fallback questions
+            console.log('⚠️ Providing fallback questions due to AI error');
 
-            throw aiError; // Let the outer catch handle it
+            return res.json({
+                questions: FALLBACK_QUESTIONS,
+                isFallback: true,
+                fallbackReason: aiError.message
+            });
         }
     } catch (error) {
         console.error('❌ Unexpected error in generate-questions:', error.message);
