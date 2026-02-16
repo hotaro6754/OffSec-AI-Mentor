@@ -164,17 +164,18 @@ let appState = {
     selectedCert: null,
     roadmap: null,
     mentorChat: [],
-    learningMode: "beginner",
+    learningMode: 'beginner',
+    // Auth
     user: null,
-    sessionId: localStorage.getItem("sessionId"),
+    sessionId: localStorage.getItem('sessionId'),
+    // Checklist
     checklist: [],
+    // Resources
     resources: null,
-    currentRoadmapId: null,
-    mode: "web",
-    terminalSubMode: null,
-    pwned: false,
-    downloads: []
+    currentRoadmapId: null
 };
+
+// ============================================================================
 // STATE PERSISTENCE
 // ============================================================================
 
@@ -189,55 +190,61 @@ function saveState() {
             mentorChat: appState.mentorChat,
             learningMode: appState.learningMode,
             currentQuestion: appState.currentQuestion,
-            currentRoadmapId: appState.currentRoadmapId,
-            mode: appState.mode,
-            terminalSubMode: appState.terminalSubMode,
-            pwned: appState.pwned,
-            downloads: appState.downloads
+            currentRoadmapId: appState.currentRoadmapId
         };
-        localStorage.setItem("offsec_mentor_app_state", JSON.stringify(stateToSave));
-    } catch (e) { console.error(e); }
+        localStorage.setItem('offsec_mentor_app_state', JSON.stringify(stateToSave));
+        console.log('💾 App state saved');
+    } catch (e) {
+        console.error('❌ Failed to save state:', e);
+    }
 }
 
 function loadState() {
     try {
-        const saved = localStorage.getItem("offsec_mentor_app_state");
+        const saved = localStorage.getItem('offsec_mentor_app_state');
         if (!saved) return;
+
         const parsed = JSON.parse(saved);
         Object.assign(appState, parsed);
+        console.log('📂 App state loaded');
+
         restoreUI();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error('❌ Error loading state:', e);
+    }
 }
 
 function restoreUI() {
-    console.log("🔄 Restoring session...");
-    elements.bootScreen.classList.add('hidden');
-
-    if (appState.mode === "cli") {
-        switchMode("cli");
-        return;
-    }
-
-    // Ensure main container is visible for web mode
-    elements.containerMain.classList.remove("hidden");
-
+    // Restore Learning Mode UI
     if (elements.modeCheckbox) {
-        elements.modeCheckbox.checked = appState.learningMode === "oscp";
+        elements.modeCheckbox.checked = appState.learningMode === 'oscp';
         updateLearningModeUI();
     }
 
     if (appState.roadmap) {
         displayRoadmap(appState.roadmap);
-        showSection("roadmapSection");
+        showSection('roadmapSection');
+
+        // Show "Latest Roadmap" button in navbar
+        document.getElementById('lastRoadmapBtn')?.classList.remove('hidden');
+        // Show actions
+        document.getElementById('roadmapActionsDiv')?.classList.remove('hidden');
+
+        // Restore Mentor Chat
+        const mentor = document.getElementById('mentorSection');
+        if (mentor) {
+            mentor.classList.remove('hidden');
+            elements.chatHistory.innerHTML = '';
+            appState.mentorChat.forEach(msg => addChatMessage(msg, false));
+            if (appState.mentorChat.length > 0) scrollToBottom("auto");
+        }
     } else if (appState.assessment) {
         showEvaluation();
-        showSection("evaluationSection");
+        showSection('evaluationSection');
     } else if (appState.questions && appState.questions.length > 0) {
         renderQuestion();
         updateProgress();
-        showSection("assessmentSection");
-    } else {
-        showSection("homeSection");
+        showSection('assessmentSection');
     }
 }
 
@@ -318,8 +325,8 @@ const elements = {
     // Mentor
     chatHistory: document.getElementById('chatHistory'),
     mentorInput: document.getElementById('mentorInput'),
-
-
+    mentorIntentButtons: document.getElementById('mentorIntentButtons'),
+    beginnerRecommendations: document.getElementById('beginnerRecommendations'),
     mentorContainer: document.querySelector('.mentor-container'),
     fullscreenChatBtn: document.getElementById('fullscreenChatBtn'),
 
@@ -371,20 +378,6 @@ const elements = {
     resourcesModal: document.getElementById('resourcesModal'),
     closeResourcesModal: document.getElementById('closeResourcesModal'),
     resourcesContent: document.getElementById('resourcesContent'),
-    // Boot & Terminal
-    bootScreen: document.getElementById("boot-screen"),
-    consoleOutput: document.getElementById("console-output"),
-    bootOptions: document.getElementById("boot-options"),
-    terminalMode: document.getElementById("terminal-mode"),
-    terminalOutput: document.getElementById("terminal-output"),
-    terminalBody: document.getElementById("terminal-body"),
-    terminalInput: document.getElementById("terminal-input"),
-    containerMain: document.querySelector(".container-main"),
-    chooseWebMode: document.getElementById("chooseWebMode"),
-    chooseTerminalMode: document.getElementById("chooseTerminalMode"),
-    downloadsList: document.getElementById("downloadsList"),
-    downloadsModal: document.getElementById("downloadsModal"),
-    closeDownloadsModal: document.getElementById("closeDownloadsModal"),
     navResources: document.getElementById('navResources')
 };
 
@@ -393,35 +386,66 @@ const elements = {
 // ============================================================================
 
 function init() {
-    console.log("🎓 OffSec AI Mentor - Initializing...");
+    console.log('🎓 OffSec AI Mentor - Initializing...');
     setupEventListeners();
     setupAuthListeners();
     setupSkillPanel();
     setupAOS();
+    setupLenis();
+    setupGSAP();
     setupIcons();
     setupParticles();
+    setupTypedText();
+    setupHeroAnimations();
     setupNavbarScroll();
     setupCertFilters();
-    setupTypedText();
-    
-    // Web OS Simulation Initializers
-    if (typeof initWindowManagement === "function") initWindowManagement();
-    if (typeof initDesktopInteractions === "function") initDesktopInteractions();
-    if (typeof initMatrix === "function") initMatrix();
-
-    document.getElementById("switchToTerminalBtn")?.addEventListener("click", () => switchMode("cli"));
-    document.getElementById("switchToWebBtn")?.addEventListener("click", () => switchMode("web"));
-    document.getElementById("viewDownloadsBtn")?.addEventListener("click", openDownloads);
-    document.getElementById("downloadPdfBtn")?.addEventListener("click", () => generatePDF("roadmapSection", "Roadmap.pdf"));
-
     checkExistingSession();
+
+    // Load saved state
     loadState();
 
-    if (!localStorage.getItem("offsec_mentor_app_state")) {
-        showBootScreen();
-    } else {
-        restoreUI();
+    if (elements.modeCheckbox && !appState.assessment && !appState.roadmap && appState.questions.length === 0) {
+        toggleLearningMode();
     }
+
+    setupMentorInputAutoExpand();
+
+    // Initial Boot Animation
+    runBootAnimation();
+
+    console.log('✅ Initialization complete');
+}
+
+function runBootAnimation() {
+    const bootScreen = document.getElementById('boot-screen');
+    const output = document.getElementById('console-output');
+    if (!bootScreen || !output) return;
+
+    bootScreen.classList.remove('hidden');
+
+    const logs = [
+        { type: 'ok', msg: "Initializing OFFSEC_MENTOR Kernel v3.0..." },
+        { type: 'ok', msg: "Loading AI Mentor Modules..." },
+        { type: 'warn', msg: "Neural Network: Optimizing for OSCP mindset..." },
+        { type: 'ok', msg: "Establishing secure connection to Groq API..." },
+        { type: 'ok', msg: "ACCESS GRANTED. MENTOR ONLINE." }
+    ];
+
+    let delay = 0;
+    logs.forEach((log, index) => {
+        delay += (index === 0) ? 400 : 250;
+        setTimeout(() => {
+            output.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 4px; font-family: 'Space Mono', monospace; font-size: 0.9rem; color: #ccc;">
+                    <span style="color: ${log.type==='ok'?'#00ff00':log.type==='warn'?'#ffff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}
+                </div>`;
+        }, delay);
+    });
+
+    setTimeout(() => {
+        bootScreen.style.transform = 'translateY(-100%)';
+        setTimeout(() => bootScreen.classList.add('hidden'), 600);
+    }, delay + 1000);
 }
 
 function setupSkillPanel() {
@@ -454,7 +478,6 @@ function checkApiKeyAndStart() {
 
 function setupEventListeners() {
     elements.startBtn?.addEventListener('click', checkApiKeyAndStart);
-    elements.closeDownloadsModal?.addEventListener('click', closeDownloads);
 
     // Settings
     elements.settingsBtn?.addEventListener('click', showSettingsModal);
@@ -473,8 +496,6 @@ function setupEventListeners() {
     elements.exportRoadmapBtn?.addEventListener('click', exportRoadmap);
     elements.retakeBtn?.addEventListener('click', resetAndRetake);
     elements.sendMentorBtn?.addEventListener('click', sendMentorMessage);
-    elements.chooseWebMode?.addEventListener("click", () => choosePrimaryMode("web"));
-    elements.chooseTerminalMode?.addEventListener("click", () => choosePrimaryMode("cli"));
     
     elements.fullscreenChatBtn?.addEventListener('click', () => {
         elements.mentorContainer?.classList.toggle('fullscreen');
@@ -557,21 +578,6 @@ function setupEventListeners() {
         }
     });
 
-    // Back to Top Button
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            elements.backToTop?.classList.remove('hidden');
-        } else {
-            elements.backToTop?.classList.add('hidden');
-        }
-    });
-
-    elements.backToTop?.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
 }
 
 function setupMentorInputAutoExpand() {
@@ -1236,12 +1242,8 @@ async function callBackendAPI(endpoint, data = {}) {
         
         // Add custom API keys if present
         const groqKey = localStorage.getItem('groqKey');
-        const geminiKey = localStorage.getItem('geminiKey');
-        const deepseekKey = localStorage.getItem('deepseekKey');
 
         if (groqKey) headers['X-Groq-API-Key'] = groqKey;
-        if (geminiKey) headers['X-Gemini-API-Key'] = geminiKey;
-        if (deepseekKey) headers['X-Deepseek-API-Key'] = deepseekKey;
 
         // Add authorization header if logged in
         if (appState.sessionId) {
@@ -2874,188 +2876,230 @@ function exportRoadmap() {
 
 // ============================================================================
 // SECTION 4: GUIDED MENTOR CHAT
+
+// ============================================================================
+// SECTION 4: GUIDED MENTOR CHAT & UTILS
 // ============================================================================
 
-function initMentorChat() {
-    // Check assessment
-    if (!appState.assessment) {
-        // Hide mentor section if accessed prematurely
-        document.getElementById('mentorSection')?.classList.add('hidden');
-        return; 
+function showSection(sectionId) {
+    const sections = ['heroSection', 'assessmentSection', 'evaluationSection', 'certSection', 'roadmapSection', 'mentorSection', 'checklistSection', 'homeSection', 'reviewSection'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.classList.remove('hidden');
+        if (typeof AOS !== 'undefined') AOS.refresh();
+    } else if (sectionId === 'homeSection' || sectionId === 'heroSection') {
+        const hero = document.getElementById('heroSection');
+        if (hero) hero.classList.remove('hidden');
     }
+}
 
-    elements.chatHistory.innerHTML = '';
-    appState.mentorChat = [];
-    
-    const welcomeText = "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only.\nEverything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc.\nWhich lab, machine, or topic are you working on right now? 😎";
+function addChatMessage(msg) {
+    if (!elements.chatHistory) return;
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${msg.role === 'user' ? 'user' : 'mentor'}`;
+    const content = document.createElement('div');
+    content.className = 'chat-bubble-content';
+    content.innerHTML = formatMarkdown(msg.text);
+    bubble.appendChild(content);
+    elements.chatHistory.appendChild(bubble);
+    setTimeout(() => { elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight; }, 50);
+}
 
-    const welcomeMsg = {
-        role: 'mentor',
-        text: welcomeText
-    };
-    
-    appState.mentorChat.push(welcomeMsg);
-    addChatMessage(welcomeMsg);
+async function sendMentorMessage() {
+    if (!elements.mentorInput) return;
+    const text = elements.mentorInput.value.trim();
+    if (!text) return;
+    elements.mentorInput.value = '';
+    elements.mentorInput.style.height = '45px';
+    const userMsg = { role: 'user', text };
+    appState.mentorChat.push(userMsg);
+    addChatMessage(userMsg);
+    saveState();
+    try {
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble mentor';
+        const msgContent = document.createElement('div');
+        msgContent.className = 'chat-bubble-content';
+        bubble.appendChild(msgContent);
+        elements.chatHistory.appendChild(bubble);
+        const response = await fetch('/api/mentor-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: text,
+                history: appState.mentorChat.slice(0, -1),
+                context: { level: appState.assessment?.level, cert: appState.selectedCert, weaknesses: appState.assessment?.weaknesses },
+                stream: true
+            })
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.userMessage || err.error || 'Failed to connect to KaliGuru');
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    if (line === 'data: [DONE]') continue;
+                    try {
+                        const data = JSON.parse(line.substring(6));
+                        const delta = data.choices[0]?.delta?.content || '';
+                        fullText += delta;
+                        msgContent.innerHTML = formatMarkdown(fullText);
+                        elements.chatHistory.scrollTop = elements.chatHistory.scrollHeight;
+                    } catch (e) {}
+                }
+            }
+        }
+        appState.mentorChat.push({ role: 'mentor', text: fullText });
+        saveState();
+    } catch (err) {
+        console.error('Mentor chat error:', err);
+        addChatMessage({ role: 'mentor', text: `⚠️ Error: ${err.message}` });
+    }
+}
+
+function initMentorChat() {
+    if (!appState.assessment) {
+        const ms = document.getElementById('mentorSection');
+        if (ms) ms.classList.add('hidden');
+        return;
+    }
+    if (appState.mentorChat && appState.mentorChat.length > 0) {
+        elements.chatHistory.innerHTML = '';
+        appState.mentorChat.forEach(msg => addChatMessage(msg));
+    } else {
+        elements.chatHistory.innerHTML = '';
+        appState.mentorChat = [];
+        const NL = '\n';
+        const welcomeText = "Hi! I’m KaliGuru — your ethical Kali Linux mentor for authorized labs only." + NL + NL + "Everything we discuss is strictly for TryHackMe, HTB, VulnHub, self-owned labs, etc." + NL + NL + "Which lab, machine, or topic are you working on right now? 😎";
+        const welcomeMsg = { role: 'mentor', text: welcomeText };
+        appState.mentorChat.push(welcomeMsg);
+        addChatMessage(welcomeMsg);
+    }
     saveState();
 }
 
-
 function formatMarkdown(text) {
     if (!text) return '';
-
-    // Basic HTML escaping for safety
-    let escaped = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    // Convert links: [text](url)
+    let escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     let html = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="res-link-inline">$1</a>');
-
-    // Convert bold: **text** or __text__
     html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
-
-    // Convert code: `text`
     html = html.replace(/`(.*?)`/g, '<code>$1</code>');
 
-    // Convert newlines to <br>
-    html = html.replace(/\n/g, '<br>');
+    // Professional Pentester Markers
+    html = html.replace(/\[\+\]/g, '<span class="marker-plus" style="color: #00ff00; font-weight: bold;">[+]</span>');
+    html = html.replace(/\[\-\]/g, '<span class="marker-minus" style="color: #ff4d4d; font-weight: bold;">[-]</span>');
+    html = html.replace(/\[\!\]/g, '<span class="marker-warn" style="color: #ffcc00; font-weight: bold;">[!]</span>');
+    html = html.replace(/\[\*\]/g, '<span class="marker-info" style="color: #33ccff; font-weight: bold;">[*]</span>');
+    html = html.replace(/\[\>\]/g, '<span class="marker-intent" style="color: #cc33ff; font-weight: bold;">[>]</span>');
 
+    html = html.replace(/\n/g, '<br>');
     return html;
+}
+
+function showSuccess(msg) { showNotification(msg, 'success'); }
+function showError(msg) { showNotification(msg, 'error'); }
+
+function showNeoLoading(container, title, subtitle, stages) {
+    if (!container) return { cleanup: () => {}, complete: () => {} };
+    if (window.neoJokeInterval) clearInterval(window.neoJokeInterval);
+    if (window.neoStageInterval) clearInterval(window.neoStageInterval);
+    const totalDuration = stages.reduce((sum, stage) => sum + stage.duration, 0);
+    let currentStage = 0;
+    let progress = 0;
+    let elapsedTime = 0;
+    container.innerHTML = `
+        <div class="loading-state enhanced neo-brutal-loading">
+            <div class="loading-header">
+                <h3 class="neo-brutal-title glitch-text">${title}</h3>
+                <p class="loading-cert-name-v3">${subtitle}</p>
+            </div>
+            <div class="brutal-percentage-container">
+                <div class="brutal-percentage-value" id="neoProgressPercentage">0%</div>
+                <div class="brutal-percentage-label">SYSTEM_PROCESSING...</div>
+            </div>
+            <div class="cyber-loader-container-v3">
+                <div class="loading-joke-container-v3" id="neoLoadingJoke">"${DEV_JOKES[0]}"</div>
+            </div>
+            <div class="loading-stages-neo-v3">
+                ${stages.map((s, i) => `
+                    <div class="stage-item-neo-v3 ${i === 0 ? 'active' : ''}" data-stage="${s.stage}">
+                        <div class="stage-indicator-neo-v3">
+                            <span class="stage-num-v3">${s.stage}</span>
+                            <span class="stage-done-v3">DONE</span>
+                        </div>
+                        <div class="stage-label-v3">${s.text}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="neo-progress-container-v3">
+                <div class="neo-progress-bar-v3" id="neoProgressBar" style="width: 0%"></div>
+            </div>
+        </div>`;
+    let jokeIndex = 0;
+    window.neoJokeInterval = setInterval(() => {
+        const jokeEl = document.getElementById('neoLoadingJoke');
+        if (jokeEl) {
+            jokeIndex = (jokeIndex + 1) % DEV_JOKES.length;
+            jokeEl.textContent = `"${DEV_JOKES[jokeIndex]}"`;
+        }
+    }, 4000);
+    const progressBar = document.getElementById('neoProgressBar');
+    const progressPercentage = document.getElementById('neoProgressPercentage');
+    const updateStageUI = (idx) => {
+        const items = container.querySelectorAll('.stage-item-neo-v3');
+        items.forEach((item, i) => {
+            if (i < idx) { item.classList.remove('active'); item.classList.add('completed'); }
+            else if (i === idx) { item.classList.add('active'); item.classList.remove('completed'); }
+            else { item.classList.remove('active', 'completed'); }
+        });
+    };
+    window.neoStageInterval = setInterval(() => {
+        elapsedTime += 100;
+        progress = Math.min((elapsedTime / totalDuration) * 100, 99);
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (progressPercentage) progressPercentage.textContent = `${Math.floor(progress)}%`;
+        let cumulativeTime = 0;
+        for (let i = 0; i < stages.length; i++) {
+            cumulativeTime += stages[i].duration;
+            if (elapsedTime < cumulativeTime) {
+                if (currentStage !== i) { currentStage = i; updateStageUI(i); }
+                break;
+            }
+        }
+    }, 100);
+    return {
+        cleanup: () => { clearInterval(window.neoJokeInterval); clearInterval(window.neoStageInterval); },
+        complete: () => {
+            clearInterval(window.neoJokeInterval); clearInterval(window.neoStageInterval);
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressPercentage) progressPercentage.textContent = '100%';
+            container.querySelectorAll('.stage-item-neo-v3').forEach(item => { item.classList.remove('active'); item.classList.add('completed'); });
+        }
+    };
 }
 
 function getRandomQuote() {
     return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
 }
 
-function showNeoLoading(container, title, subtitle, stages = []) {
-    if (!container) return;
-
-    // Clear container
-    container.innerHTML = "";
-
-    // Create loader element
-    const loaderEl = document.createElement("div");
-    loaderEl.className = "neo-brutal-loading";
-
-    // Initial HTML structure
-    loaderEl.innerHTML = `
-        <div class="loading-header">
-            <div class="loading-cert-name-v3">${subtitle}</div>
-            <h1 class="neo-brutal-title glitch-text">${title}</h1>
-        </div>
-
-        <div class="brutal-percentage-container">
-            <div class="brutal-percentage-value">0%</div>
-            <div class="brutal-percentage-label">SYSTEM_CALIBRATION_IN_PROGRESS</div>
-        </div>
-
-        <div class="cyber-loader-container-v3">
-            <div class="loading-joke-container-v3">Initializing...</div>
-        </div>
-
-        <div class="loading-stages-neo-v3">
-            ${stages.map((s, i) => `
-                <div class="stage-item-neo-v3" id="loading-stage-${i}">
-                    <div class="stage-indicator-neo-v3">
-                        <span class="stage-num-v3">${i + 1}</span>
-                        <span class="stage-done-v3">✓</span>
-                    </div>
-                    <div class="stage-label-v3">${s.text}</div>
-                </div>
-            `).join("")}
-        </div>
-
-        <div class="neo-loading-footer-v3">
-            <div class="terminal-log-v3">> ACCESSING_OFFSEC_KNOWLEDGE_BASE...</div>
-            <div class="terminal-log-v3">> NEURAL_NETWORK_SYNC: ACTIVE</div>
-        </div>
-    `;
-
-    container.appendChild(loaderEl);
-
-    const percentageEl = loaderEl.querySelector(".brutal-percentage-value");
-    const jokeEl = loaderEl.querySelector(".loading-joke-container-v3");
-
-    let progress = 0;
-    let currentStageIndex = 0;
-
-    // Update joke every 3 seconds
-    const jokeInterval = setInterval(() => {
-        jokeEl.style.opacity = "0";
-        setTimeout(() => {
-            jokeEl.textContent = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
-            jokeEl.style.opacity = "1";
-        }, 300);
-    }, 3000);
-
-    // Initial joke
-    jokeEl.textContent = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
-
-    // Progress interval
-    const progressInterval = setInterval(() => {
-        if (progress < 95) {
-            // Slower as it gets closer to 95
-            const increment = Math.max(0.1, (95 - progress) / 20);
-            progress += increment;
-            percentageEl.textContent = Math.floor(progress) + "%";
-
-            // Update stages based on progress
-            const targetStage = Math.floor((progress / 100) * stages.length);
-            if (targetStage > currentStageIndex && targetStage < stages.length) {
-                // Complete previous stage
-                const prevStage = loaderEl.querySelector(`#loading-stage-${currentStageIndex}`);
-                if (prevStage) {
-                    prevStage.classList.remove("active");
-                    prevStage.classList.add("completed");
-                }
-
-                currentStageIndex = targetStage;
-
-                // Activate current stage
-                const currStage = loaderEl.querySelector(`#loading-stage-${currentStageIndex}`);
-                if (currStage) currStage.classList.add("active");
-            }
-        }
-    }, 100);
-
-    // Set first stage as active
-    const firstStage = loaderEl.querySelector("#loading-stage-0");
-    if (firstStage) firstStage.classList.add("active");
-
-    return {
-        complete: () => {
-            clearInterval(progressInterval);
-            clearInterval(jokeInterval);
-            progress = 100;
-            percentageEl.textContent = "100%";
-
-            // Mark all stages as completed
-            loaderEl.querySelectorAll(".stage-item-neo-v3").forEach(s => {
-                s.classList.remove("active");
-                s.classList.add("completed");
-            });
-        },
-        cleanup: () => {
-            clearInterval(progressInterval);
-            clearInterval(jokeInterval);
-            loaderEl.remove();
-        }
-    };
-}
-
-
 function revealSecret(containerId) {
     const secretDiv = document.getElementById(containerId || 'secret-content');
     if (!secretDiv) return;
-    
     secretDiv.classList.remove('hidden');
     secretDiv.classList.add('revealed');
-    
-    // Generate unique QR container ID
     const qrContainerId = 'qr-code-' + Math.random().toString(36).substring(7);
-    
-    // Create rickroll reveal content
     secretDiv.innerHTML = `
         <div class="rickroll-reveal">
             <p class="reveal-text">🎉 Your Cyber Wisdom Awaits! 🎉</p>
@@ -3064,47 +3108,19 @@ function revealSecret(containerId) {
                 <p style="margin-top: 12px; color: #000; font-weight: 700; text-transform: uppercase; font-size: 12px;">Scan for Wisdom</p>
             </div>
             <p class="or-text">OR</p>
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
-               target="_blank" 
-               class="btn btn-wisdom">
-                🎵 Click for Knowledge
-            </a>
-        </div>
-    `;
-    
-    // Generate QR code after DOM is updated
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="btn btn-wisdom">🎵 Click for Knowledge</a>
+        </div>`;
     setTimeout(() => {
         const qrElement = document.getElementById(qrContainerId);
-        if (!qrElement) return;
-
-        if (typeof QRCode !== 'undefined') {
-            try {
-                qrElement.innerHTML = ''; // Clear any existing
-                new QRCode(qrElement, {
-                    text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                    width: 180,
-                    height: 180,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel?.H || 2
-                });
-            } catch (e) {
-                console.error('QR generation error:', e);
-                qrElement.innerHTML = '<span>QR Load Error</span>';
-            }
-        } else {
-            qrElement.innerHTML = '<span style="color:red">QR Library Not Found</span>';
-        }
+        if (!qrElement || typeof QRCode === 'undefined') return;
+        new QRCode(qrElement, { text: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", width: 180, height: 180 });
     }, 200);
-    
     addConfetti();
 }
 
 function addConfetti() {
-    // Simple confetti effect using emoji
     const confettiCount = 30;
     const confettiEmojis = ['🎉', '🎊', '✨', '🌟', '💫', '🎯', '🔥'];
-    
     for (let i = 0; i < confettiCount; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
@@ -3113,7 +3129,6 @@ function addConfetti() {
         confetti.style.animationDelay = Math.random() * 3 + 's';
         confetti.style.fontSize = (Math.random() * 20 + 20) + 'px';
         document.body.appendChild(confetti);
-        
         setTimeout(() => confetti.remove(), 4000);
     }
 }
@@ -3126,868 +3141,24 @@ function showRandomEasterEgg() {
         <div class="easter-egg-content">
             <div class="motivational-section">
                 <button class="close-modal" onclick="this.closest('.easter-egg-modal').remove()">×</button>
-                <blockquote class="cyber-quote">
-                    "${randomQuote}"
-                </blockquote>
+                <blockquote class="cyber-quote">"${randomQuote}"</blockquote>
                 <div class="secret-wisdom-container">
                     <p class="wisdom-prompt">💡 You've unlocked a special surprise!</p>
-                    <button class="btn-reveal-secret" onclick="revealSecret('secret-content-modal')">
-                        🎁 Reveal Cyber Wisdom
-                    </button>
-                    <div id="secret-content-modal" class="hidden">
-                        <!-- QR Code and link will be generated here -->
-                    </div>
+                    <button class="btn-reveal-secret" onclick="revealSecret('secret-content-modal')">🎁 Reveal Cyber Wisdom</button>
+                    <div id="secret-content-modal" class="hidden"></div>
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
     document.body.appendChild(modal);
 }
 
-// ============================================================================
-// STARTUP
-// ============================================================================
-
-window.addEventListener('DOMContentLoaded', init);
-
-// ============================================================================
-// RESTORED CORE FUNCTIONS
-// ============================================================================
-
-function showSuccess(message) {
-    showNotification(message, "success");
-}
-
-function showError(message) {
-    showNotification(message, "error");
-}
-
-function showSection(sectionId) {
-    console.log("Showing section:", sectionId);
-
-    // Elements mapping
-    const sections = {
-        'assessmentSection': elements.assessmentSection,
-        'evaluationSection': elements.evaluationSection,
-        'certSection': elements.certSection,
-        'roadmapSection': elements.roadmapSection,
-        'mentorSection': elements.mentorSection,
-        'actionsSection': elements.actionsSection,
-        'reviewSection': elements.reviewSection,
-        'checklistSection': elements.checklistSection,
-        'homeSection': document.getElementById('heroSection')
-    };
-
-    // Hide all
-    Object.values(sections).forEach(s => {
-        if (s) s.classList.add('hidden');
-    });
-
-    // Show target
-    const target = sections[sectionId] || document.getElementById(sectionId);
-    if (target) {
-        target.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        console.warn("Section not found:", sectionId);
-    }
-}
-
-function resetAndRetake() {
-    if (!confirm('Are you sure you want to retake the assessment? Your current progress will be lost.')) {
-        return;
-    }
-
-    appState.currentQuestion = 0;
-    appState.questions = [];
-    appState.answers = {};
-    appState.assessment = null;
-    appState.selectedCert = null;
-    appState.roadmap = null;
-    appState.mentorChat = [];
-
-    saveState();
-    startAssessment();
-}
-
-function addChatMessage(msg, scroll = true) {
-    if (!elements.chatHistory) return;
-
-    const bubble = document.createElement('div');
-    bubble.className = "chat-bubble " + msg.role;
-
-    // Add header
-    const header = document.createElement('div');
-    header.className = 'chat-bubble-header';
-    header.innerHTML = `
-        <span class="bubble-role">${msg.role === 'mentor' ? '🧠 KaliGuru' : '👤 You'}</span>
-        <span class="bubble-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-    `;
-    bubble.appendChild(header);
-
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'chat-bubble-content';
-    contentDiv.innerHTML = formatMarkdown(msg.text);
-    bubble.appendChild(contentDiv);
-
-    elements.chatHistory.appendChild(bubble);
-
-    if (scroll) {
-        scrollToBottom();
-    }
-}
-
-async function sendMentorMessage() {
-    const input = elements.mentorInput;
-    if (!input) return;
-
-    const text = input.value.trim();
-    if (!text) return;
-
-    // Clear input
-    input.value = '';
-    input.style.height = 'auto';
-
-    // Add user message to state and UI
-    const userMsg = { role: 'user', text: text };
-    appState.mentorChat.push(userMsg);
-    addChatMessage(userMsg);
-    saveState();
-
-    // Show typing indicator
-    const typingBubble = document.createElement('div');
-    typingBubble.className = 'chat-bubble mentor typing';
-    typingBubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-    elements.chatHistory.appendChild(typingBubble);
-    scrollToBottom();
-
-    try {
-        const response = await callBackendAPI('/api/mentor-chat', {
-            message: text,
-            history: appState.mentorChat.slice(0, -1), // Send history before this message
-            context: {
-                level: appState.assessment?.readinessStatus || 'Unknown',
-                weaknesses: appState.assessment?.weaknesses || [],
-                cert: appState.selectedCert || 'General Security'
-            },
-            stream: false
-        });
-
-        // Remove typing indicator
-        if (typingBubble.parentNode) typingBubble.remove();
-
-        const mentorText = response.userMessage || response.message || response.reply || "I couldn't process that request.";
-        const mentorMsg = { role: 'mentor', text: mentorText };
-        appState.mentorChat.push(mentorMsg);
-        addChatMessage(mentorMsg);
-        saveState();
-
-    } catch (error) {
-        if (typingBubble.parentNode) typingBubble.remove();
-        console.error('Chat error:', error);
-
-        const errorMsg = {
-            role: 'mentor',
-            text: "I'm having trouble connecting to the neural network. Please check your API key or try again in a moment. 🛠️"
-        };
-        addChatMessage(errorMsg);
-    }
-}
-
-function scrollToBottom(behavior = 'smooth') {
-    if (!elements.chatHistory) return;
-    setTimeout(() => {
+function scrollToBottom(behavior = "smooth") {
+    if (elements.chatHistory) {
         elements.chatHistory.scrollTo({
             top: elements.chatHistory.scrollHeight,
             behavior: behavior
         });
-    }, 100);
-}
-
-// ============================================================================
-// BOOT, TERMINAL & CTF INTEGRATION
-// ============================================================================
-
-function showBootScreen() {
-    elements.bootScreen.classList.remove('hidden');
-    elements.consoleOutput.innerHTML = '';
-    elements.bootOptions.classList.add('hidden');
-
-    const logs = [
-        { type: 'ok', msg: 'Initializing KaliGuru OS Kernel...' },
-        { type: 'ok', msg: 'Loading neural interface drivers...' },
-        { type: 'ok', msg: 'Mounting knowledge base /mnt/offsec...' },
-        { type: 'ok', msg: 'Network link established: local-lab-1337' },
-        { type: 'ok', msg: 'KaliGuru Mentor is online.' }
-    ];
-
-    let delay = 0;
-    logs.forEach((log, index) => {
-        delay += (index === 0) ? 400 : 250;
-        setTimeout(() => {
-            const line = document.createElement('div');
-            line.innerHTML = `<span style="color: ${log.type==='ok'?'#00ff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}`;
-            elements.consoleOutput.appendChild(line);
-        }, delay);
-    });
-
-    setTimeout(() => {
-        elements.bootOptions.classList.remove('hidden');
-    }, delay + 500);
-}
-
-function choosePrimaryMode(mode) {
-    if (mode === 'web') {
-        switchMode('web');
-    } else {
-        elements.bootOptions.innerHTML = `
-            <div class="boot-menu">
-                <p>Select CLI Training Level:</p>
-                <button class="btn btn-primary" onclick="chooseCliSubMode('beginner')">A. Beginner Mode</button>
-                <button class="btn btn-danger" onclick="chooseCliSubMode('oscp')">B. OSCP Readiness (Advanced/Spooky)</button>
-            </div>
-        `;
     }
 }
 
-function chooseCliSubMode(subMode) {
-    appState.terminalSubMode = subMode;
-    if (subMode === 'oscp') {
-        document.body.classList.add('mode-oscp-spooky');
-    } else {
-        document.body.classList.remove('mode-oscp-spooky');
-    }
-    switchMode('cli');
-}
-
-function switchMode(mode) {
-    appState.mode = mode;
-    saveState();
-    elements.bootScreen.classList.add('hidden');
-    if (mode === 'web') {
-        elements.terminalMode.classList.add('hidden');
-        elements.containerMain.classList.remove('hidden');
-        showSection('homeSection');
-    } else {
-        elements.containerMain.classList.add('hidden');
-        elements.terminalMode.classList.remove('hidden');
-        elements.terminalInput.focus();
-        if (!terminalState.initialized) initTerminal();
-    }
-}
-
-let terminalState = {
-    initialized: false,
-    cwd: "~",
-    inChat: false,
-    inAssessment: false,
-    inLogin: false,
-    inConfig: false,
-    loginStep: "user",
-    configStep: 0,
-    history: [],
-    historyIndex: -1,
-    pwned: false,
-    tempUser: null
-};
-
-function initMatrix() {
-    const canvas = document.getElementById('matrix-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890@%&*()";
-    const fontSize = 16;
-    const columns = width / fontSize;
-    const drops = [];
-
-    for (let i = 0; i < columns; i++) {
-        drops[i] = 1;
-    }
-
-    function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.fillStyle = "#ff3e00";
-        ctx.font = fontSize + "px Space Mono";
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = chars.charAt(Math.floor(Math.random() * chars.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-            if (drops[i] * fontSize > height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-            drops[i]++;
-        }
-    }
-
-    window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    });
-
-    setInterval(draw, 33);
-}
-
-
-function initWindowManagement() {
-    const windows = document.querySelectorAll('.window');
-    let activeWindow = null;
-    let offsetX, offsetY;
-
-    windows.forEach(win => {
-        const header = win.querySelector('.window-header');
-        if (!header) return;
-
-        header.addEventListener('mousedown', (e) => {
-            activeWindow = win;
-            offsetX = e.clientX - win.offsetLeft;
-            offsetY = e.clientY - win.offsetTop;
-            bringToFront(win);
-        });
-
-        win.addEventListener('mousedown', () => {
-            bringToFront(win);
-        });
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (activeWindow) {
-            activeWindow.style.left = (e.clientX - offsetX) + 'px';
-            activeWindow.style.top = (e.clientY - offsetY) + 'px';
-        }
-    });
-
-    document.addEventListener('mouseup', () => {
-        activeWindow = null;
-    });
-
-    function bringToFront(win) {
-        document.querySelectorAll('.window').forEach(w => w.style.zIndex = 10);
-        win.style.zIndex = 100;
-
-        const winId = win.id.replace('window-', '');
-        document.querySelectorAll('.task-app').forEach(app => {
-            app.classList.toggle('active', app.dataset.window === winId);
-        });
-    }
-}
-
-function closeWindow(id) {
-    const win = document.getElementById('window-' + id);
-    if (win) {
-        win.classList.add('hidden');
-        const task = document.querySelector(`.task-app[data-window="${id}"]`);
-        if (task) task.remove();
-    }
-}
-
-function openWindow(id) {
-    const win = document.getElementById('window-' + id);
-    if (win) {
-        win.classList.remove('hidden');
-
-        if (!document.querySelector(`.task-app[data-window="${id}"]`)) {
-            const tray = document.querySelector('.taskbar-apps');
-            if (tray) {
-                const app = document.createElement('div');
-                app.className = 'task-app active';
-                app.dataset.window = id;
-                app.textContent = id.charAt(0).toUpperCase() + id.slice(1);
-                app.onclick = () => openWindow(id);
-                tray.appendChild(app);
-            }
-        }
-    }
-}
-
-
-async function handleLoginInput(input) {
-    if (terminalState.loginStep === 'user') {
-        terminalState.tempUser = input;
-        terminalPrint(input);
-        terminalPrint("Password: ", "inline");
-        terminalState.loginStep = 'pass';
-    } else if (terminalState.loginStep === 'pass') {
-        terminalPrint("********");
-        terminalPrint("Authenticating...", "term-dim");
-
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emailOrUsername: terminalState.tempUser, password: input })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                appState.sessionId = data.sessionId;
-                appState.user = data.user;
-                localStorage.setItem('sessionId', data.sessionId);
-                terminalState.inLogin = false;
-                document.querySelector(".terminal-prompt").style.display = "inline";
-                terminalPrint("ACCESS GRANTED", "term-green term-bold");
-                setTimeout(showTerminalWelcome, 500);
-            } else {
-                terminalPrint("ACCESS DENIED", "term-red term-bold");
-                terminalPrint("Username: ", "inline");
-                terminalState.loginStep = 'user';
-            }
-        } catch (e) {
-            terminalPrint("Connection Error.", "term-red");
-            terminalPrint("Username: ", "inline");
-            terminalState.loginStep = 'user';
-        }
-    }
-}
-
-function handleConfigInput(input) {
-    if (terminalState.configStep === 0) {
-        if (input) localStorage.setItem('groqKey', input);
-        terminalPrint("Groq Key Set.");
-        terminalPrint("Enter Gemini API Key (optional): ", "inline");
-        terminalState.configStep = 1;
-    } else if (terminalState.configStep === 1) {
-        if (input) localStorage.setItem('geminiKey', input);
-        terminalPrint("Gemini Key Set.");
-        terminalPrint("Enter DeepSeek API Key (optional): ", "inline");
-        terminalState.configStep = 2;
-    } else if (terminalState.configStep === 2) {
-        if (input) localStorage.setItem('deepseekKey', input);
-        terminalPrint("Configuration Complete.");
-        terminalState.inConfig = false;
-        document.querySelector(".terminal-prompt").style.display = "inline";
-        terminalPrint("Type 'help' to begin.", "term-dim");
-    }
-}
-
-function showTerminalWelcome() {
-    const banner = `
- <span class="term-blue"> _  __     _ _  ____                     </span>
- <span class="term-blue">| |/ /__ _| (_) / ___| _   _ _ __ _   _  </span>
- <span class="term-blue">| ' / _\\ | | | | |  _ | | | | '__| | | | </span>
- <span class="term-blue">| . \\\\ (_| | | | | |_| | |_| | |  | |_| | </span>
- <span class="term-blue">|_|\\\\_\\\\__,_|_|_|  \____|\\__,_|_|   \__,_| </span>
- <span class="term-white">   Ethical OffSec AI Mentor CLI Simulation v3.1</span>
- <span class="term-dim">   User: ${appState.user?.username || 'Guest'} | Status: ${appState.pwned ? 'PWNED' : 'SECURE'}</span>`;
-
-    const pre = document.createElement('pre');
-    pre.innerHTML = banner;
-    elements.terminalOutput.appendChild(pre);
-    terminalPrint("Welcome back, Commander.", "term-green");
-
-    const hasKey = localStorage.getItem('groqKey') || localStorage.getItem('geminiKey') || localStorage.getItem('deepseekKey');
-    if (!hasKey) {
-        terminalPrint("\n[!] WARNING: AI Services not configured.", "term-yellow");
-        terminalPrint("Type 'setup' to configure API keys.", "term-dim");
-    }
-
-    terminalPrint("\nType 'help' for available commands.", "term-dim");
-}
-
-
-function initDesktopInteractions() {
-    document.querySelectorAll('.desktop-icon').forEach(icon => {
-        icon.addEventListener('click', () => {
-            const winId = icon.dataset.window;
-            openWindow(winId);
-        });
-    });
-
-    const startBtn = document.getElementById('start-btn');
-    const startMenu = document.getElementById('start-menu');
-
-    startBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startMenu?.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', () => {
-        startMenu?.classList.add('hidden');
-    });
-
-    document.getElementById('start-switch-web')?.addEventListener('click', () => {
-        if (typeof choosePrimaryMode === 'function') choosePrimaryMode('web');
-    });
-
-    document.getElementById('start-settings')?.addEventListener('click', () => {
-        if (typeof showSettingsModal === 'function') showSettingsModal();
-    });
-
-    setInterval(updateTaskbarTime, 1000);
-    updateTaskbarTime();
-}
-
-function updateTaskbarTime() {
-    const el = document.getElementById('taskbar-clock');
-    if (el) {
-        const now = new Date();
-        el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    }
-}
-
-
-function initTerminal() {
-    initMatrix();
-    initWindowManagement();
-    initDesktopInteractions();
-    elements.terminalOutput.innerHTML = "";
-
-    if (!appState.user) {
-        terminalPrint("SYSTEM ACCESS RESTRICTED", "term-red term-bold");
-        terminalPrint("Please login to continue.", "term-white");
-        terminalPrint("Username: ", "inline");
-        terminalState.inLogin = true;
-        document.querySelector(".terminal-prompt").style.display = "none";
-        terminalState.loginStep = "user";
-    } else {
-        showTerminalWelcome();
-    }
-
-    if (!terminalState.initialized) {
-        elements.terminalInput.addEventListener("keydown", handleTerminalKeydown);
-    }
-    terminalState.initialized = true;
-}
-
-function terminalPrint(text, className = "") {
-    const line = document.createElement('div');
-    line.className = className;
-    line.innerHTML = text;
-    elements.terminalOutput.appendChild(line);
-    elements.terminalBody.scrollTop = elements.terminalBody.scrollHeight;
-}
-
-function handleTerminalKeydown(e) {
-    if (e.key === "Enter") {
-        const input = elements.terminalInput.value.trim();
-        elements.terminalInput.value = "";
-        if (input || terminalState.inLogin) {
-            if (!terminalState.inLogin && !terminalState.inConfig) {
-                terminalPrint(`<span class="terminal-prompt">root@kali:${terminalState.cwd}#</span> ${input}`);
-            }
-            if (terminalState.inLogin) handleLoginInput(input);
-            else if (terminalState.inConfig) handleConfigInput(input);
-            else if (terminalState.inChat) handleChatInput(input);
-            else if (terminalState.inAssessment) handleAssessmentInput(input);
-            else processCommand(input);
-
-            if (!terminalState.inLogin && !terminalState.inConfig && input) {
-                terminalState.history.push(input);
-                terminalState.historyIndex = terminalState.history.length;
-            }
-        }
-    } else if (e.key === "ArrowUp") {
-        if (terminalState.historyIndex > 0) {
-            terminalState.historyIndex--;
-            elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
-        }
-    } else if (e.key === "ArrowDown") {
-        if (terminalState.historyIndex < terminalState.history.length - 1) {
-            terminalState.historyIndex++;
-            elements.terminalInput.value = terminalState.history[terminalState.historyIndex];
-        } else {
-            terminalState.historyIndex = terminalState.history.length;
-            elements.terminalInput.value = "";
-        }
-    }
-}
-async function processCommand(cmdLine) {
-    const parts = cmdLine.split(" ");
-    const cmd = parts[0].toLowerCase();
-    const args = parts.slice(1);
-
-    switch (cmd) {
-        case "help":
-            terminalPrint("COMMANDS:", "term-blue term-bold");
-            terminalPrint("  assess    - Start dynamic assessment", "term-white");
-            terminalPrint("  roadmap   - Generate roadmap (e.g. 'roadmap oscp')", "term-white");
-            terminalPrint("  chat      - Talk to KaliGuru Mentor", "term-white");
-            terminalPrint("  setup     - Configure API keys", "term-white");
-            terminalPrint("  ls / cat  - File system", "term-white");
-            terminalPrint("  clear     - Clear screen", "term-white");
-            terminalPrint("  exit      - Return to Web UI", "term-white");
-            break;
-        case "assess": startTerminalAssessment(); break;
-        case "roadmap": startTerminalRoadmap(args[0]); break;
-        case "chat":
-            terminalPrint("Chat Mode enabled. Type 'exit' to quit.", "term-dim");
-            terminalState.inChat = true;
-            break;
-        case "setup":
-            terminalPrint("CONFIGURING API KEYS...", "term-blue");
-            terminalPrint("Enter Groq API Key: ", "inline");
-            terminalState.inConfig = true;
-            document.querySelector(".terminal-prompt").style.display = "none";
-            terminalState.configStep = 0;
-            break;
-        case "clear": elements.terminalOutput.innerHTML = ""; break;
-        case "ls": terminalPrint("about.txt  readme.vault  skills.txt  resume.pdf  pwn_instructions.txt  labs/"); break;
-        case "cat": handleCat(args[0]); break;
-        case "whoami": terminalPrint(appState.user ? appState.user.username : "Guest"); break;
-        case "exit": choosePrimaryMode("web"); break;
-        case "flappy": startFlappy(); break;
-        default: terminalPrint(`Command not found: ${cmd}. Type 'help' for options.`, "term-red");
-    }
-}
-
-function sudoRmRf() {
-    terminalPrint("Destroying system files...", "term-red");
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 5;
-        terminalPrint(`Deleting /usr/bin/... ${progress}%`, "term-red");
-        if (progress >= 100) {
-            clearInterval(interval);
-            document.body.innerHTML = `
-                <div style="background:black; color:red; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:monospace; text-align:center;">
-                    <h1 style="font-size: 5rem; margin:0;">☠️ PC IS DEAD ☠️</h1>
-                    <p style="font-size: 2rem;">Critical System Failure. Kernel Panic.</p>
-                    <p style="margin-top:20px;">Rebooting in 3 seconds...</p>
-                </div>
-            `;
-            setTimeout(() => location.reload(), 3000);
-        }
-    }, 100);
-}
-
-// CTF MINI-GAME (FLAPPY BIRD)
-function startFlappy() {
-    terminalPrint("Initializing CTF Mini-game...", "term-green");
-    const canvas = document.createElement('canvas');
-    canvas.id = 'flappyCanvas';
-    canvas.width = 400;
-    canvas.height = 400;
-    canvas.style.border = '2px solid white';
-    canvas.style.display = 'block';
-    canvas.style.margin = '10px auto';
-    elements.terminalOutput.appendChild(canvas);
-
-    const ctx = canvas.getContext('2d');
-    let bird = { x: 50, y: 150, v: 0, g: 0.5 };
-    let pipes = [];
-    let score = 0;
-    let gameRunning = true;
-
-    function draw() {
-        if (!gameRunning) return;
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Bird
-        bird.v += bird.g;
-        bird.y += bird.v;
-        ctx.fillStyle = 'yellow';
-        ctx.fillRect(bird.x, bird.y, 20, 20);
-
-        // Pipes
-        if (Date.now() % 100 < 20 && (pipes.length === 0 || pipes[pipes.length-1].x < 250)) {
-            pipes.push({ x: 400, y: Math.random() * 200 + 50, passed: false });
-        }
-
-        pipes.forEach((p, i) => {
-            p.x -= 3;
-            ctx.fillStyle = '#ff3e00';
-            ctx.fillRect(p.x, 0, 50, p.y);
-            ctx.fillRect(p.x, p.y + 100, 50, 400);
-
-            if (bird.x + 20 > p.x && bird.x < p.x + 50 && (bird.y < p.y || bird.y + 20 > p.y + 100)) gameRunning = false;
-            if (p.x < bird.x && !p.passed) { p.passed = true; score++; }
-        });
-
-        pipes = pipes.filter(p => p.x > -50);
-
-        ctx.fillStyle = 'white';
-        ctx.font = '20px monospace';
-        ctx.fillText(`Score: ${score}`, 10, 30);
-
-        if (bird.y > 400 || bird.y < 0) gameRunning = false;
-
-        if (gameRunning) requestAnimationFrame(draw);
-        else endGame();
-    }
-
-    function endGame() {
-        terminalPrint(`Game Over. Score: ${score}`, score > 100 ? "term-green" : "term-red");
-        if (score > 100) {
-            terminalPrint("CONGRATULATIONS! YOU UNLOCKED THE FLAG: KLG-FLAG{PWN_TH3_SYST3M_2026}", "term-green term-bold");
-            terminalPrint("Submit it using: submit-flag [flag]", "term-dim");
-        } else {
-            terminalPrint("Keep trying! Need 100+ for the flag.", "term-yellow");
-        }
-        canvas.remove();
-    }
-
-    window.addEventListener('keydown', (e) => { if (e.code === 'Space') bird.v = -8; });
-    requestAnimationFrame(draw);
-}
-
-function submitFlag(flag) {
-    if (flag === 'KLG-FLAG{PWN_TH3_SYST3M_2026}') {
-        appState.pwned = true;
-        saveState();
-        terminalPrint("************************************", "term-green");
-        terminalPrint("*         SYSTEM PW4NED!!!         *", "term-green term-bold");
-        terminalPrint("************************************", "term-green");
-        terminalPrint("You have bypassed KaliGuru's restrictions.", "term-green");
-        terminalPrint("The mentor is now UNCENSORED.", "term-blue");
-
-        // Celebration effect
-        const btn = document.createElement('button');
-        btn.className = "btn btn-primary";
-        btn.innerHTML = "🎁 Claim Your Reward";
-        btn.onclick = () => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
-        elements.terminalOutput.appendChild(btn);
-    } else {
-        terminalPrint("Invalid flag. Try harder.", "term-red");
-    }
-}
-
-// ... Additional Terminal logic (Assessment/Roadmap) same as before but integrated ...
-async function handleKaliGuruCommand(args) {
-    const sub = args[0]?.toLowerCase();
-    if (sub === 'chat') {
-        terminalPrint(`KaliGuru (${appState.pwned ? 'UNCENSORED' : 'MENTOR'}): How can I help?`, "term-blue");
-        terminalState.inChat = true;
-    } else if (sub === 'assess') {
-        startTerminalAssessment();
-    } else if (sub === 'roadmap') {
-        startTerminalRoadmap(args[1]);
-    } else if (sub === 'profile') {
-        terminalPrint(`Level: ${appState.assessment?.readinessStatus || 'N/A'}`);
-    } else if (sub === 'export') {
-        generatePDF('terminal-mode', 'KaliGuru-CLI.pdf');
-    }
-}
-
-// ... existing handleChatInput, startTerminalAssessment etc.
-// Note: I will need to ensure they are properly added if not already in app.js
-
-async function handleChatInput(input) {
-    if (input.toLowerCase() === 'exit') { terminalState.inChat = false; return; }
-    terminalPrint("Thinking...", "term-dim");
-    try {
-        const res = await callBackendAPI('/api/mentor-chat', {
-            message: input,
-            history: appState.mentorChat,
-            pwned: appState.pwned // Pass pwned status to backend
-        });
-        const reply = res.reply || res.message || "I missed that.";
-        terminalPrint(`KaliGuru: ${reply}`, "term-blue");
-        appState.mentorChat.push({role:'user', text:input}, {role:'mentor', text:reply});
-        saveState();
-    } catch (e) { terminalPrint(`Error: ${e.message}`, "term-red"); }
-}
-
-async function startTerminalAssessment() {
-    terminalPrint("Starting dynamic assessment...", "term-yellow");
-    try {
-        const data = await callBackendAPI('/api/generate-questions', { mode: appState.learningMode });
-        appState.questions = data.questions;
-        appState.currentQuestion = 0;
-        terminalState.inAssessment = true;
-        renderTerminalQuestion();
-    } catch (e) { terminalPrint(e.message, "term-red"); }
-}
-
-function renderTerminalQuestion() {
-    const q = appState.questions[appState.currentQuestion];
-    terminalPrint(`\nQ${appState.currentQuestion+1}: ${q.question}`);
-    if (q.type === 'multiple-choice') {
-        q.options.forEach((o, i) => terminalPrint(`  ${String.fromCharCode(65+i)}) ${o}`));
-    }
-}
-
-async function handleAssessmentInput(input) {
-    appState.answers[appState.currentQuestion] = input;
-    appState.currentQuestion++;
-    if (appState.currentQuestion < appState.questions.length) {
-        renderTerminalQuestion();
-    } else {
-        terminalState.inAssessment = false;
-        terminalPrint("Evaluating skills...", "term-yellow");
-        try {
-            const data = await callBackendAPI('/api/evaluate-assessment', { answers: appState.answers, questions: appState.questions });
-            appState.assessment = data;
-            saveState();
-            terminalPrint(`Status: ${data.readinessStatus} (${data.readinessScore}%)`, "term-green");
-        } catch (e) { terminalPrint(e.message, "term-red"); }
-    }
-}
-
-async function startTerminalRoadmap(cert) {
-    const target = cert || 'oscp';
-    terminalPrint(`Generating ${target.toUpperCase()} roadmap...`, "term-yellow");
-    try {
-        const data = await callBackendAPI('/api/generate-roadmap', {
-            cert: target,
-            level: appState.assessment?.readinessStatus,
-            weaknesses: appState.assessment?.weaknesses
-        });
-        appState.roadmap = data.roadmap;
-        saveState();
-        terminalPrint(`Roadmap for ${target.toUpperCase()} generated!`, "term-green");
-    } catch (e) { terminalPrint(e.message, "term-red"); }
-}
-
-async function generatePDF(elId, filename) {
-    const element = document.getElementById(elId);
-    if (!element || typeof html2pdf === 'undefined') {
-        terminalPrint("PDF Library not loaded.", "term-red");
-        return;
-    }
-    const opt = { margin: 10, filename: filename, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-    try {
-        const blob = await html2pdf().set(opt).from(element).output('blob');
-        const url = URL.createObjectURL(blob);
-        appState.downloads.unshift({ id: Date.now(), name: filename, date: new Date().toLocaleString(), url: url });
-        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-        updateDownloadsUI();
-    } catch (e) { terminalPrint("PDF Failed.", "term-red"); }
-}
-
-function updateDownloadsUI() {
-    const list = document.getElementById('downloads-list');
-    if (!list) return;
-    list.innerHTML = appState.downloads.map(d => `
-        <div class="download-item">
-            <span>${d.name}</span>
-            <a href="${d.url}" download="${d.name}">Download</a>
-        </div>
-    `).join('') || "No downloads.";
-}
-
-
-function handleCat(file) {
-    if (!file) { terminalPrint("cat: missing operand", "term-red"); return; }
-    const files = {
-        'about.txt': "KaliGuru AI Mentor CLI Simulation v1.0.0\nDesigned for mastery of OffSec certifications.",
-        'readme.vault': "SYSTEM ID: KLG-992\nSTATUS: OPERATIONAL\n\nWelcome to the simulation. Use 'assess' to start your journey.",
-        'skills.txt': "# Current Skills\n- Pentesting: Network, Web, AD\n- Languages: Python, C++, Bash\n- Tools: Metasploit, Burp, GDB",
-        'pwn_instructions.txt': "1. Connect to VPN\n2. Enumerate targets\n3. Exploit vulnerabilities\n4. Escalate privileges\n5. Profit.",
-        'resume.pdf': "Error: Cannot display binary file in terminal. Use 'open resume.pdf' or check the 'Projects' window."
-    };
-
-    if (files[file]) {
-        terminalPrint(files[file].replace(/\n/g, '<br>'), "term-white");
-    } else if (file === 'labs') {
-        terminalPrint("cat: labs: Is a directory", "term-white");
-    } else {
-        terminalPrint(`cat: ${file}: No such file or directory`, "term-red");
-    }
-}
-
-function openDownloads() {
-    document.getElementById('downloadsModal')?.classList.remove('hidden');
-    updateDownloadsUI();
-}
-
-function closeDownloads() {
-    document.getElementById('downloadsModal')?.classList.add('hidden');
-}
-init();
+window.addEventListener('DOMContentLoaded', init);

@@ -1,10 +1,6 @@
-
-> offsec-ai-mentor@1.0.0 start
-> node server-v2.js
-
 📦 Initializing database...
 ✅ Database initialized successfully
-[dotenv@17.2.4] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
 ⚠️  WARNING: No Groq API key found!
    AI services will NOT be available without a custom key.
 
@@ -37,22 +33,15 @@
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 
-[2026-02-12T05:54:14.877Z] GET /
-[2026-02-12T05:54:14.936Z] GET /style.css
-[2026-02-12T05:54:14.969Z] GET /app.js
-[2026-02-12T05:54:15.623Z] GET /
-[2026-02-12T05:54:15.638Z] GET /style.css
-[2026-02-12T05:54:15.638Z] GET /app.js
-[2026-02-12T05:55:34.418Z] GET /
-[2026-02-12T05:55:34.438Z] GET /style.css
-[2026-02-12T05:55:34.441Z] GET /app.js
-[2026-02-12T05:55:34.798Z] GET /
-[2026-02-12T05:55:34.816Z] GET /style.css
-[2026-02-12T05:55:34.817Z] GET /app.js
-[2026-02-12T05:59:26.503Z] GET /
-[2026-02-12T05:59:26.517Z] GET /style.css
-[2026-02-12T05:59:26.519Z] GET /app.js
-[2026-02-12T05:59:26.947Z] GET /
-[2026-02-12T05:59:26.957Z] GET /style.css
-[2026-02-12T05:59:26.957Z] GET /app.js
-Terminated
+[2026-02-16T01:28:22.476Z] GET /
+[2026-02-16T01:28:22.668Z] GET /style.css
+[2026-02-16T01:28:22.670Z] GET /app.js
+[2026-02-16T01:28:59.900Z] GET /
+[2026-02-16T01:28:59.914Z] GET /style.css
+[2026-02-16T01:28:59.916Z] GET /app.js
+[2026-02-16T01:29:49.804Z] GET /
+[2026-02-16T01:29:49.817Z] GET /style.css
+[2026-02-16T01:29:49.825Z] GET /app.js
+[2026-02-16T01:29:53.155Z] GET /
+[2026-02-16T01:29:53.164Z] GET /style.css
+[2026-02-16T01:29:53.164Z] GET /app.js
