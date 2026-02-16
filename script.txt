@@ -1,0 +1,19 @@
+--- DISCORD MESSAGE ---
+🚀 Hey everyone! I just finished enhancing my OffSec AI Mentor project! 🤖 It now features a persistent KaliGuru chatbot with real-time streaming responses, improved roadmaps, and a clean Neo-Brutalist UI. Check out the video below to see it in action! #OffSec #CyberSecurity #AI #KaliLinux
+
+--- VIDEO SCRIPT / AUDIENCE TEXT ---
+Welcome to the OffSec AI Mentor project!
+
+This platform is designed for the community to help navigate the challenging path of cybersecurity certifications.
+
+At its heart is KaliGuru, your specialized AI mentor. KaliGuru isn't just a chatbot; it's a senior instructor that understands the 'Try Harder' mindset. It provides guidance strictly for authorized labs like TryHackMe, HackTheBox, and VulnHub, ensuring ethical boundaries are always respected.
+
+Key Features:
+1. Neural Skill Assessment: Dynamic questions that evaluate your technical readiness.
+2. Personalized Roadmaps: Custom learning paths for 13+ certifications including OSCP, OSEP, and OSWE.
+3. KaliGuru Mentor Chat: Real-time, streaming assistance with tools, techniques, and lab strategy.
+4. Neo-Brutalist Aesthetic: A high-contrast, professional UI designed for modern pentesters.
+
+Whether you're starting from zero or aiming for an elite OffSec Expert certification, the OffSec AI Mentor is here to coach you through every step.
+
+Let's dive into the demo...
