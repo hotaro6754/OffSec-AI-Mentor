@@ -579,6 +579,8 @@ function setupEventListeners() {
     });
 
 
+}
+// Auto-closed by Bolt
 function setupMentorInputAutoExpand() {
     const input = elements.mentorInput;
     if (!input) return;
@@ -2950,6 +2952,18 @@ async function sendMentorMessage() {
         const decoder = new TextDecoder();
         let fullText = '';
 
+
+        let pendingUpdate = false;
+        function updateStreamingUI() {
+            if (pendingUpdate) return;
+            pendingUpdate = true;
+            requestAnimationFrame(() => {
+                contentDiv.innerHTML = formatMarkdown(fullText);
+                scrollToBottom('auto');
+                pendingUpdate = false;
+            });
+        }
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -2965,21 +2979,17 @@ async function sendMentorMessage() {
                         const parsed = JSON.parse(data);
                         if (parsed.choices?.[0]?.delta?.content) {
                             fullText += parsed.choices[0].delta.content;
-                            contentDiv.innerHTML = formatMarkdown(fullText);
-                            // Auto scroll during stream
-                            bubble.scrollIntoView({ behavior: 'auto', block: 'end' });
+                            updateStreamingUI();
                         }
-                    } catch (e) {
-                        // Not JSON or partial JSON
-                    }
+                    } catch (e) {}
                 }
             }
         }
+        contentDiv.innerHTML = formatMarkdown(fullText);
+        scrollToBottom('smooth');
 
-        // Save mentor message to state
-        mentorMsg.text = fullText;
-        appState.mentorChat.push(mentorMsg);
-        saveState();
+
+saveState();
 
     } catch (error) {
         console.error('Mentor chat error:', error);
@@ -3005,29 +3015,16 @@ function createChatBubble(role, text) {
 
 function formatMarkdown(text) {
     if (!text) return '';
-
-    // Basic HTML escaping for safety
-    let escaped = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    // Convert links: [text](url)
+    let escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     let html = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="res-link-inline">$1</a>');
-
-    // Convert bold: **text** or __text__
-    html = html.replace(/(\\*\\*|__)(.*?)\\1/g, '<strong>$2</strong>');
-
-    // Convert code: `text`
+    html = html.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
     html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-
-    // Convert newlines to <br>
-    html = html.replace(/\\n/g, '<br>');
-
+    html = html.replace(/\n/g, "<br>");
     return html;
 }
 
 
+    function getRandomQuote() {
     return CYBER_QUOTES[Math.floor(Math.random() * CYBER_QUOTES.length)];
 }
 
@@ -3133,5 +3130,70 @@ function showRandomEasterEgg() {
 // ============================================================================
 // STARTUP
 // ============================================================================
+
+
+const sectionCache = {};
+function showSection(sectionId) {
+    const sections = ["hero", "assessmentSection", "evaluationSection", "certSection", "roadmapSection", "mentorSection", "checklistSection", "actionsSection", "reviewSection"];
+    sections.forEach(id => {
+        if (!sectionCache[id]) sectionCache[id] = document.getElementById(id) || document.querySelector("." + id);
+        if (sectionCache[id]) sectionCache[id].classList.add("hidden");
+    });
+    if (!sectionCache[sectionId]) sectionCache[sectionId] = document.getElementById(sectionId) || document.querySelector("." + sectionId);
+    if (sectionCache[sectionId]) sectionCache[sectionId].classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function scrollToBottom(behavior = "smooth") {
+    if (elements.chatHistory) {
+        elements.chatHistory.scrollTo({
+            top: elements.chatHistory.scrollHeight,
+            behavior: behavior
+        });
+    }
+}
+
+function showSuccess(message) {
+    showNotification(message, 'success');
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
+function resetAndRetake() {
+    appState.currentQuestion = 0;
+    appState.questions = [];
+    appState.answers = {};
+    appState.assessment = null;
+    appState.selectedCert = null;
+    appState.roadmap = null;
+    appState.roadmapJSON = null;
+    appState.mentorChat = [];
+    saveState();
+    startAssessment();
+}
+
+function showAuthModal(tab = 'login') {
+    if (!elements.authModal) return;
+    elements.authModal.classList.remove('hidden');
+    const tabs = document.querySelectorAll('.auth-tab');
+    tabs.forEach(t => {
+        if (t.dataset.tab === tab) t.classList.add('active');
+        else t.classList.remove('active');
+    });
+    if (tab === 'login') {
+        elements.loginForm?.classList.remove('hidden');
+        elements.registerForm?.classList.add('hidden');
+    } else {
+        elements.loginForm?.classList.add('hidden');
+        elements.registerForm?.classList.remove('hidden');
+    }
+}
+
+function hideAuthModal() {
+    elements.authModal?.classList.add('hidden');
+}
+
 
 window.addEventListener('DOMContentLoaded', init);
