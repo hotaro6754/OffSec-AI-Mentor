@@ -4354,3 +4354,85 @@ body.mode-oscp .message-content code {
 .message-content strong {
     font-weight: 800;
 }
+
+/* NEO-LOADING SYSTEM (ZERO-FALLBACK UI) */
+.neo-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--neo-red);
+    font-family: 'Space Mono', monospace;
+    padding: 20px;
+    text-align: center;
+}
+
+.neo-loading-container {
+    max-width: 600px;
+    width: 100%;
+    border: 3px solid var(--neo-red);
+    background: #111;
+    padding: 30px;
+    box-shadow: 10px 10px 0px var(--neo-red);
+}
+
+.neo-loading-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.neo-loading-status {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #fff;
+    min-height: 1.5em;
+}
+
+.neo-loading-progress-container {
+    width: 100%;
+    height: 30px;
+    border: 2px solid #555;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.neo-loading-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--neo-red);
+    transition: width 0.3s ease;
+}
+
+.neo-loading-joke {
+    font-style: italic;
+    color: #888;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    transition: opacity 0.5s ease;
+}
+
+.neo-loading-logs {
+    margin-top: 30px;
+    text-align: left;
+    font-size: 0.8rem;
+    color: #0f0;
+    height: 100px;
+    overflow-y: hidden;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+}
+
+.neo-loading-log-line {
+    margin-bottom: 4px;
+}

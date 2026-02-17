@@ -26,6 +26,7 @@
             crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Boot Screen -->
@@ -141,6 +142,7 @@
             </div>
             <div class="nav-links">
                 <button class="btn btn-outline btn-sm hidden" id="lastRoadmapBtn">🗺️ Current Roadmap</button>
+                <button class="btn btn-outline btn-sm" onclick="showSection('mentorSection'); initMentorChat();">💬 Mentor Chat</button>
                 <button class="btn btn-outline btn-sm" id="settingsBtn">⚙️ Settings</button>
                 <div id="navAuth" class="nav-auth">
                     <button class="btn btn-outline btn-sm" id="loginBtn">Login</button>
@@ -447,6 +449,7 @@
                 <div class="action-buttons-grid">
                     <button class="btn btn-secondary" id="copyRoadmapBtn">📋 Copy Roadmap</button>
                     <button class="btn btn-secondary" id="exportRoadmapBtn">💾 Export as JSON</button>
+                    <button class="btn btn-secondary" id="downloadPdfBtn">📄 Download PDF</button>
                     <button class="btn btn-primary" id="regenerateRoadmapBtn">🔄 Generate New Roadmap</button>
                 </div>
             </div>

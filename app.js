@@ -283,6 +283,7 @@ const elements = {
     selectCertBtn: document.getElementById('selectCertBtn'),
     copyRoadmapBtn: document.getElementById('copyRoadmapBtn'),
     exportRoadmapBtn: document.getElementById('exportRoadmapBtn'),
+    downloadPdfBtn: document.getElementById('downloadPdfBtn'),
     retakeBtn: document.getElementById('retakeBtn'),
     sendMentorBtn: document.getElementById('sendMentorBtn'),
     modeCheckbox: document.getElementById('modeCheckbox'),
@@ -325,8 +326,6 @@ const elements = {
     // Mentor
     chatHistory: document.getElementById('chatHistory'),
     mentorInput: document.getElementById('mentorInput'),
-    mentorIntentButtons: document.getElementById('mentorIntentButtons'),
-    beginnerRecommendations: document.getElementById('beginnerRecommendations'),
     mentorContainer: document.querySelector('.mentor-container'),
     fullscreenChatBtn: document.getElementById('fullscreenChatBtn'),
 
@@ -427,25 +426,32 @@ function runBootAnimation() {
         { type: 'ok', msg: "Initializing OFFSEC_MENTOR Kernel v3.0..." },
         { type: 'ok', msg: "Loading AI Mentor Modules..." },
         { type: 'warn', msg: "Neural Network: Optimizing for OSCP mindset..." },
-        { type: 'ok', msg: "Establishing secure connection to Groq API..." },
+        { type: 'ok', msg: "Establishing secure connection to multi-model orchestration..." },
+        { type: 'joke', msg: "75% of bugs disappear when the API key works." },
         { type: 'ok', msg: "ACCESS GRANTED. MENTOR ONLINE." }
     ];
 
     let delay = 0;
     logs.forEach((log, index) => {
-        delay += (index === 0) ? 400 : 250;
+        delay += (index === 0) ? 400 : 300;
         setTimeout(() => {
+            let color = '#00ff00';
+            if (log.type === 'warn') color = '#ffff00';
+            if (log.type === 'error') color = '#ff0000';
+            if (log.type === 'joke') color = '#00bfff';
+
             output.innerHTML += `
                 <div style="display: flex; align-items: center; margin-bottom: 4px; font-family: 'Space Mono', monospace; font-size: 0.9rem; color: #ccc;">
-                    <span style="color: ${log.type==='ok'?'#00ff00':log.type==='warn'?'#ffff00':'#ff0000'}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}
+                    <span style="color: ${color}; font-weight: bold; margin-right: 15px;">[${log.type.toUpperCase()}]</span> ${log.msg}
                 </div>`;
+            output.scrollTop = output.scrollHeight;
         }, delay);
     });
 
     setTimeout(() => {
         bootScreen.style.transform = 'translateY(-100%)';
         setTimeout(() => bootScreen.classList.add('hidden'), 600);
-    }, delay + 1000);
+    }, delay + 1500);
 }
 
 function setupSkillPanel() {
@@ -494,6 +500,7 @@ function setupEventListeners() {
     elements.prevBtn?.addEventListener('click', prevQuestion);
     elements.copyRoadmapBtn?.addEventListener('click', copyRoadmap);
     elements.exportRoadmapBtn?.addEventListener('click', exportRoadmap);
+    elements.downloadPdfBtn?.addEventListener('click', downloadRoadmapPDF);
     elements.retakeBtn?.addEventListener('click', resetAndRetake);
     elements.sendMentorBtn?.addEventListener('click', sendMentorMessage);
     
@@ -1284,6 +1291,80 @@ async function callBackendAPI(endpoint, data = {}) {
     }
 }
 
+function showNeoLoading(container, title, subtitle, stages) {
+    const overlay = document.createElement('div');
+    overlay.className = 'neo-loading-overlay';
+    overlay.innerHTML = `
+        <div class="neo-loading-container">
+            <div class="neo-loading-header">
+                <div class="neo-loading-title">${title}</div>
+                <div class="neo-loading-subtitle">${subtitle}</div>
+            </div>
+            <div class="neo-loading-body">
+                <div class="neo-loading-text">Initializing...</div>
+                <div class="neo-loading-progress-container">
+                    <div class="neo-loading-progress-bar"></div>
+                </div>
+                <div class="neo-loading-joke">"75% of bugs disappear when the API key works."</div>
+            </div>
+            <div class="neo-loading-stages">
+                ${stages.map(s => `<div class="neo-loading-stage" data-stage="${s.stage}">${s.text}</div>`).join('')}
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = '';
+    container.appendChild(overlay);
+
+    let currentStage = 0;
+    let jokeInterval = setInterval(() => {
+        const jokeEl = overlay.querySelector('.neo-loading-joke');
+        if (jokeEl) {
+            jokeEl.style.opacity = 0;
+            setTimeout(() => {
+                jokeEl.textContent = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
+                jokeEl.style.opacity = 1;
+            }, 500);
+        }
+    }, 4000);
+
+    const runStages = async () => {
+        for (const stage of stages) {
+            currentStage = stage.stage;
+            const stageEl = overlay.querySelector(`.neo-loading-stage[data-stage="${currentStage}"]`);
+            const textEl = overlay.querySelector('.neo-loading-text');
+            const barEl = overlay.querySelector('.neo-loading-progress-bar');
+
+            if (stageEl) stageEl.classList.add('active');
+            if (textEl) textEl.textContent = stage.text;
+            if (barEl) barEl.style.width = `${(currentStage / stages.length) * 100}%`;
+
+            await new Promise(r => setTimeout(r, stage.duration));
+            if (stageEl) {
+                stageEl.classList.remove('active');
+                stageEl.classList.add('completed');
+            }
+        }
+    };
+
+    runStages();
+
+    return {
+        complete: () => {
+            clearInterval(jokeInterval);
+            const barEl = overlay.querySelector('.neo-loading-progress-bar');
+            if (barEl) barEl.style.width = '100%';
+            const textEl = overlay.querySelector('.neo-loading-text');
+            if (textEl) textEl.textContent = "Task Complete. Enumeration Successful.";
+        },
+        cleanup: () => {
+            clearInterval(jokeInterval);
+            overlay.remove();
+        }
+    };
+}
+
+
 // ============================================================================
 // SECTION 1: START ASSESSMENT
 // ============================================================================
@@ -1331,24 +1412,11 @@ async function startAssessment() {
         renderQuestion();
         updateProgress();
     } catch (error) {
-        loader.cleanup();
         console.error('❌ Error starting assessment:', error);
-
-        elements.questionContainer.innerHTML = `
-            <div class="error-state neo-brutal-card" style="padding: 40px; text-align: center; background: white; border: 4px solid black; box-shadow: 8px 8px 0px black;">
-                <div style="font-size: 64px; margin-bottom: 20px;">🚨</div>
-                <h3 class="neo-brutal-title" style="margin-bottom: 16px;">Assessment Generation Failed</h3>
-                <p style="margin-bottom: 24px; font-weight: 500;">${error.message || 'The AI was unable to generate questions at this time.'}</p>
-                <div style="display: flex; gap: 16px; justify-content: center;">
-                    <button onclick="startAssessment()" class="btn btn-primary" style="background: var(--primary-v3); color: white; border: 3px solid black; padding: 12px 24px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px black;">Try Again</button>
-                    <button onclick="showSection('homeSection')" class="btn btn-secondary" style="background: white; color: black; border: 3px solid black; padding: 12px 24px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px black;">Go Back</button>
-                </div>
-            </div>
-        `;
-
-        showError('Failed to generate assessment questions. Please try again.');
-        elements.startBtn.disabled = false;
-        elements.startBtn.textContent = 'Assess My Skill Level';
+        // ZERO-FALLBACK: Silent retry with status update
+        const errorMsg = document.querySelector('.neo-loading-text');
+        if (errorMsg) errorMsg.textContent = "Re-establishing connection... Applying OffSec mindset...";
+        setTimeout(() => startAssessment(), 3000);
     }
 }
 
@@ -1540,10 +1608,8 @@ async function proceedToEvaluation() {
     const evaluationContainer = document.querySelector('.evaluation-container');
 
     // Don't overwrite original content if we're already in an error state
-    if (!window.originalEvaluationContent || evaluationContainer.querySelector('.error-state')) {
-        if (!evaluationContainer.querySelector('.error-state')) {
-            window.originalEvaluationContent = evaluationContainer.innerHTML;
-        }
+    if (!window.originalEvaluationContent) {
+        window.originalEvaluationContent = evaluationContainer.innerHTML;
     }
 
     evaluationContainer.innerHTML = '';
@@ -1559,7 +1625,7 @@ async function proceedToEvaluation() {
     const loader = showNeoLoading(evaluationContainer, "ANALYZING SKILLS", "LEVEL EVALUATION", loadingStages);
 
     try {
-        elements.reviewContinueBtn.disabled = true;
+        if (elements.reviewContinueBtn) elements.reviewContinueBtn.disabled = true;
 
         // Call backend API for evaluation
         const data = await callBackendAPI('/api/evaluate-assessment', {
@@ -1580,29 +1646,16 @@ async function proceedToEvaluation() {
         showEvaluation();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-        loader.cleanup();
         console.error('Error evaluating assessment:', error);
-
-        evaluationContainer.innerHTML = `
-            <div class="error-state neo-brutal-card" style="padding: 40px; text-align: center; background: white; border: 4px solid black; box-shadow: 8px 8px 0px black;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
-                <h3 class="neo-brutal-title" style="margin-bottom: 16px;">Evaluation Failed</h3>
-                <p style="margin-bottom: 24px; font-weight: 500;">${error.message || 'The AI was unable to evaluate your assessment.'}</p>
-                <div style="display: flex; gap: 16px; justify-content: center;">
-                    <button onclick="proceedToEvaluation()" class="btn btn-primary" style="background: var(--primary-v3); color: white; border: 3px solid black; padding: 12px 24px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px black;">Retry Evaluation</button>
-                    <button onclick="showSection('assessmentSection')" class="btn btn-secondary" style="background: white; color: black; border: 3px solid black; padding: 12px 24px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px black;">Return to Assessment</button>
-                </div>
-            </div>
-        `;
-
-        if (error.status === 429) {
-            showError('The AI service is currently at capacity. Please wait a few minutes or provide your own Groq API key in Settings for priority access.');
-        } else {
-            showError('Failed to evaluate assessment. Please try again.');
-        }
+        // ZERO-FALLBACK: No error state UI.
+        const errorMsg = document.querySelector('.neo-loading-text');
+        if (errorMsg) errorMsg.textContent = "Deeper analysis required... Retrying evaluation...";
+        setTimeout(() => proceedToEvaluation(), 3000);
     } finally {
-        elements.reviewContinueBtn.disabled = false;
-        elements.reviewContinueBtn.textContent = 'Continue to Evaluation';
+        if (elements.reviewContinueBtn) {
+            elements.reviewContinueBtn.disabled = false;
+            elements.reviewContinueBtn.textContent = 'Continue to Evaluation';
+        }
     }
 }
 
@@ -2007,28 +2060,9 @@ async function generateRoadmapForCert(certId) {
         showSuccess('Roadmap generated successfully!');
     } catch (error) {
         console.error('Error generating roadmap:', error);
-        
-        loader.cleanup();
-        
-        // Show friendly error message (not technical details)
-        let errorMessage = error.userMessage || error.message || 'AI is taking longer than expected. Please try again.';
-        let subMessage = 'The AI service might be experiencing high demand. This usually resolves in a few minutes.';
-
-        if (error.status === 429) {
-            errorMessage = 'AI Service at Capacity';
-            subMessage = 'The mentor is currently helping many other students. Please wait a few minutes or provide your own Groq API key in Settings for priority access.';
-        }
-        
-        roadmapContent.innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">${error.status === 429 ? '🚦' : '⏳'}</div>
-                <h3>${error.status === 429 ? 'Rate Limit Exceeded' : 'Roadmap Generation Delayed'}</h3>
-                <p class="error-message-main">${errorMessage}</p>
-                <p class="error-message-sub">${subMessage}</p>
-                <button class="btn btn-primary" onclick="openCertModal()">Try Again</button>
-                ${!localStorage.getItem('groqKey') ? '<button class="btn btn-secondary" style="margin-top:10px" onclick="showSettingsModal()">Configure API Key</button>' : ''}
-            </div>
-        `;
+        const errorMsg = document.querySelector('.neo-loading-text');
+        if (errorMsg) errorMsg.textContent = "Optimizing path... Rerouting through secure channels...";
+        setTimeout(() => generateRoadmapForCert(certId), 3000);
     }
 }
 
@@ -2851,13 +2885,18 @@ function copyRoadmap() {
 function exportRoadmap() {
     let text = '';
     let filename = '';
+    const date = new Date().toISOString().split('T')[0];
+    const cert = appState.selectedCert || 'Cyber';
     
-    if (appState.roadmapJSON) {
-        text = JSON.stringify(appState.roadmapJSON, null, 2);
-        filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.json`;
+    if (appState.roadmap && typeof appState.roadmap === 'object') {
+        text = JSON.stringify(appState.roadmap, null, 2);
+        filename = `OffSec-Roadmap-${cert}-${date}.json`;
+    } else if (appState.roadmap) {
+        text = appState.roadmap;
+        filename = `OffSec-Roadmap-${cert}-${date}.txt`;
     } else {
-        text = appState.roadmap || 'No roadmap available';
-        filename = `OffSec-Roadmap-${appState.selectedCert}-${new Date().toISOString().split('T')[0]}.txt`;
+        showError('No roadmap available to export.');
+        return;
     }
     
     const blob = new Blob([text], { type: 'text/plain' });
@@ -2866,12 +2905,81 @@ function exportRoadmap() {
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
-
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+    showSuccess('Roadmap exported successfully!');
+}
+
+async function downloadRoadmapPDF(retryCount = 0) {
+    console.log('📄 Starting PDF generation (attempt ' + (retryCount + 1) + ')...');
     
-    showSuccess('Roadmap exported!');
+    if (!window.html2pdf) {
+        showError('PDF library not loaded. Retrying...');
+        setTimeout(() => downloadRoadmapPDF(retryCount + 1), 2000);
+        return;
+    }
+
+    const element = document.getElementById('roadmapSection');
+    if (!element) return;
+
+    // Show loading
+    showNotification('Preparing your PDF... Hang tight!', 'info');
+
+    const opt = {
+        margin: [10, 10],
+        filename: `OffSec-Roadmap-${appState.selectedCert || 'Cyber'}-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            letterRendering: true
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    try {
+        // Ensure content is visible and stable
+        const clone = element.cloneNode(true);
+        clone.style.padding = '20px';
+        clone.style.background = 'white';
+        clone.style.color = 'black';
+
+        // Remove interactive elements from PDF
+        clone.querySelectorAll('.btn, .version-selector-container, #roadmapActionsDiv').forEach(el => el.remove());
+
+        // Fix for black background in OSCP mode
+        if (document.body.classList.contains('mode-oscp')) {
+            clone.style.backgroundColor = '#ffffff';
+            clone.querySelectorAll('*').forEach(el => {
+                el.style.color = '#000000';
+                el.style.borderColor = '#000000';
+            });
+        }
+
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '800px'; // Fixed width for consistent PDF layout
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        await html2pdf().set(opt).from(clone).save();
+
+        document.body.removeChild(container);
+        showSuccess('Roadmap PDF downloaded successfully! 🚀');
+    } catch (error) {
+        console.error('PDF Generation Error:', error);
+        if (retryCount < 2) {
+            console.log('Retrying PDF generation...');
+            setTimeout(() => downloadRoadmapPDF(retryCount + 1), 2000);
+        } else {
+            showError('PDF generation failed. Try copying the roadmap instead.');
+        }
+    }
 }
 
 
@@ -2880,12 +2988,6 @@ function exportRoadmap() {
 // ============================================================================
 
 function initMentorChat() {
-    // Check assessment
-    if (!appState.assessment) {
-        // Hide mentor section if accessed prematurely
-        document.getElementById('mentorSection')?.classList.add('hidden');
-        return; 
-    }
 
     elements.chatHistory.innerHTML = '';
     appState.mentorChat = [];
