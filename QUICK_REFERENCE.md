@@ -15,7 +15,6 @@ requirements.txt    → Dependencies
 .env               → Your API key (create from .env.example)
 start.sh           → Automated setup script
 README.md          → Full documentation
-USAGE_GUIDE.md     → Detailed user guide
 PROJECT_OVERVIEW.md → Technical deep-dive
 ```
 
@@ -193,10 +192,9 @@ rm .env
 ## 📞 Getting Help
 
 1. Check `README.md` for detailed docs
-2. Review `USAGE_GUIDE.md` for how-tos
-3. Read `PROJECT_OVERVIEW.md` for technical details
-4. Open GitHub issue for bugs
-5. Check Streamlit community for framework issues
+2. Read `PROJECT_OVERVIEW.md` for technical details
+3. Open GitHub issue for bugs
+4. Check Streamlit community for framework issues
 
 ## 🎓 Remember
 

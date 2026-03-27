@@ -89,13 +89,6 @@ Complete project documentation:
 - Troubleshooting guide
 - Educational resources
 
-#### `USAGE_GUIDE.md`
-Detailed user manual:
-- Step-by-step usage for each feature
-- Example workflows
-- Best practices
-- Tips for effective learning
-
 #### `CONTRIBUTING.md`
 Developer guide:
 - How to contribute
